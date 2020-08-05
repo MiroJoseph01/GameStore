@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=EPUAKHAW04F4\\SQLEXPRESS;Database=GameStore_VB;Trusted_Connection=True;MultipleActiveResultSets=true"
+  }
+}
