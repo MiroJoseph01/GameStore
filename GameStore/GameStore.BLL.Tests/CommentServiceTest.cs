@@ -5,10 +5,11 @@ using AutoMapper;
 using GameStore.BLL.Interfaces;
 using GameStore.BLL.Services;
 using GameStore.DAL.Interfaces;
-using GameStore.DAL.Interfaces.RepostitoriesInterfaces;
-using GameStore.WEB.Util.AutoMapperProfiles;
+using GameStore.DAL.Interfaces.Repositories;
 using Moq;
 using Xunit;
+using BusinessModels = GameStore.BLL.Models;
+using DbModels = GameStore.DAL.Entities;
 
 namespace GameStore.BLL.Tests
 {
@@ -17,12 +18,16 @@ namespace GameStore.BLL.Tests
         private const string GameKey = "mario";
 
         private readonly ICommentService _commentService;
+        private readonly Mock<IGameService> _gameService;
         private readonly Mock<ICommentRepository> _commentRepository;
         private readonly Mock<IGameRepository> _gameRepository;
         private readonly Mock<IUnitOfWork> _unitOfWork;
-        private readonly IMapper _mapper;
+        private readonly Mock<IMapper> _mapper;
 
-        private Guid _gameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019");
+        private readonly List<DbModels.Comment> _commentsFromDb;
+        private readonly List<BusinessModels.Comment> _comments;
+
+        private readonly Guid _gameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019");
 
         public CommentServiceTest()
         {
@@ -30,30 +35,26 @@ namespace GameStore.BLL.Tests
 
             _gameRepository = new Mock<IGameRepository>();
 
+            _gameService = new Mock<IGameService>();
+
             _unitOfWork = new Mock<IUnitOfWork>();
 
-            MapperConfiguration mockMapper = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new CommentProfile());
-                cfg.AddProfile(new GameProfile());
-                cfg.AddProfile(new GenreProfile());
-            });
-            _mapper = mockMapper.CreateMapper();
+            _mapper = new Mock<IMapper>();
 
-            _commentService = new CommentService(_gameRepository.Object, _commentRepository.Object, _unitOfWork.Object, _mapper);
-        }
+            _commentService = new CommentService(
+                _gameRepository.Object,
+                _commentRepository.Object,
+                _unitOfWork.Object,
+                _mapper.Object);
 
-        [Fact]
-        public void GetAllCommentsByGameKey_PassGameKey_ReturnsListOfComments()
-        {
-            List<DAL.Entities.Comment> comments = new List<DAL.Entities.Comment>
+            _commentsFromDb = new List<DbModels.Comment>
             {
-                new DAL.Entities.Comment
+                new DbModels.Comment
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
                     CommentId = Guid.NewGuid(),
-                    CommentingGame = new DAL.Entities.Game
+                    CommentingGame = new DbModels.Game
                     {
                         GameId = _gameId,
                         Key = GameKey,
@@ -62,25 +63,25 @@ namespace GameStore.BLL.Tests
                     ParentCommentId = null,
                 },
 
-                new DAL.Entities.Comment
+                new DbModels.Comment
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
                     CommentId = Guid.NewGuid(),
-                    CommentingGame = new DAL.Entities.Game
+                    CommentingGame = new DbModels.Game
                     {
-                        Key = "mario",
+                        Key = "contr_strike",
                     },
-                    GameId = _gameId,
+                    GameId = Guid.NewGuid(),
                     ParentCommentId = null,
                 },
 
-                new DAL.Entities.Comment
+                new DbModels.Comment
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
                     CommentId = Guid.NewGuid(),
-                    CommentingGame = new DAL.Entities.Game
+                    CommentingGame = new DbModels.Game
                     {
                         Key = "lol",
                     },
@@ -89,62 +90,81 @@ namespace GameStore.BLL.Tests
                 },
             };
 
-            List<DAL.Entities.Game> gameList = new List<DAL.Entities.Game>
+            _comments = new List<BusinessModels.Comment>
             {
-                new DAL.Entities.Game
+                new BusinessModels.Comment
+                {
+                    Name = "Comment Name",
+                    Body = "Comment Body",
+                    CommentId = Guid.NewGuid(),
+                    GameId = _gameId,
+                    ParentCommentId = null,
+                },
+
+                new BusinessModels.Comment
+                {
+                    Name = "Comment Name",
+                    Body = "Comment Body",
+                    CommentId = Guid.NewGuid(),
+                    GameId = Guid.NewGuid(),
+                    ParentCommentId = null,
+                },
+            };
+        }
+
+        [Fact]
+        public void GetAllCommentsByGameKey_PassGameKey_ReturnsListOfComments()
+        {
+            List<DbModels.Game> gameList = new List<DbModels.Game>
+            {
+                new DbModels.Game
                 {
                     GameId = _gameId,
                     Key = GameKey,
                 },
 
-                new DAL.Entities.Game
+                new DbModels.Game
                 {
                     GameId = Guid.Empty,
                     Key = "lol",
                 },
             };
 
-            List<Models.Comment> commentsToCheck = new List<Models.Comment>
-            {
-                new Models.Comment
-                {
-                    Name = "Comment Name",
-                    Body = "Comment Body",
-                    CommentId = Guid.NewGuid(),
-                    GameId = _gameId,
-                    ParentCommentId = null,
-                },
-
-                new Models.Comment
-                {
-                    Name = "Comment Name",
-                    Body = "Comment Body",
-                    CommentId = Guid.NewGuid(),
-                    GameId = _gameId,
-                    ParentCommentId = null,
-                },
-            };
-
-            _gameRepository.Setup(g => g.GetByKey(GameKey)).Returns(gameList.First());
-            _commentRepository.Setup(c => c.GetCommentsByGameId(_gameId))
-                .Returns(comments.Where(y => y.GameId.Equals(_gameId)));
+            _gameService
+                .Setup(c => c.IsPresent(It.IsAny<string>()))
+                .Returns(true);
+            _gameRepository
+                .Setup(g => g.GetByKey(GameKey))
+                .Returns(gameList.First());
+            _commentRepository
+                .Setup(c => c.GetCommentsByGameId(_gameId))
+                .Returns(_commentsFromDb.Where(y => y.GameId.Equals(_gameId)));
+            _mapper
+                .Setup(m => m
+                    .Map<IEnumerable<BusinessModels.Comment>>(
+                        It.IsAny<IEnumerable<DbModels.Comment>>()))
+                .Returns(
+                    new List<BusinessModels.Comment> { _comments.First() });
 
             int res = _commentService.GetAllCommentsByGameKey(GameKey).Count();
 
-            Assert.Equal(gameList.Count(), res);
+            Assert
+                .Equal(
+                    _comments.Where(y => y.GameId.Equals(_gameId)).Count(),
+                    res);
         }
 
         [Fact]
         public void GetAllCommentsByGameKey_PassGameKey_ReturnsEmptyList()
         {
-            List<DAL.Entities.Comment> comments = new List<DAL.Entities.Comment>
+            List<DbModels.Comment> commentsFromDb = new List<DbModels.Comment>
             {
-                new DAL.Entities.Comment
+                new DbModels.Comment
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
                     CommentId = Guid.NewGuid(),
-                    CommentingGame = new DAL.Entities.Game
+                    CommentingGame = new DbModels.Game
                     {
                         GameId = _gameId,
                         Key = GameKey,
@@ -154,36 +174,53 @@ namespace GameStore.BLL.Tests
                 },
             };
 
-            List<DAL.Entities.Game> gameList = new List<DAL.Entities.Game>
+            List<BusinessModels.Comment> comments =
+                new List<BusinessModels.Comment>();
+
+            List<DbModels.Game> gameList = new List<DbModels.Game>
             {
-                new DAL.Entities.Game
+                new DbModels.Game
                 {
                     GameId = _gameId,
                     Key = GameKey,
                 },
 
-                new DAL.Entities.Game
+                new DbModels.Game
                 {
                     GameId = Guid.NewGuid(),
                     Key = "lol",
                 },
             };
 
+            _gameService
+                .Setup(c => c.IsPresent(It.IsAny<string>()))
+                .Returns(true);
+
+            _mapper
+                .Setup(m => m.Map<IEnumerable<BusinessModels.Comment>>(
+                    It.IsAny<IEnumerable<DbModels.Comment>>()))
+                .Returns(comments);
+
             _gameRepository.Setup(g => g.GetByKey("lol")).Returns(gameList.Last());
 
-            _commentRepository.Setup(c => c.GetAll()).Returns(comments);
+            _commentRepository.Setup(c => c.GetAll()).Returns(_commentsFromDb);
 
-            IEnumerable<Models.Comment> res = _commentService.GetAllCommentsByGameKey("lol");
+            IEnumerable<BusinessModels.Comment> res = _commentService
+                .GetAllCommentsByGameKey("lol");
 
-            Assert.Equal(Enumerable.Empty<Models.Comment>(), res);
+            Assert.Empty(res);
         }
 
         [Fact]
         public void AddCommentToGame_PassGameModelAndCommentModel_VerifyAdding()
         {
-            Models.Game game = new Models.Game { GameId = _gameId, Key = GameKey };
+            BusinessModels.Game game = new BusinessModels.Game
+            {
+                GameId = _gameId,
+                Key = GameKey,
+            };
 
-            Models.Comment newComment = new Models.Comment
+            BusinessModels.Comment newComment = new BusinessModels.Comment
             {
                 Name = "Comment Name",
                 Body = "Comment Body",
@@ -193,7 +230,7 @@ namespace GameStore.BLL.Tests
             };
 
             _gameRepository.Setup(g => g.GetById(_gameId))
-                .Returns(new DAL.Entities.Game
+                .Returns(new DbModels.Game
                 {
                     GameId = _gameId,
                     Key = GameKey,
@@ -201,7 +238,84 @@ namespace GameStore.BLL.Tests
 
             _commentService.AddCommentToGame(game, newComment);
 
-            _commentRepository.Verify(x => x.Create(It.IsAny<DAL.Entities.Comment>()), Times.Once);
+            _commentRepository
+                .Verify(x => x.Create(It.IsAny<DbModels.Comment>()), Times.Once);
+        }
+
+        [Fact]
+        public void DeleteComment_PassComment_VerifyDeleting()
+        {
+            _commentRepository
+                .Setup(c => c.IsPresent(It.IsAny<Guid>()))
+                .Returns(true);
+
+            _commentRepository
+                .Setup(c => c.GetById(It.IsAny<Guid>()))
+                .Returns(_commentsFromDb.First());
+
+            _commentService.DeleteComment(_comments.First());
+
+            _commentRepository.Verify(c => c.Delete(It.IsAny<Guid>()));
+        }
+
+        [Fact]
+        public void DeleteComment_PassDeletedComment_ThrowsException()
+        {
+            var comment = _commentsFromDb.First();
+            comment.IsRemoved = true;
+
+            Assert
+                .Throws<ArgumentException>(() => _commentService
+                    .DeleteComment(_comments.First()));
+
+            comment = null;
+
+            Assert
+                .Throws<ArgumentException>(() => _commentService
+                    .DeleteComment(_comments.First()));
+        }
+
+        [Fact]
+        public void UpdateComment_PassComment_ReturnsComment()
+        {
+            _mapper
+                .Setup(m => m
+                    .Map<DbModels.Comment>(It.IsAny<BusinessModels.Comment>()))
+                .Returns(_commentsFromDb.First());
+
+            var result = _commentService.UpdateComment(_comments.First());
+
+            _commentRepository.Verify(c => c
+                .Update(It.IsAny<Guid>(), It.IsAny<DbModels.Comment>()));
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void GetCommentById_PassCommentId_ReturnsComment()
+        {
+            _commentRepository
+                .Setup(c => c.GetById(It.IsAny<Guid>()))
+                .Returns(_commentsFromDb.First());
+            _mapper
+                .Setup(m => m
+                    .Map<BusinessModels.Comment>(
+                        It.IsAny<DbModels.Comment>()))
+                .Returns(_comments.First());
+
+            var result = _commentService.GetCommentById(_comments.First().CommentId);
+
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public void GetCommentById_PassNonExistingCommentId_ReturnsNull()
+        {
+            var comment = _commentsFromDb.First();
+            comment.IsRemoved = true;
+
+            var result = _commentService.GetCommentById(_comments.First().CommentId);
+
+            Assert.Null(result);
         }
     }
 }

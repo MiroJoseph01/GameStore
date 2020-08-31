@@ -1,0 +1,62 @@
+﻿@model IEnumerable<GameViewModel>
+
+@{
+    ViewData["Title"] = "Main Page";
+}
+
+<h1>Main Page</h1>
+
+<p>
+    <a asp-action="CreateNewGame">Create game</a>
+</p>
+<p>
+    <a asp-action="CreateNewPublisher">Create publisher</a>
+</p>
+
+@{
+    if (Model.Count() == 0 || Model is null)
+    {
+        <h3>No games yet</h3>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Key)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                    <th>
+                        Options
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Key)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.ActionLink("Game Details", "ViewGameDetails", new { item.Key })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    }
+}

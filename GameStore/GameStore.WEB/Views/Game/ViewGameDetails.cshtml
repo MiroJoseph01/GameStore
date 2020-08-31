@@ -1,0 +1,112 @@
+﻿@model GameStore.Web.ViewModels.GameViewModel
+
+@{
+    ViewData["Title"] = "Game Details";
+}
+
+<h2>Game Details</h2>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Key)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Key)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.UnitsInStock)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.UnitsInStock)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Publisher)
+        </dt>
+        <dd>
+            @{
+                if (!(Model.Publisher is null))
+                {
+                        <span>| </span><a asp-action="ViewPublisher" asp-route-name="@Model.Publisher.ToLower().Replace(' ', '_')">@Model.Publisher</a><span> |</span>
+                }
+                else
+                {
+                    <span>| No publisher |</span>
+                }
+            }
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Genres)
+        </dt>
+        <dd>
+            @{
+                if (Model.Genres.Count == 0)
+                {
+                    <span>| No genres yet |</span>
+                }
+                else
+                {
+                    <span>| </span>
+                    foreach (var item in Model.Genres)
+                    {
+                        <span>@item.GenreName |</span>
+                    }
+                }
+            }
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Platforms)
+        </dt>
+        <dd>
+            <span>| </span>
+            @foreach (var item in Model.Platforms)
+            {
+                <span>@item.PlatformName |</span>
+            }
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Discontinued)
+        </dt>
+        <dd>
+            @{
+                if (Model.Discontinued)
+                {
+                    <span>| Yes |</span>
+                }
+                else
+                {
+                    <span>| No |</span>
+                }
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="ViewComments" asp-controller="Comment" asp-route-key="@Model.Key">Comments</a> |
+    <a asp-action="Download" target="_blank" asp-route-key="@Model.Key">Download</a> |
+    <a asp-action="AddDetail" asp-controller="Basket">Add to Basket</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using GameStore.DAL.Interfaces;
+using GameStore.DAL.Entities.Interfaces;
 
 namespace GameStore.DAL.Entities
 {
@@ -17,8 +17,8 @@ namespace GameStore.DAL.Entities
 
         public Guid GameId { get; set; }
 
-        public virtual Game CommentingGame { get; set; }
-
         public bool IsRemoved { get; set; }
+
+        public Game CommentingGame { get; set; }
     }
 }

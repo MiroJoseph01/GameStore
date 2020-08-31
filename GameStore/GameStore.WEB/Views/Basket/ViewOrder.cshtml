@@ -1,0 +1,58 @@
+﻿@model GameStore.Web.ViewModels.BasketViewModel
+
+@{
+    ViewData["Title"] = "Order";
+}
+
+<div>
+    <h4>Basket</h4>
+    <hr />
+
+    @{
+        if (Model is null)
+        {
+            <h5>No order details yet</h5>
+            <div>
+                <a asp-action="Index" asp-controller="Games">Back to List</a>
+            </div>
+        }
+        else
+        { <dl class="row">
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.OrderStatus)
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.OrderStatus)
+                </dd>
+                <dt class="col-sm-2">
+                    @Html.DisplayNameFor(model => model.OrderDetails) :
+                </dt>
+            </dl>
+            <div>
+                @foreach (var d in Model.OrderDetails)
+                {
+                    <div class="card">
+                        <div class="card-header">
+                            <b>Product Name: </b><i>@d.ProductName </i>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                <b>Quantity: </b><i>@d.Quantity </i>
+                            </div>
+                            <div class="card-text">
+                                <b>Price: </b><i>@d.Price </i>
+                            </div>
+                            <div class="card-text">
+                                <b>Discount: </b><i>@d.Discount %</i>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div>
+                <a asp-action="Index" asp-controller="Games">Back to List</a>
+            </div>
+        }
+    }
+</div>

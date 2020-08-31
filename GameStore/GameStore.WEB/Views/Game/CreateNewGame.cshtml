@@ -1,0 +1,80 @@
+﻿@model GameCreateViewModel
+
+@{
+    ViewData["Title"] = "New Game";
+}
+
+<h2>New Game</h2>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="CreateNewGame">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Key" class="control-label"></label>
+                <p>Example: <i>happy_farm_2</i></p>
+                <input asp-for="Key" class="form-control" />
+                <span asp-validation-for="Key" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UnitsInStock" class="control-label"></label>
+                <input asp-for="UnitsInStock" class="form-control" />
+                <span asp-validation-for="UnitsInStock" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Discontinued" class="control-label"></label>
+                <span><input asp-for="Discontinued" class="form-control" /></span>
+                <span asp-validation-for="Discontinued" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PlatformOptions" class="control-label"></label>
+                <div>
+                    @for (var i = 0; i < Model.PlatformOptions.Count; i++)
+                    {
+                        <input type="hidden" asp-for="@Model.PlatformOptions[i].Value" />
+                        <input asp-for="PlatformOptions[i].Selected" /> @Model.PlatformOptions[i].Text <br />
+                    }
+                    <span asp-validation-for="PlatformOptions" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Genres" class="control-label"></label>
+                <div>
+                    @Html.ListBoxFor(model => model.Genres, Model.GenreOptions, new { size = 5 })
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="PublisherName" class="control-label"></label>
+                <div>
+                    <select asp-for="PublisherName" asp-items="Model.PublisherOptions"></select>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

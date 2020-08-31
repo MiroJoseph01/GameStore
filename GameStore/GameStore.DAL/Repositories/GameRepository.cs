@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameStore.DAL.Entities;
-using GameStore.DAL.Interfaces;
+using GameStore.DAL.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace GameStore.DAL.Repositories
 {
-    public class GameRepository : GenericRepository<Game>, IGameRepository
+    public class GameRepository : Repository<Game>, IGameRepository
     {
         private readonly GameStoreContext _dbContext;
 
@@ -19,9 +19,11 @@ namespace GameStore.DAL.Repositories
 
         public override IEnumerable<Game> GetAll()
         {
-            Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Game, IList<GamePlatform>> gameEntities = _dbContext.Games.Where(x => !x.IsRemoved)
+            var gameEntities = _dbContext.Games
+                .Where(x => !x.IsRemoved)
                 .Include(x => x.GenreGames)
-                .Include(y => y.PlatformGames);
+                .Include(y => y.PlatformGames)
+                .Include(z => z.Publisher);
 
             return gameEntities;
         }
@@ -32,7 +34,8 @@ namespace GameStore.DAL.Repositories
                 .Where(r => r.IsRemoved == false)
                 .Include(x => x.GenreGames)
                 .Include(y => y.PlatformGames)
-                .Include(z => z.Comments);
+                .Include(z => z.Comments)
+                .Include(v => v.Publisher);
 
             return gameEntities.FirstOrDefault(x => x.GameId == id);
         }
@@ -42,6 +45,7 @@ namespace GameStore.DAL.Repositories
             var gameEntities = _dbContext.Set<Game>()
                 .Include(x => x.GenreGames)
                 .Include(y => y.PlatformGames)
+                .Include(p => p.Publisher)
                 .Include(z => z.Comments);
 
             return gameEntities.FirstOrDefault(x => x.Key == key);
@@ -54,7 +58,9 @@ namespace GameStore.DAL.Repositories
                 .Select(y => y.GenreId)
                 .ToList();
 
-            return _dbContext.Genres.Where(x => genresId.Contains(x.GenreId)).ToList();
+            return _dbContext.Genres
+                .Where(x => genresId.Contains(x.GenreId))
+                .ToList();
         }
 
         public IEnumerable<Platform> GetGamePlatforms(Guid id)
@@ -64,7 +70,9 @@ namespace GameStore.DAL.Repositories
                 .Select(y => y.PlatformId)
                 .ToList();
 
-            return _dbContext.Platforms.Where(x => platformsId.Contains(x.PlatformId)).ToList();
+            return _dbContext.Platforms
+                .Where(x => platformsId.Contains(x.PlatformId))
+                .ToList();
         }
 
         public IEnumerable<Game> GetGamesOfGenre(Guid genreId)
@@ -74,7 +82,9 @@ namespace GameStore.DAL.Repositories
                 .Select(y => y.GameId)
                 .ToList();
 
-            return _dbContext.Games.Where(x => gamesId.Contains(x.GameId)).ToList();
+            return _dbContext.Games
+                .Where(x => gamesId.Contains(x.GameId))
+                .ToList();
         }
 
         public IEnumerable<Game> GetGamesOfPlatform(Guid platformId)
@@ -84,7 +94,16 @@ namespace GameStore.DAL.Repositories
                 .Select(y => y.GameId)
                 .ToList();
 
-            return _dbContext.Games.Where(x => gamesId.Contains(x.GameId)).ToList();
+            return _dbContext.Games
+                .Where(x => gamesId.Contains(x.GameId))
+                .ToList();
+        }
+
+        public IEnumerable<Game> GetGamesOfPublisher(Guid publisherId)
+        {
+            return _dbContext.Games
+                .Where(x => x.PublisherId.Equals(publisherId))
+                .ToList();
         }
     }
 }

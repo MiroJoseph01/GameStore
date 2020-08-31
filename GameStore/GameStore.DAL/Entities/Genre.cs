@@ -1,5 +1,5 @@
 ﻿using System;
-using GameStore.DAL.Interfaces;
+using GameStore.DAL.Entities.Interfaces;
 
 namespace GameStore.DAL.Entities
 {

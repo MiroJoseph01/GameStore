@@ -19,7 +19,8 @@ namespace GameStore.BLL.Services
 
             stream.Write(binary, 0, binary.Length);
 
-            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK)
+            HttpResponseMessage result = new HttpResponseMessage(
+                HttpStatusCode.OK)
             {
                 Content = new ByteArrayContent(stream.ToArray()),
             };

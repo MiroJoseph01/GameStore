@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using GameStore.DAL.Interfaces;
+using GameStore.DAL.Entities.Interfaces;
+using GameStore.DAL.Entities.SupportingModels;
 
 namespace GameStore.DAL.Entities
 {
@@ -10,8 +11,8 @@ namespace GameStore.DAL.Entities
 
         public string PlatformName { get; set; }
 
-        public virtual IList<GamePlatform> PlatformGames { get; set; }
-
         public bool IsRemoved { get; set; }
+
+        public IList<GamePlatform> PlatformGames { get; set; }
     }
 }

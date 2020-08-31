@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
-using GameStore.BLL.Models;
 using GameStore.DAL.Interfaces;
-using GameStore.DAL.Interfaces.RepostitoriesInterfaces;
+using GameStore.DAL.Interfaces.Repositories;
+using BusinessModels = GameStore.BLL.Models;
+using DbModels = GameStore.DAL.Entities;
 
 namespace GameStore.BLL.Services
 {
@@ -14,7 +16,11 @@ namespace GameStore.BLL.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public CommentService(IGameRepository gameRepository, ICommentRepository commentRepository, IUnitOfWork unitOfWork, IMapper mapper)
+        public CommentService(
+            IGameRepository gameRepository,
+            ICommentRepository commentRepository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
             _gameRepository = gameRepository;
             _commentRepository = commentRepository;
@@ -22,43 +28,74 @@ namespace GameStore.BLL.Services
             _mapper = mapper;
         }
 
-        public Comment AddCommentToGame(Game game, Comment comment)
+        public BusinessModels.Comment AddCommentToGame(
+            BusinessModels.Game game,
+            BusinessModels.Comment comment)
         {
-            DAL.Entities.Game gameFromDB = _gameRepository.GetById(game.GameId);
+            DbModels.Game gameFromDb = _gameRepository
+                .GetById(game.GameId);
 
-            if (gameFromDB.Comments is null)
-            {
-                gameFromDB.Comments = new List<DAL.Entities.Comment>();
-            }
-
-            DAL.Entities.Comment commentFromDB = new DAL.Entities.Comment
+            DbModels.Comment commentFromDb = new DbModels.Comment
             {
                 GameId = game.GameId,
-                CommentingGame = gameFromDB,
+                CommentingGame = gameFromDb,
                 Body = comment.Body,
                 Name = comment.Name,
                 ParentCommentId = comment.ParentCommentId,
             };
 
-            _commentRepository.Create(commentFromDB);
+            _commentRepository.Create(commentFromDb);
 
             _unitOfWork.Commit();
 
             return comment;
         }
 
-        public IEnumerable<Comment> GetAllCommentsByGameKey(string gameKey)
+        public void DeleteComment(BusinessModels.Comment comment)
         {
-            DAL.Entities.Game game = _gameRepository.GetByKey(gameKey);
-
-            if (game is null)
+            if (!_commentRepository.IsPresent(comment.CommentId))
             {
-                return null;
+                throw new ArgumentException("" +
+                    "Comment doesn't exist or has been already deleted");
             }
 
-            IEnumerable<DAL.Entities.Comment> commentsFromDB = _commentRepository.GetCommentsByGameId(game.GameId);
+            _commentRepository.Delete(comment.CommentId);
 
-            IEnumerable<Comment> comments = _mapper.Map<IEnumerable<Comment>>(commentsFromDB);
+            _unitOfWork.Commit();
+        }
+
+        public BusinessModels.Comment UpdateComment(
+            BusinessModels.Comment comment)
+        {
+            _commentRepository
+                .Update(comment.CommentId, _mapper
+                .Map<DbModels.Comment>(comment));
+
+            _unitOfWork.Commit();
+
+            return comment;
+        }
+
+        public BusinessModels.Comment GetCommentById(Guid commentId)
+        {
+            DbModels.Comment commentFromDb = _commentRepository
+                .GetById(commentId);
+
+            var comment = _mapper.Map<BusinessModels.Comment>(commentFromDb);
+
+            return comment;
+        }
+
+        public IEnumerable<BusinessModels.Comment> GetAllCommentsByGameKey(
+            string gameKey)
+        {
+            DbModels.Game game = _gameRepository.GetByKey(gameKey);
+
+            IEnumerable<DbModels.Comment> commentsFromDb =
+                _commentRepository.GetCommentsByGameId(game.GameId);
+
+            IEnumerable<BusinessModels.Comment> comments = _mapper
+                .Map<IEnumerable<BusinessModels.Comment>>(commentsFromDb);
 
             return comments;
         }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
-namespace GameStore.WEB.Util
+namespace GameStore.Web.Util
 {
     public class ExceptionFilter : IExceptionFilter
     {
@@ -14,7 +14,9 @@ namespace GameStore.WEB.Util
 
         public void OnException(ExceptionContext context)
         {
-            _logger.LogError($"Exception in method {context.ActionDescriptor.DisplayName}. " +
+            _logger.LogError(
+                $"Exception in method " +
+                $"{context.ActionDescriptor.DisplayName}. " +
                 $"Exception messsage: {context.Exception.Message}\n" +
                 $"Trace: {context.Exception.StackTrace}");
 

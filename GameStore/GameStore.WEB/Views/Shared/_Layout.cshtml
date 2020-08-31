@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <link href="/lib/twitter-bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="/css/Style.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <main class="container" role="main">
+        <p>
+            <cache expires-after="@TimeSpan.FromMinutes(1)">
+                @await Component.InvokeAsync("CountGames")
+            </cache>
+            <a asp-action="ViewOrder" asp-controller="Basket">Basket</a>
+        </p>
+        @RenderBody()
+    </main>
+
+    <footer class="footer mt-auto py-3">
+        <div class="container">
+            <span class="text-muted">Game Store 2020</span>
+        </div>
+    </footer>
+
+    @RenderSection("scripts", required: false)
+    <script src="/lib/jquery/jquery.min.js"></script>
+    <script src="/lib/jquery-ajax-unobtrusive/jquery.unobtrusive-ajax.js"></script>
+    <script src="/lib/twitter-bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>

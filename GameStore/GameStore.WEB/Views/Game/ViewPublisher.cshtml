@@ -1,0 +1,52 @@
+﻿@model GameStore.Web.ViewModels.PublisherViewModel
+
+@{
+    ViewData["Title"] = "Publisher";
+}
+
+
+<div>
+    <h4>Publisher</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.CompanyName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.CompanyName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HomePage)
+        </dt>
+        <dd class="col-sm-10">
+            | <a href="@Model.HomePage">link</a> |
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.PublisherGames)
+        </dt>
+        <dd class="col-sm-10">
+            @{
+                if (Model.PublisherGames.Count == 0 || Model.PublisherGames == null)
+                {
+                    <i>No games</i>
+                }
+                else
+                {
+                    <div>
+                        <span>   | </span>
+                        @foreach (var i in Model.PublisherGames)
+                        {
+                            <a asp-action="ViewGameDetails" asp-route-key="@i.Key">@i.Name</a><span> |</span>
+                        }
+                    </div>
+                }
+            }
+        </dd>
+    </dl>
+</div>

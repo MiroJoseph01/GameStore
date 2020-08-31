@@ -9,6 +9,6 @@ namespace GameStore.BLL.Models
 
         public string PlatformName { get; set; }
 
-        public IEnumerable<Game> PlatformGames { get; set; }
+        public IList<Game> PlatformGames { get; set; }
     }
 }

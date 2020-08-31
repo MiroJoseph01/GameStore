@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using GameStore.BLL.Models;
 
 namespace GameStore.BLL.Interfaces
@@ -11,6 +12,8 @@ namespace GameStore.BLL.Interfaces
 
         Game GetGameByKey(string key);
 
+        Game GetGameById(Guid gameId);
+
         IEnumerable<Game> GetAllGames();
 
         void DeleteGame(Game game);
@@ -19,6 +22,10 @@ namespace GameStore.BLL.Interfaces
 
         IEnumerable<Game> GetGamesByPlatform(Platform genre);
 
+        IEnumerable<Game> GetGamesByPublisher(Publisher publisher);
+
         bool IsPresent(string gameKey);
+
+        int Count();
     }
 }

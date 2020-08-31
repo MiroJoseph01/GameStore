@@ -1,5 +1,6 @@
-{
+﻿{
   "ConnectionStrings": {
-    "DefaultConnection": "Server=EPUAKHAW04F4\\SQLEXPRESS;Database=GameStore_VB;Trusted_Connection=True;MultipleActiveResultSets=true"
+    "DevelopmentConnection": "Server=EPUAKHAW04F4\\SQLEXPRESS;Database=GameStore_VB;Trusted_Connection=True;MultipleActiveResultSets=true",
+    "DefaultConnection": "Data Source=tcp:ecsd00300935.epam.com,8272;User Id=student;Password=23AXK@cQRz;Initial Catalog=volodymyrbukhanovskyi;MultipleActiveResultSets=True"
   }
 }

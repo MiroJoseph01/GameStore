@@ -3,11 +3,11 @@ using GameStore.BLL.Interfaces;
 using GameStore.BLL.Services;
 using GameStore.DAL;
 using GameStore.DAL.Interfaces;
-using GameStore.DAL.Interfaces.RepostitoriesInterfaces;
+using GameStore.DAL.Interfaces.Repositories;
 using GameStore.DAL.Repositories;
-using GameStore.WEB.Filters;
-using GameStore.WEB.Util;
-using GameStore.WEB.Util.AutoMapperProfiles;
+using GameStore.Web.Filters;
+using GameStore.Web.Util;
+using GameStore.Web.Util.AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -15,56 +15,49 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace GameStore.WEB
+namespace GameStore.Web
 {
     public class Startup
     {
         private readonly IConfigurationRoot _configurationString;
-        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _currentEnvironment;
 
-        public Startup(IWebHostEnvironment hostingEnvironment, IConfiguration configuration)
+        public Startup(IWebHostEnvironment hostingEnvironment)
         {
-            _configuration = configuration;
-
             _configurationString = new ConfigurationBuilder()
                 .SetBasePath(hostingEnvironment.ContentRootPath)
                 .AddJsonFile("db_settings.json").Build();
+            _currentEnvironment = hostingEnvironment;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            MapperConfiguration mappingConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new GameProfile());
-                mc.AddProfile(new CommentProfile());
-                mc.AddProfile(new GenreProfile());
-                mc.AddProfile(new PlatformProfile());
-            });
+            ConfigureAutoMapper(services);
 
-            IMapper mapper = mappingConfig.CreateMapper();
+            ConfigureRepositories(services);
 
-            services.AddSingleton(mapper);
+            ConfigureApplicationServices(services);
 
             services.AddScoped<LoggingFilter>();
 
-            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
-            services.AddScoped<IGameRepository, GameRepository>();
-
-            services.AddScoped<ICommentRepository, CommentRepository>();
-
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-            services.AddScoped<IGameService, GameService>();
-
-            services.AddScoped<ICommentService, CommentService>();
-
-            services.AddScoped<IFileService, FileService>();
-
-            services.AddDbContext<GameStoreContext>(i =>
-                i.UseSqlServer(_configurationString.GetConnectionString("DefaultConnection")));
+            if (_currentEnvironment.EnvironmentName == "Development")
+            {
+                services.AddDbContext<GameStoreContext>(i =>
+                    i.UseSqlServer(
+                        _configurationString
+                            .GetConnectionString(
+                                Constants.DevelopmentConnectionString)));
+            }
+            else
+            {
+                services.AddDbContext<GameStoreContext>(i =>
+                    i.UseSqlServer(
+                        _configurationString
+                            .GetConnectionString(
+                                Constants.DefaultConnectionString)));
+            }
 
             services.AddMvc(option =>
             {
@@ -82,19 +75,67 @@ namespace GameStore.WEB
                 app.UseDeveloperExceptionPage();
             }
 
-            using (IServiceScope serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            using (
+                IServiceScope serviceScope = app
+                    .ApplicationServices
+                    .GetService<IServiceScopeFactory>()
+                    .CreateScope())
             {
-                GameStoreContext context = serviceScope.ServiceProvider.GetRequiredService<GameStoreContext>();
+                GameStoreContext context = serviceScope
+                    .ServiceProvider
+                    .GetRequiredService<GameStoreContext>();
                 context.Database.EnsureCreated();
             }
 
             app.UseStaticFiles();
 
-            app.UseStatusCodePages();
+            app.UseStatusCodePagesWithReExecute(Constants.ErrorRoute);
 
             app.UseRouting();
 
             app.UseMvcWithDefaultRoute();
+        }
+
+        private void ConfigureApplicationServices(IServiceCollection services)
+        {
+            services.AddScoped<IGameService, GameService>();
+
+            services.AddScoped<ICommentService, CommentService>();
+
+            services.AddScoped<IFileService, FileService>();
+
+            services.AddScoped<IGenreService, GenreService>();
+
+            services.AddScoped<IPlatformService, PlatformService>();
+
+            services.AddScoped<IPublisherService, PublisherService>();
+
+            services.AddScoped<IOrderService, OrderService>();
+        }
+
+        private void ConfigureRepositories(IServiceCollection services)
+        {
+            services
+                .AddScoped(
+                typeof(IRepository<>),
+                typeof(Repository<>));
+
+            services.AddScoped<IGameRepository, GameRepository>();
+
+            services.AddScoped<ICommentRepository, CommentRepository>();
+
+            services.AddScoped<IOrderRepository, OrderRepository>();
+
+            services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+        }
+
+        private void ConfigureAutoMapper(IServiceCollection services)
+        {
+            IMapper mapper = AutoMapperConfiguration.Configure();
+
+            services.AddSingleton(mapper);
         }
     }
 }
