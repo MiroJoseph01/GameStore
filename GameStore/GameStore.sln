@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.WEB", "GameStore.WEB\GameStore.WEB.csproj", "{5FA36890-4D2D-4CA7-AE80-D1DE046EFA69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.Web", "GameStore.WEB\GameStore.Web.csproj", "{5FA36890-4D2D-4CA7-AE80-D1DE046EFA69}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.DAL", "GameStore.DAL\GameStore.DAL.csproj", "{465F3BAB-43FF-4058-B789-71A03954FFAB}"
 EndProject

@@ -1,4 +1,4 @@
-﻿namespace GameStore.WEB.ViewModels
+﻿namespace GameStore.Web.ViewModels
 {
     public class GenreViewModel
     {

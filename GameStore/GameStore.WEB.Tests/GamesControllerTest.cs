@@ -1,223 +1,276 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
 using GameStore.BLL.Models;
-using GameStore.WEB.Controllers;
-using GameStore.WEB.Util.AutoMapperProfiles;
-using GameStore.WEB.ViewModels;
+using GameStore.Web.Controllers;
+using GameStore.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Moq;
 using Xunit;
 
-namespace GameStore.WEB.Tests
+namespace GameStore.Web.Tests
 {
     public class GamesControllerTest
     {
-        private readonly GamesController _gamesController;
+        private readonly GameController _gamesController;
         private readonly Mock<IGameService> _gameService;
         private readonly Mock<IFileService> _fileService;
-        private readonly IMapper _mapper;
-        private readonly Mock<ILogger<GamesController>> _logger;
+        private readonly Mock<IGenreService> _genreService;
+        private readonly Mock<IPlatformService> _platformService;
+        private readonly Mock<IPublisherService> _publisherService;
+        private readonly Mock<IMapper> _mapper;
+
+        private readonly List<Game> _games;
+        private readonly List<GameViewModel> _gamesVM;
+        private readonly List<GameCreateViewModel> _gameCreateVM;
+
+        private readonly List<Platform> _platforms;
+        private readonly List<PlatformViewModel> _platformsVM;
+
+        private readonly List<Genre> _genres;
+        private readonly List<GenreViewModel> _genresVM;
+
+        private readonly List<Publisher> _publishers;
 
         public GamesControllerTest()
         {
             _gameService = new Mock<IGameService>();
             _fileService = new Mock<IFileService>();
-            _logger = new Mock<ILogger<GamesController>>();
+            _platformService = new Mock<IPlatformService>();
+            _genreService = new Mock<IGenreService>();
+            _publisherService = new Mock<IPublisherService>();
+            _mapper = new Mock<IMapper>();
 
-            MapperConfiguration mockMapper = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new CommentProfile());
-                cfg.AddProfile(new GameProfile());
-                cfg.AddProfile(new GenreProfile());
-                cfg.AddProfile(new PlatformProfile());
-            });
-            _mapper = mockMapper.CreateMapper();
+            _gamesController = new GameController(
+                _gameService.Object,
+                _fileService.Object,
+                _genreService.Object,
+                _platformService.Object,
+                _publisherService.Object,
+                _mapper.Object);
 
-            _gamesController = new GamesController(_gameService.Object, _fileService.Object, _mapper, _logger.Object);
-        }
-
-        [Fact]
-        public void Index_ReturnsListOfGames()
-        {
-            Guid gameId = Guid.NewGuid();
-            List<Game> games = new List<Game>
+            _games = new List<Game>
             {
                 new Game
                 {
-                    GameId = gameId,
+                    GameId = Guid.NewGuid(),
                     Key = "mario",
                     Name = "Mario",
                 },
             };
 
-            _gameService.Setup(g => g.GetAllGames()).Returns(games);
+            _gamesVM = new List<GameViewModel>
+            {
+                new GameViewModel
+                {
+                   GameId = "f38358a2-4724-403c-981e-ffcd3511e805",
+                   Key = "mario",
+                   Name = "Mario",
+                   Description = "Game Description",
+                   Comments = null,
+                   Platforms = new List<PlatformViewModel>
+                    {
+                        new PlatformViewModel
+                        {
+                            PlatformId = Guid.NewGuid().ToString(),
+                            PlatformName = "browser",
+                        },
+                    },
+                },
+            };
+
+            _gameCreateVM = new List<GameCreateViewModel>
+            {
+                new GameCreateViewModel
+                {
+                    Key = "mario",
+                    Name = "Mario",
+                    Description = It.IsAny<string>(),
+                    Comments = null,
+                    PublisherName = "NoPublisher",
+                    PlatformOptions = new List<SelectListItem>
+                    {
+                        new SelectListItem
+                        {
+                            Value = Guid.NewGuid().ToString(),
+                            Text = "browser",
+                            Selected = true,
+                        },
+                    },
+                },
+            };
+
+            _platforms = new List<Platform>
+            {
+                new Platform
+                {
+                    PlatformId = Guid.NewGuid(),
+                    PlatformName = "platform",
+                },
+            };
+
+            _platformsVM = new List<PlatformViewModel>
+            {
+                new PlatformViewModel
+                {
+                    PlatformId = _platforms.First().PlatformId.ToString(),
+                    PlatformName = "platform",
+                },
+            };
+
+            _genres = new List<Genre>
+            {
+                new Genre
+                {
+                    GenreId = Guid.NewGuid(),
+                    GenreName = "Genre",
+                },
+            };
+
+            _genresVM = new List<GenreViewModel>
+            {
+                new GenreViewModel
+                {
+                    GenreId = _genres.First().GenreId.ToString(),
+                    GenreName = "Genre",
+                },
+            };
+
+            _publishers = new List<Publisher>
+            {
+                new Publisher
+                {
+                    PublisherId = Guid.NewGuid(),
+                    Description = "Description",
+                    CompanyName = "Name",
+                    HomePage = "link",
+                },
+            };
+        }
+
+        [Fact]
+        public void Index_ReturnsListOfGames()
+        {
+            _gameService.Setup(g => g.GetAllGames()).Returns(_games);
+            _mapper.Setup(m => m.Map<IEnumerable<GameViewModel>>(_games)).Returns(_gamesVM);
 
             IActionResult result = _gamesController.Index();
 
-            OkObjectResult view = Assert.IsType<OkObjectResult>(result);
+            ViewResult view = Assert.IsType<ViewResult>(result);
+            IEnumerable<GameViewModel> model = Assert.IsAssignableFrom<IEnumerable<GameViewModel>>(view.Model);
+            Assert.Single(model);
         }
 
         [Fact]
-        public void IndexByKey_PassCorrectGameKey_ReturnsGameModel()
+        public void ViewGameDetails_PassCorrectGameKey_ReturnsGameModel()
         {
-            Guid gameId = Guid.NewGuid();
-            Game game = new Game
-            {
-                GameId = gameId,
-                Key = "mario",
-                Name = "Mario",
-            };
+            var game = _games.First();
 
-            _gameService.Setup(g => g.GetGameByKey("mario")).Returns(game);
+            _gameService.Setup(g => g.IsPresent(game.Key)).Returns(true);
+            _gameService.Setup(g => g.GetGameByKey(game.Key)).Returns(game);
+            _mapper.Setup(m => m.Map<GameViewModel>(game)).Returns(_gamesVM.First());
 
-            IActionResult result = _gamesController.Index("mario");
+            IActionResult result = _gamesController.ViewGameDetails(game.Key);
 
-            OkObjectResult view = Assert.IsType<OkObjectResult>(result);
-            Game model = Assert.IsAssignableFrom<Game>(
-                view.Value);
-            Assert.IsType<Game>(model);
+            ViewResult view = Assert.IsType<ViewResult>(result);
+            GameViewModel model = Assert.IsAssignableFrom<GameViewModel>(
+               view.Model);
+            Assert.IsType<GameViewModel>(model);
         }
 
         [Fact]
-        public void Index_PassWrongGameKey_ReturnsNotFoundObjectResult()
+        public void ViewGameDetails_PassWrongGameKey_ReturnsNotFoundObjectResult()
         {
-            Guid gameId = Guid.NewGuid();
-            Game game = new Game
-            {
-                GameId = gameId,
-                Key = "mario",
-                Name = "Mario",
-            };
+            Game game = _games.First();
+            const string WrongKey = "WRONG";
 
-            _gameService.Setup(g => g.GetGameByKey("mario")).Returns(game);
+            _gameService.Setup(g => g.IsPresent(game.Key)).Returns(false);
+            _gameService.Setup(g => g.GetGameByKey(game.Key)).Returns(game);
 
-            IActionResult result = _gamesController.Index("wrong");
+            IActionResult result = _gamesController.ViewGameDetails(WrongKey);
 
-            NotFoundObjectResult view = Assert.IsType<NotFoundObjectResult>(result);
+            NotFoundResult view = Assert.IsType<NotFoundResult>(result);
+            Assert.Equal(404, view.StatusCode);
         }
 
         [Fact]
         public void New_PassGameViewModel_VerifyAdding()
         {
-            GameViewModel gameViewModel = new GameViewModel
-            {
-                Key = "mario",
-                Name = "Mario",
-                Description = It.IsAny<string>(),
-                Comments = null,
-                Platforms = new List<PlatformViewModel>
-                {
-                    new PlatformViewModel
-                    {
-                        PlatformId = Guid.NewGuid().ToString(),
-                        PlatformName = "browser",
-                    },
-                },
-            };
+            GameCreateViewModel gameCreateVM = _gameCreateVM.First();
+            Game game = _games.First();
 
-            Game game = new Game
-            {
-                Key = gameViewModel.Key,
-                Name = gameViewModel.Name,
-                Description = gameViewModel.Description,
-                Comments = _mapper.Map<IList<Comment>>(gameViewModel.Comments),
-                GameGenres = _mapper.Map<IList<Genre>>(gameViewModel.Genres),
-                GamePlatforms = _mapper.Map<IList<Platform>>(gameViewModel.Platforms),
-            };
-
-            _gameService.Setup(g => g.GetGameByKey(gameViewModel.Key))
+            _gameService.Setup(g => g.GetGameByKey(gameCreateVM.Key))
                 .Returns(game);
 
-            IActionResult result = _gamesController.New(gameViewModel);
+            IActionResult result = _gamesController.CreateNewGame(gameCreateVM);
 
             _gameService.Verify(g => g.CreateGame(It.IsAny<Game>()));
 
-            OkObjectResult view = Assert.IsType<OkObjectResult>(result);
+            Assert.IsType<RedirectToActionResult>(result);
+        }
+
+        [Fact]
+        public void New_ReturnsViewForCreatingGame()
+        {
+            _platformService.Setup(p => p.GetAllPlatforms()).Returns(_platforms);
+            _mapper.Setup(m => m.Map<IList<PlatformViewModel>>(_platforms)).Returns(_platformsVM);
+            _publisherService.Setup(p => p.GetAllPublishers()).Returns(_publishers);
+            _mapper.Setup(m => m.Map<IList<GenreViewModel>>(_genres)).Returns(_genresVM);
+            _genreService.Setup(g => g.GetAllGenres()).Returns(_genres);
+
+            var result = _gamesController.CreateNewGame();
+
+            ViewResult view = Assert.IsType<ViewResult>(result);
+            GameCreateViewModel model = Assert.IsAssignableFrom<GameCreateViewModel>(view.Model);
         }
 
         [Fact]
         public void Update_PassGameViewModel_VerifyUpdating()
         {
-            GameViewModel gameViewModel = new GameViewModel
-            {
-                GameId = "f38358a2-4724-403c-981e-ffcd3511e805",
-                Key = "mario",
-                Name = "Mario",
-                Description = "Game Description",
-                Comments = null,
-                Platforms = new List<PlatformViewModel>
-                {
-                    new PlatformViewModel
-                    {
-                        PlatformId = Guid.NewGuid().ToString(),
-                        PlatformName = "browser",
-                    },
-                },
-            };
-
-            Game game = new Game
-            {
-                Key = gameViewModel.Key,
-                Name = gameViewModel.Name,
-                Description = gameViewModel.Description,
-                Comments = _mapper.Map<IList<Comment>>(gameViewModel.Comments),
-                GamePlatforms = _mapper.Map<IList<Platform>>(gameViewModel.Platforms),
-            };
+            GameViewModel gameViewModel = _gamesVM.First();
+            Game game = _games.First();
 
             _gameService.Setup(g => g.EditGame(It.IsAny<Game>()))
                 .Returns(game);
+            _mapper.Setup(m => m.Map<Game>(_gamesVM));
 
             IActionResult result = _gamesController.Update(gameViewModel);
 
             _gameService.Verify(g => g.EditGame(It.IsAny<Game>()));
 
-            OkObjectResult view = Assert.IsType<OkObjectResult>(result);
-            GameViewModel model = Assert.IsAssignableFrom<GameViewModel>(
-                view.Value);
-            Assert.IsType<GameViewModel>(model);
+            RedirectToActionResult view = Assert.IsType<RedirectToActionResult>(result);
         }
 
         [Fact]
         public void Delete_PassGameViewModel_VerifyDeliting()
         {
-            GameViewModel gameViewModel = new GameViewModel
-            {
-                GameId = "f38358a2-4724-403c-981e-ffcd3511e805",
-                Key = "mario",
-                Name = "Mario",
-                Description = "Game Description",
-                Comments = null,
-                Platforms = new List<PlatformViewModel>
-                {
-                    new PlatformViewModel
-                    {
-                        PlatformId = Guid.NewGuid().ToString(),
-                        PlatformName = "browser",
-                    },
-                },
-            };
+            var game = _games.First();
 
-            Game gameBLL = new Game
-            {
-                Key = gameViewModel.Key,
-                Name = gameViewModel.Name,
-                Description = gameViewModel.Description,
-                Comments = _mapper.Map<IList<Comment>>(gameViewModel.Comments),
-                GamePlatforms = _mapper.Map<IList<Platform>>(gameViewModel.Platforms),
-            };
+            _gameService.Setup(g => g.IsPresent(game.Key)).Returns(true);
+            _gameService.Setup(g => g.GetGameByKey(game.Key)).Returns(game);
 
-            _gameService.Setup(g => g.GetGameByKey("mario")).Returns(gameBLL);
-
-            IActionResult result = _gamesController.Delete(gameViewModel.Key);
+            IActionResult result = _gamesController.Delete(game.Key);
 
             _gameService.Verify(g => g.DeleteGame(It.IsAny<Game>()));
 
-            OkObjectResult view = Assert.IsType<OkObjectResult>(result);
-            Assert.Equal($"Game with key: \'{gameViewModel.Key}\' is deleted", view.Value);
+            RedirectToActionResult view = Assert.IsType<RedirectToActionResult>(result);
+        }
+
+        [Fact]
+        public void Delete_PassNonExistingGameViewModel_ReturnsNotFound()
+        {
+            var game = _games.First();
+
+            _gameService.Setup(g => g.IsPresent(game.Key)).Returns(false);
+            _gameService.Setup(g => g.GetGameByKey(game.Key)).Returns((Game)null);
+
+            IActionResult result = _gamesController.Delete(game.Key);
+
+            NotFoundResult view = Assert.IsType<NotFoundResult>(result);
         }
 
         [Fact]

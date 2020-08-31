@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameStore.DAL.Entities;
-using GameStore.DAL.Interfaces.RepostitoriesInterfaces;
+using GameStore.DAL.Interfaces.Repositories;
 
 namespace GameStore.DAL.Repositories
 {
-    public class CommentRepository : GenericRepository<Comment>, ICommentRepository
+    public class CommentRepository : Repository<Comment>, ICommentRepository
     {
         private readonly GameStoreContext _dbContext;
 
@@ -18,7 +18,9 @@ namespace GameStore.DAL.Repositories
 
         public IEnumerable<Comment> GetCommentsByGameId(Guid gameId)
         {
-            List<Comment> commentsByGaneId = _dbContext.Set<Comment>().Where(x => x.GameId.Equals(gameId)).ToList();
+            List<Comment> commentsByGaneId = _dbContext.Set<Comment>()
+                .Where(x => x.GameId.Equals(gameId))
+                .ToList();
 
             return commentsByGaneId;
         }

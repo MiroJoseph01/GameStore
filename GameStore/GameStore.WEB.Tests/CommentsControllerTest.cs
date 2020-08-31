@@ -4,44 +4,39 @@ using System.Linq;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
 using GameStore.BLL.Models;
-using GameStore.WEB.Controllers;
-using GameStore.WEB.Util.AutoMapperProfiles;
-using GameStore.WEB.ViewModels;
+using GameStore.Web.Controllers;
+using GameStore.Web.ViewModels;
+using GameStore.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace GameStore.WEB.Tests
+namespace GameStore.Web.Tests
 {
     public class CommentsControllerTest
     {
-        private readonly CommentsController _commentsController;
+        private readonly CommentController _commentsController;
         private readonly Mock<IGameService> _gameService;
         private readonly Mock<ICommentService> _commentService;
-        private readonly Mock<ILogger<CommentsController>> _logger;
-        private readonly IMapper _mapper;
+        private readonly Mock<ILogger<CommentController>> _logger;
+        private readonly Mock<IMapper> _mapper;
 
         public CommentsControllerTest()
         {
             _gameService = new Mock<IGameService>();
             _commentService = new Mock<ICommentService>();
-            _logger = new Mock<ILogger<CommentsController>>();
+            _logger = new Mock<ILogger<CommentController>>();
+            _mapper = new Mock<IMapper>();
 
-            MapperConfiguration mockMapper = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile(new CommentProfile());
-                cfg.AddProfile(new GameProfile());
-                cfg.AddProfile(new GenreProfile());
-                cfg.AddProfile(new PlatformProfile());
-            });
-            _mapper = mockMapper.CreateMapper();
-
-            _commentsController = new CommentsController(_gameService.Object, _commentService.Object, _logger.Object, _mapper);
+            _commentsController = new CommentController(
+                _gameService.Object,
+                _commentService.Object,
+                _mapper.Object);
         }
 
         [Fact]
-        public void NewComment_PassCommentModelAndGameModel_VerifyAdding()
+        public void ViewComments_PassCommentModelAndGameModel_VerifyAdding()
         {
             Guid gameId = Guid.NewGuid();
 
@@ -62,7 +57,7 @@ namespace GameStore.WEB.Tests
                 },
             };
 
-            CommentViewModel comment = new CommentViewModel
+            CommentsViewModel comment = new CommentsViewModel
             {
                 Name = "Comment Name",
                 Body = "Comment Body",
@@ -70,18 +65,17 @@ namespace GameStore.WEB.Tests
 
             _gameService.Setup(g => g.GetGameByKey(game.Key)).Returns(game);
 
-            IActionResult result = _commentsController.NewComment(comment, game.Key);
+            IActionResult result = _commentsController
+                .ViewComments(comment, game.Key);
 
-            _commentService.Verify(c => c.AddCommentToGame(game, It.IsAny<Comment>()));
+            _commentService
+                .Verify(c => c.AddCommentToGame(game, It.IsAny<Comment>()));
 
-            OkObjectResult view = Assert.IsType<OkObjectResult>(result);
-            GameViewModel model = Assert.IsAssignableFrom<GameViewModel>(
-                view.Value);
-            Assert.IsType<GameViewModel>(model);
+            RedirectToActionResult view = Assert.IsType<RedirectToActionResult>(result);
         }
 
         [Fact]
-        public void Comments_PassValidGameKey_ReturnsListOfComments()
+        public void ViewComments_PassValidGameKey_ReturnsListOfComments()
         {
             string gameKey = "lol";
 
@@ -89,6 +83,7 @@ namespace GameStore.WEB.Tests
             {
                 GameId = Guid.NewGuid(),
                 Key = gameKey,
+                Name = "Name",
             };
 
             List<Comment> commentList = new List<Comment>
@@ -110,16 +105,35 @@ namespace GameStore.WEB.Tests
                 },
             };
 
+            List<CommentViewModel> viewCommentList = new List<CommentViewModel>
+            {
+               new CommentViewModel
+               {
+                    Name = "Comment Name",
+                    Body = "Comment Body",
+               },
+
+               new CommentViewModel
+                {
+                    Name = "Comment Name",
+                    Body = "Comment Body",
+                },
+            };
+
             _commentService.Setup(c => c.GetAllCommentsByGameKey(gameKey))
                 .Returns(commentList);
+            _mapper
+                .Setup(m => m.Map<IEnumerable<CommentViewModel>>(
+                    It.IsAny<IEnumerable<Comment>>()))
+                .Returns(viewCommentList);
             _gameService.Setup(g => g.IsPresent(gameKey)).Returns(true);
+            _gameService.Setup(g => g.GetGameByKey(It.IsAny<string>())).Returns(game);
 
-            IActionResult result = _commentsController.Comments(gameKey);
+            IActionResult result = _commentsController.ViewComments(gameKey);
 
-            OkObjectResult view = Assert.IsType<OkObjectResult>(result);
-            IEnumerable<CommentViewModel> model = Assert.IsAssignableFrom<IEnumerable<CommentViewModel>>(
-                view.Value);
-            Assert.Equal(commentList.Count(), model.Count());
+            ViewResult view = Assert.IsType<ViewResult>(result);
+            CommentsViewModel model = Assert.IsAssignableFrom<CommentsViewModel>(view.Model);
+            Assert.Equal(commentList.Count(), model.Comments.Count());
         }
     }
 }

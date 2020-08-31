@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
-using GameStore.DAL.Entities;
+using GameStore.DAL.Entities.SupportingModels;
 using GameStore.DAL.Interfaces;
+using GameStore.DAL.Interfaces.Repositories;
+using BusinessModels = GameStore.BLL.Models;
+using DbModels = GameStore.DAL.Entities;
 
 namespace GameStore.BLL.Services
 {
@@ -14,95 +17,121 @@ namespace GameStore.BLL.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public GameService(IGameRepository gameRepository, IUnitOfWork unitOfWork, IMapper mapper)
+        public GameService(
+            IGameRepository gameRepository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
             _gameRepository = gameRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public void CreateGame(Models.Game game)
+        public void CreateGame(BusinessModels.Game game)
         {
             if (string.IsNullOrEmpty(game.Key))
             {
                 game.Key = game.Name.ToLower().Replace(" ", "_");
             }
 
-            if (game.GamePlatforms is null || game.GamePlatforms.Count() == 0)
+            if (!game.GamePlatforms.Any())
             {
-                throw new Exception("Platform is required");
+                throw new ArgumentException("Platform is required");
             }
 
-            _gameRepository.Create(ConvertGame(game));
+            _gameRepository.Create(Convert(game));
 
             _unitOfWork.Commit();
         }
 
-        public void DeleteGame(Models.Game game)
+        public void DeleteGame(BusinessModels.Game game)
         {
-            Game gameFromDB = _gameRepository.GetById(game.GameId);
-
-            if (gameFromDB.IsRemoved)
+            if (!_gameRepository.IsPresent(game.GameId))
             {
-                throw new Exception($"Game with id \'{game.GameId}\' has already deleted");
+                throw new ArgumentException(
+                    $"Game with id \'{game.GameId}\' " +
+                    $"has already been deleted or doesn't exist");
             }
 
-            gameFromDB.IsRemoved = true;
+            DbModels.Game gameFromDb = _gameRepository.GetById(game.GameId);
+
+            gameFromDb.IsRemoved = true;
 
             _unitOfWork.Commit();
         }
 
-        public Models.Game EditGame(Models.Game game)
+        public BusinessModels.Game EditGame(BusinessModels.Game game)
         {
-            Game gameFromDB = _gameRepository.GetById(game.GameId);
+            if (!_gameRepository.IsPresent(game.GameId))
+            {
+                throw new ArgumentException("Invalid game id");
+            }
 
-            UpdateGenres(game);
-            UpdatePlatforms(game);
-            gameFromDB.Key = game.Key;
-            gameFromDB.Name = game.Name;
-            gameFromDB.Description = game.Description;
+            var gameToUpdate = Convert(game);
+
+            _gameRepository.Update(game.GameId, gameToUpdate);
 
             _unitOfWork.Commit();
 
             return game;
         }
 
-        public IEnumerable<Models.Game> GetAllGames()
+        public IEnumerable<BusinessModels.Game> GetAllGames()
         {
-            IEnumerable<Game> gamesFromDB = _gameRepository.GetAll();
+            IEnumerable<DbModels.Game> gamesFromDb = _gameRepository.GetAll();
 
-            return ConvertGames(gamesFromDB);
+            return Convert(gamesFromDb);
         }
 
-        public Models.Game GetGameByKey(string key)
+        public BusinessModels.Game GetGameByKey(string key)
         {
-            Game gameFromDB = _gameRepository.GetAll().Where(x => x.Key == key).FirstOrDefault();
-
-            if (gameFromDB is null || gameFromDB.IsRemoved)
+            if (!IsPresent(key))
             {
                 return null;
             }
 
-            return ConvertGames(new List<Game> { gameFromDB }).FirstOrDefault();
+            DbModels.Game gameFromDb = _gameRepository.GetByKey(key);
+
+            return Convert(gameFromDb);
         }
 
-        public IEnumerable<Models.Game> GetGamesByGenre(Models.Genre genre)
+        public BusinessModels.Game GetGameById(Guid id)
         {
-            IEnumerable<Game> gamesFromDB = _gameRepository.GetGamesOfGenre(genre.GenreId);
+            DbModels.Game gameFromDb = _gameRepository.GetById(id);
 
-            return ConvertGames(gamesFromDB);
+            return Convert(gameFromDb);
         }
 
-        public IEnumerable<Models.Game> GetGamesByPlatform(Models.Platform platform)
+        public IEnumerable<BusinessModels.Game> GetGamesByGenre(
+            BusinessModels.Genre genre)
         {
-            IEnumerable<Game> gamesFromDB = _gameRepository.GetGamesOfPlatform(platform.PlatformId);
+            IEnumerable<DbModels.Game> gamesFromDb = _gameRepository
+                .GetGamesOfGenre(genre.GenreId);
 
-            return ConvertGames(gamesFromDB);
+            return Convert(gamesFromDb);
+        }
+
+        public IEnumerable<BusinessModels.Game> GetGamesByPlatform(
+            BusinessModels.Platform platform)
+        {
+            IEnumerable<DbModels.Game> gamesFromDb = _gameRepository
+                .GetGamesOfPlatform(platform.PlatformId);
+
+            return Convert(gamesFromDb);
+        }
+
+        public IEnumerable<BusinessModels.Game> GetGamesByPublisher(
+            BusinessModels.Publisher publisher)
+        {
+            IEnumerable<DbModels.Game> gamesFromDb = _gameRepository
+                .GetGamesOfPublisher(publisher.PublisherId);
+
+            return Convert(gamesFromDb);
         }
 
         public bool IsPresent(string gameKey)
         {
-            Game game = _gameRepository.GetByKey(gameKey);
+            DbModels.Game game = _gameRepository.GetByKey(gameKey);
 
             if (game is null)
             {
@@ -112,134 +141,89 @@ namespace GameStore.BLL.Services
             return true;
         }
 
-        private IEnumerable<Models.Genre> GetGameGenres(Guid id)
+        public int Count()
         {
-            IEnumerable<Genre> genresFromDB = _gameRepository.GetGameGenres(id);
+            return _gameRepository.GetAll().Count();
+        }
 
-            IEnumerable<Models.Genre> genres = _mapper.Map<IEnumerable<Models.Genre>>(genresFromDB);
+        private IList<BusinessModels.Genre> GetGameGenres(Guid id)
+        {
+            IEnumerable<DbModels.Genre> genresFromDb = _gameRepository
+                .GetGameGenres(id);
+
+            var genres = _mapper
+                .Map<IEnumerable<BusinessModels.Genre>>(genresFromDb).ToList();
 
             return genres;
         }
 
-        private IEnumerable<Models.Platform> GetGamePlatforms(Guid id)
+        private IList<BusinessModels.Platform> GetGamePlatforms(Guid id)
         {
-            IEnumerable<Platform> platformsFromDB = _gameRepository.GetGamePlatforms(id);
+            IEnumerable<DbModels.Platform> platformsFromDb = _gameRepository
+                .GetGamePlatforms(id);
 
-            IEnumerable<Models.Platform> platforms = platformsFromDB.Select(x => new Models.Platform
-            {
-                PlatformId = x.PlatformId,
-                PlatformName = x.PlatformName,
-            }).ToList();
+            IList<BusinessModels.Platform> platforms = platformsFromDb
+                .Select(x => new BusinessModels.Platform
+                {
+                    PlatformId = x.PlatformId,
+                    PlatformName = x.PlatformName,
+                })
+                .ToList();
 
             return platforms;
         }
 
-        private IList<Models.Comment> GetGameComments(Guid id)
+        private IList<BusinessModels.Comment> GetGameComments(Guid id)
         {
-            IList<Comment> commentsFromDB = _gameRepository.GetById(id).Comments;
+            IList<DbModels.Comment> commentsFromDb = _gameRepository
+                .GetById(id).Comments;
 
-            if (commentsFromDB is null)
-            {
-                return new List<Models.Comment>();
-            }
-            else
-            {
-                IList<Models.Comment> comments = _mapper.Map<IList<Models.Comment>>(commentsFromDB);
+            var comments = _mapper
+                .Map<IList<BusinessModels.Comment>>(commentsFromDb);
 
-                return comments;
-            }
+            return comments;
         }
 
-        private void UpdateGenres(Models.Game game)
+        private IEnumerable<BusinessModels.Game> Convert(
+            IEnumerable<DbModels.Game> gamesFromDb)
         {
-            Game gameFromDB = _gameRepository.GetById(game.GameId);
+            var games = _mapper.Map<List<BusinessModels.Game>>(gamesFromDb);
 
-            List<GameGenre> genres = game.GameGenres.Select(x => new GameGenre
+            foreach (BusinessModels.Game g in games)
             {
-                GameId = game.GameId,
-                GenreId = x.GenreId,
-            }).ToList();
-
-            if (gameFromDB.GenreGames is null)
-            {
-                gameFromDB.GenreGames = new List<GameGenre>();
+                g.GameGenres = GetGameGenres(g.GameId);
+                g.GamePlatforms = GetGamePlatforms(g.GameId);
+                g.Comments = GetGameComments(g.GameId);
             }
-
-            if (game.GameGenres is null)
-            {
-                game.GameGenres = new List<Models.Genre>();
-            }
-
-            gameFromDB.GenreGames.Clear();
-
-            gameFromDB.GenreGames = genres;
-        }
-
-        private void UpdatePlatforms(Models.Game game)
-        {
-            Game gameFromDB = _gameRepository.GetById(game.GameId);
-
-            if (gameFromDB.PlatformGames is null)
-            {
-                gameFromDB.PlatformGames = new List<GamePlatform>();
-            }
-
-            if (game.GamePlatforms is null || game.GamePlatforms.Count() == 0)
-            {
-                throw new Exception("Platform is requried");
-            }
-            else
-            {
-                List<GamePlatform> platforms = game.GamePlatforms.Select(x => new GamePlatform
-                {
-                    GameId = game.GameId,
-                    PlatformId = x.PlatformId,
-                }).ToList();
-
-                gameFromDB.PlatformGames.Clear();
-
-                gameFromDB.PlatformGames = platforms;
-            }
-        }
-
-        private IEnumerable<Models.Game> ConvertGames(IEnumerable<Game> gamesFromDB)
-        {
-            List<Models.Game> games = gamesFromDB.Select(x => new Models.Game
-            {
-                GameId = x.GameId,
-                Name = x.Name,
-                Description = x.Description,
-                Key = x.Key,
-                GameGenres = GetGameGenres(x.GameId),
-                GamePlatforms = GetGamePlatforms(x.GameId),
-                Comments = GetGameComments(x.GameId),
-            }).ToList();
 
             return games;
         }
 
-        private Game ConvertGame(Models.Game game)
+        private BusinessModels.Game Convert(DbModels.Game gameFromDb)
         {
-            Game gameFromDB = new Game
-            {
-                GameId = game.GameId,
-                Name = game.Name,
-                Description = game.Description,
-                GenreGames = AddGenres(game.GameId, game.GameGenres),
-                PlatformGames = AddPlatforms(game.GameId, game.GamePlatforms),
-                Key = game.Key,
-            };
+            var game = _mapper.Map<BusinessModels.Game>(gameFromDb);
+            game.GameGenres = GetGameGenres(game.GameId);
+            game.GamePlatforms = GetGamePlatforms(game.GameId);
+            game.Comments = GetGameComments(game.GameId);
 
-            return gameFromDB;
+            return game;
         }
 
-        private IList<GameGenre> AddGenres(Guid id, IEnumerable<Models.Genre> genres)
+        private DbModels.Game Convert(BusinessModels.Game game)
         {
-            if (genres is null)
-            {
-                return new List<GameGenre>();
-            }
+            var gameFromDb = _mapper.Map<DbModels.Game>(game);
+            gameFromDb.PlatformGames = GetGamePlatforms(
+                game.GameId,
+                game.GamePlatforms);
+            gameFromDb.GenreGames = GetGameGenres(game.GameId, game.GameGenres);
 
+            return gameFromDb;
+        }
+
+        private IList<GameGenre> GetGameGenres(
+            Guid id,
+            IEnumerable<BusinessModels.Genre> genres)
+        {
             List<GameGenre> gameGenresList = genres.Select(x => new GameGenre
             {
                 GameId = id,
@@ -249,13 +233,10 @@ namespace GameStore.BLL.Services
             return gameGenresList;
         }
 
-        private IList<GamePlatform> AddPlatforms(Guid id, IEnumerable<Models.Platform> platforms)
+        private IList<GamePlatform> GetGamePlatforms(
+            Guid id,
+            IEnumerable<BusinessModels.Platform> platforms)
         {
-            if (platforms is null)
-            {
-                return new List<GamePlatform>();
-            }
-
             List<GamePlatform> gamePlatformsList = platforms.Select(x => new GamePlatform
             {
                 GameId = id,

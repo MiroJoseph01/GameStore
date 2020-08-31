@@ -1,0 +1,26 @@
+﻿@model IEnumerable<CommentViewModel>
+
+<ul>
+    @foreach (var i in Model)
+    {
+    <li>
+        <div>
+            <b>@Html.DisplayNameFor(model => model.Name): </b>
+            <i>@i.Name</i>
+        </div>
+        <div>
+            <b>@Html.DisplayNameFor(model => model.Body): </b>
+            <i>@i.Body</i>
+        </div>
+        <div>
+            <input type="hidden" value="@i.CommentId" />
+            <button class="btn-dark" onclick="document.getElementById('ParentCommentId').value=$(this).prev().attr('value')">Reply</button>
+        </div>
+        @if (i.Replies != null || i.Replies.Count != 0)
+        {
+            <partial name="ViewNestedComments" for="@i.Replies" />
+        }
+    </li>
+    }
+</ul>
+

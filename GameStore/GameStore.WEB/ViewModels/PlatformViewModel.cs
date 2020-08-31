@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GameStore.WEB.ViewModels
+namespace GameStore.Web.ViewModels
 {
     public class PlatformViewModel
     {

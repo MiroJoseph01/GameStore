@@ -30,7 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\GameStore.BLL\GameStore.BLL.csproj" />
     <ProjectReference Include="..\GameStore.DAL\GameStore.DAL.csproj" />
-    <ProjectReference Include="..\GameStore.WEB\GameStore.WEB.csproj" />
+    <ProjectReference Include="..\GameStore.Web\GameStore.Web.csproj" />
   </ItemGroup>
 
 </Project>
