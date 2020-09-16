@@ -1,5 +1,6 @@
 using AutoMapper;
 using GameStore.BLL.Interfaces;
+using GameStore.BLL.Payments;
 using GameStore.BLL.Services;
 using GameStore.DAL;
 using GameStore.DAL.Interfaces;
@@ -19,6 +20,8 @@ namespace GameStore.Web
 {
     public class Startup
     {
+        private const string DevelopmentConnectionString = "DevelopmentConnection";
+        private const string DefaultConnectionString = "DefaultConnection";
         private readonly IConfigurationRoot _configurationString;
         private readonly IWebHostEnvironment _currentEnvironment;
 
@@ -29,6 +32,8 @@ namespace GameStore.Web
                 .AddJsonFile("db_settings.json").Build();
             _currentEnvironment = hostingEnvironment;
         }
+
+        public IConfigurationRoot Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -47,21 +52,19 @@ namespace GameStore.Web
                 services.AddDbContext<GameStoreContext>(i =>
                     i.UseSqlServer(
                         _configurationString
-                            .GetConnectionString(
-                                Constants.DevelopmentConnectionString)));
+                            .GetConnectionString(DevelopmentConnectionString)));
             }
             else
             {
                 services.AddDbContext<GameStoreContext>(i =>
                     i.UseSqlServer(
                         _configurationString
-                            .GetConnectionString(
-                                Constants.DefaultConnectionString)));
+                            .GetConnectionString(DefaultConnectionString)));
             }
 
             services.AddMvc(option =>
             {
-                option.EnableEndpointRouting = false;
+                //option.EnableEndpointRouting = false;
                 option.Filters.Add(typeof(LoggingFilter));
                 option.Filters.Add(typeof(ExceptionFilter));
             });
@@ -89,11 +92,14 @@ namespace GameStore.Web
 
             app.UseStaticFiles();
 
-            app.UseStatusCodePagesWithReExecute(Constants.ErrorRoute);
-
             app.UseRouting();
 
-            app.UseMvcWithDefaultRoute();
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
 
         private void ConfigureApplicationServices(IServiceCollection services)
@@ -111,6 +117,8 @@ namespace GameStore.Web
             services.AddScoped<IPublisherService, PublisherService>();
 
             services.AddScoped<IOrderService, OrderService>();
+
+            services.AddScoped<IPaymentContext, PaymentContext>();
         }
 
         private void ConfigureRepositories(IServiceCollection services)

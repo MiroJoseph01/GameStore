@@ -41,7 +41,7 @@ namespace GameStore.BLL.Services
             if (_platformRepository.IsPresent(platform.PlatformId))
             {
                 throw new ArgumentException(
-                    "Platfrom doesn't exist or has been already deleted");
+                    "Platform doesn't exist or has already been deleted");
             }
 
             _platformRepository.Delete(platform.PlatformId);

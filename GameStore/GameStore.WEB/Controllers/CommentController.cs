@@ -3,11 +3,13 @@ using System.Linq;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
 using GameStore.BLL.Models;
+using GameStore.Web.Util;
 using GameStore.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.Web.Controllers
 {
+    [CustomController("Comment")]
     public class CommentController : Controller
     {
         private readonly IGameService _gameService;

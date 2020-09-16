@@ -1,15 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net.Http;
+using System.Threading.Tasks;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
 using GameStore.BLL.Models;
+using GameStore.Web.Util;
 using GameStore.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GameStore.Web.Controllers
 {
+    [CustomController("Game")]
     public class GameController : Controller
     {
         private const string NoPublisher = "NoPublisher";
@@ -52,7 +55,7 @@ namespace GameStore.Web.Controllers
         }
 
         [HttpGet]
-        [Route("games")]
+        [Route("")]
         public ViewResult Index()
         {
             IEnumerable<Game> games = _gameService.GetAllGames();
@@ -226,9 +229,9 @@ namespace GameStore.Web.Controllers
 
         [HttpGet]
         [Route("game/{key}/download")]
-        public HttpResponseMessage Download()
+        public async Task<IActionResult> Download()
         {
-            return _fileService.CreateFile();
+            return await _fileService.CreateFile(this);
         }
 
         [HttpGet]
@@ -282,6 +285,30 @@ namespace GameStore.Web.Controllers
             _publisherService.CreatePublisher(publisherForCreation);
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private string GetContentType(string path)
+        {
+            var types = GetMimeTypes();
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return types[ext];
+        }
+
+        private Dictionary<string, string> GetMimeTypes()
+        {
+            return new Dictionary<string, string>
+            {
+                {".txt", "text/plain"},
+                {".pdf", "application/pdf"},
+                {".doc", "application/vnd.ms-word"},
+                {".docx", "application/vnd.ms-word"},
+                {".xls", "application/vnd.ms-excel"},
+                {".png", "image/png"},
+                {".jpg", "image/jpeg"},
+                {".jpeg", "image/jpeg"},
+                {".gif", "image/gif"},
+                {".csv", "text/csv"},
+            };
         }
     }
 }

@@ -296,10 +296,16 @@ namespace GameStore.DAL
                 Status = "Open",
             };
 
-            var orderStatus2 = new OrderStatus
+            OrderStatus orderStatus2 = new OrderStatus
             {
                 OrderStatusId = Guid.NewGuid(),
-                Status = "Submitted",
+                Status = "Paid",
+            };
+
+            OrderStatus orderStatus3 = new OrderStatus
+            {
+                OrderStatusId = Guid.NewGuid(),
+                Status = "NotPaid",
             };
 
             var order1 = new Order
@@ -362,7 +368,7 @@ namespace GameStore.DAL
             builder.Entity<GamePlatform>().HasData(gamePlatform);
 
             builder.Entity<OrderStatus>()
-                .HasData(orderStatus1, orderStatus2);
+                .HasData(orderStatus1, orderStatus2, orderStatus3);
 
             builder.Entity<OrderDetail>()
                 .HasData(orderDetail1, orderDetail2, orderDetail3);

@@ -43,7 +43,7 @@ namespace GameStore.BLL.Services
             if (!_publisherRepository.IsPresent(publisher.PublisherId))
             {
                 throw new ArgumentException(
-                    "Publisher doesn't exist or has been already deleted");
+                    "Publisher doesn't exist or has already been deleted");
             }
 
             _publisherRepository.Delete(publisher.PublisherId);

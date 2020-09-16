@@ -31,7 +31,7 @@ namespace GameStore.DAL.Repositories
         public override Game GetById(Guid id)
         {
             var gameEntities = _dbContext.Set<Game>()
-                .Where(r => r.IsRemoved == false)
+                .Where(r => !r.IsRemoved)
                 .Include(x => x.GenreGames)
                 .Include(y => y.PlatformGames)
                 .Include(z => z.Comments)
@@ -43,6 +43,7 @@ namespace GameStore.DAL.Repositories
         public Game GetByKey(string key)
         {
             var gameEntities = _dbContext.Set<Game>()
+                .Where(x => !x.IsRemoved)
                 .Include(x => x.GenreGames)
                 .Include(y => y.PlatformGames)
                 .Include(p => p.Publisher)
@@ -83,7 +84,8 @@ namespace GameStore.DAL.Repositories
                 .ToList();
 
             return _dbContext.Games
-                .Where(x => gamesId.Contains(x.GameId))
+                .Where(x => gamesId.Contains(x.GameId)
+                && !x.IsRemoved)
                 .ToList();
         }
 
@@ -95,14 +97,16 @@ namespace GameStore.DAL.Repositories
                 .ToList();
 
             return _dbContext.Games
-                .Where(x => gamesId.Contains(x.GameId))
+                .Where(x => gamesId.Contains(x.GameId)
+                && !x.IsRemoved)
                 .ToList();
         }
 
         public IEnumerable<Game> GetGamesOfPublisher(Guid publisherId)
         {
             return _dbContext.Games
-                .Where(x => x.PublisherId.Equals(publisherId))
+                .Where(x => x.PublisherId.Equals(publisherId)
+                && !x.IsRemoved)
                 .ToList();
         }
     }

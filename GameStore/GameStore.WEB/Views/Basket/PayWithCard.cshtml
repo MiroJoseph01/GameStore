@@ -1,0 +1,39 @@
+﻿@model GameStore.Web.ViewModels.CreditCardViewModel
+@{
+    ViewData["Title"] = "Card";
+}
+<link rel="stylesheet" href="~/css/credit-form-styles.css">
+<form autocomplete="off" class="credit-card" asp-action="PayWithCard">
+    <div class="form-header">
+        <h4 class="title">Credit card detail</h4>
+    </div>
+
+    <div class="form-body">
+        <div class="full-name">
+            <label asp-for="FullName"></label>
+            <input asp-for="FullName" class="card-name" onkeydown="return alphaOnly(event)" />
+            <span asp-validation-for="FullName" class="text-danger"></span>
+        </div>
+        <div class="number">
+            <label asp-for="CardNumber"></label>
+            <input asp-for="CardNumber" class="card-number" type="tel" onkeydown="return digitOnlyCC(event)" />
+            <span asp-validation-for="CardNumber" class="text-danger"></span>
+        </div>
+        <div class="card-verification">
+            <label asp-for="CVV"></label>
+            <input asp-for="CVV" class="card-cvv" type="password" onkeydown="return digitOnly(event)" />
+            <span asp-validation-for="CVV" class="text-danger"></span>
+        </div>
+
+        <div class="date">
+            <label asp-for="Date"></label>
+            <input asp-for="Date" class="card-date" onkeydown="return digitOnlyDate(event)" />
+            <span asp-validation-for="Date" class="text-danger"></span>
+        </div>
+
+        <input type="submit" class="proceed-btn" value="Pay with Card" />
+    </div>
+</form>
+
+<script src="~/js/card-validation.js"></script>
+

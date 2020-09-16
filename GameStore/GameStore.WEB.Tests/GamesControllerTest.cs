@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
 using GameStore.BLL.Models;
@@ -276,9 +275,9 @@ namespace GameStore.Web.Tests
         [Fact]
         public void Download_ReturnsHttpResponseMessage()
         {
-            HttpResponseMessage result = _gamesController.Download();
+            var result = _gamesController.Download();
 
-            _fileService.Verify(f => f.CreateFile());
+            _fileService.Verify(f => f.CreateFile(_gamesController));
         }
     }
 }

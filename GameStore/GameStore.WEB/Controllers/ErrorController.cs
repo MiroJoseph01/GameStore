@@ -1,10 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using GameStore.Web.Util;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.Web.Controllers
 {
+    [CustomController("Game")]
     public class ErrorController : Controller
     {
-        [Route("Error/{statusCode}")]
+        public ErrorController()
+        { }
+
+        [Route("error/{statusCode}")]
         public IActionResult HandleErrorHttpStatus(int statusCode)
         {
             ViewBag.ErrorMessage = statusCode switch

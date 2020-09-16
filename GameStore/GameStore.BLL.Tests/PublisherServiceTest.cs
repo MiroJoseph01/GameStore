@@ -88,7 +88,7 @@ namespace GameStore.BLL.Tests
         }
 
         [Fact]
-        public void GetPublisherByName_PassUncorrectIdOrRemovedPublisherId_ReturnsNull()
+        public void GetPublisherByName_PassIncorrectIdOrRemovedPublisherId_ReturnsNull()
         {
             var publisher = _publishers.First();
 

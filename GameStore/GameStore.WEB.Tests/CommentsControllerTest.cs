@@ -6,7 +6,6 @@ using GameStore.BLL.Interfaces;
 using GameStore.BLL.Models;
 using GameStore.Web.Controllers;
 using GameStore.Web.ViewModels;
-using GameStore.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;

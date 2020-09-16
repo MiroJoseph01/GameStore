@@ -14,5 +14,7 @@ namespace GameStore.Web.ViewModels
 
         [Display(Name = "Status")]
         public string OrderStatus { get; set; }
+
+        public decimal Total { get; set; }
     }
 }

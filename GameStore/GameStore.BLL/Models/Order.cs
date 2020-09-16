@@ -13,6 +13,8 @@ namespace GameStore.BLL.Models
 
         public string Status { get; set; }
 
+        public decimal Total { get; set; }
+
         public IList<OrderDetail> OrderDetails { get; set; }
     }
 }

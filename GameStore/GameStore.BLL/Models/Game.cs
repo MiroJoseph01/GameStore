@@ -19,6 +19,8 @@ namespace GameStore.BLL.Models
 
         public string Description { get; set; }
 
+        public float Discount { get; set; }
+
         public bool Discontinued { get; set; }
 
         public short UnitsInStock { get; set; }

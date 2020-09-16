@@ -29,11 +29,15 @@ namespace GameStore.Web.ViewModels
 
         public bool Discontinued { get; set; }
 
+        [Required]
+        [Range(0, 1, ErrorMessage = "Unvalid Discount")]
+        public float Discount { get; set; }
+
         [Display(Name = "Units in stock")]
-        [Range(0, 100000, ErrorMessage = "Uncorrect number of units")]
+        [Range(0, 100000, ErrorMessage = "Incorrect number of units (not more then 100000 units)")]
         public short UnitsInStock { get; set; }
 
-        [Range(0, 10000, ErrorMessage = "Uncorrect price")]
+        [Range(0, 10000, ErrorMessage = "Incorrect price (should be between 0 and 10000)")]
         public decimal Price { get; set; }
 
         public IList<CommentViewModel> Comments { get; set; }

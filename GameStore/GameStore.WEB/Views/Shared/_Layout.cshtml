@@ -8,14 +8,19 @@
 </head>
 
 <body>
+    <nav class="navigation navbar-dark justify-content-around bg-dark">
+        <div class="text-white">
+            <a asp-action="ViewOrder" class="float-right btn-outline-light btn-dark rounded basket" asp-controller="Basket">Basket</a>
+            <p>
+                <cache expires-after="@TimeSpan.FromMinutes(1)">
+                    @await Component.InvokeAsync("CountGames")
+                </cache>
+            </p>
 
+        </div>
+    </nav>
     <main class="container" role="main">
-        <p>
-            <cache expires-after="@TimeSpan.FromMinutes(1)">
-                @await Component.InvokeAsync("CountGames")
-            </cache>
-            <a asp-action="ViewOrder" asp-controller="Basket">Basket</a>
-        </p>
+        
         @RenderBody()
     </main>
 

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using GameStore.Web.ViewModels;
 
 namespace GameStore.Web.ViewModels
 {
