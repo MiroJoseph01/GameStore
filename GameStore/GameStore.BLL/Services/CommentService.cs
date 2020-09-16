@@ -55,8 +55,8 @@ namespace GameStore.BLL.Services
         {
             if (!_commentRepository.IsPresent(comment.CommentId))
             {
-                throw new ArgumentException("" +
-                    "Comment doesn't exist or has been already deleted");
+                throw new ArgumentException(
+                    "Comment doesn't exist or has already been deleted");
             }
 
             _commentRepository.Delete(comment.CommentId);

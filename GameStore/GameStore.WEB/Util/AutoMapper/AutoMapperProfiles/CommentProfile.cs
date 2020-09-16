@@ -1,7 +1,6 @@
 ﻿using System;
 using AutoMapper;
 using GameStore.Web.ViewModels;
-using GameStore.Web.ViewModels;
 using BusinessModels = GameStore.BLL.Models;
 using DbModels = GameStore.DAL.Entities;
 
@@ -39,7 +38,7 @@ namespace GameStore.Web.Util.AutoMapperProfiles
                         z => string.IsNullOrEmpty(z.GameId) ?
                         Guid.Empty : Guid.Parse(z.GameId)));
 
-            CreateMap<DbModels.Comment, BusinessModels.Comment>();
+            CreateMap<DbModels.Comment, BusinessModels.Comment>().ReverseMap();
 
             CreateMap<CommentsViewModel, BusinessModels.Comment>();
         }

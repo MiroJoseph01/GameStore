@@ -39,7 +39,7 @@ namespace GameStore.BLL.Services
             if (!_genreRepository.IsPresent(genre.GenreId))
             {
                 throw new ArgumentException(
-                    "Genre doesn't exist or has been already deleted");
+                    "Genre doesn't exist or has already been deleted");
             }
 
             _genreRepository.Delete(genre.GenreId);

@@ -27,6 +27,23 @@ namespace GameStore.DAL.Repositories
                         && x.IsRemoved == false)
                 .ToList();
 
+            foreach (var o in res)
+            {
+                o.OrderDetails = o.OrderDetails.Where(x => x.IsRemoved == false).ToList();
+            }
+
+            return res;
+        }
+
+        public override Order GetById(Guid id)
+        {
+            var res = _dbContext.Orders
+                .Include(y => y.OrderDetails)
+                .Include(z => z.OrderStatus)
+                .FirstOrDefault(x => x.OrderId.Equals(id) && x.IsRemoved == false);
+
+            res.OrderDetails = res.OrderDetails.Where(x => x.IsRemoved == false).ToList();
+
             return res;
         }
     }

@@ -1,0 +1,74 @@
+﻿body,
+html{
+    background-color:white;
+}
+
+.credit-card {
+    width: 360px;
+    min-height: 400px;
+    max-height: 600px;
+    margin: auto;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #fff;
+    box-shadow: 1px 2px 3px 0 rgba(0,0,0,.10);
+}
+
+.form-header {
+    height: 60px;
+    padding: 20px 30px 0;
+    border-bottom: 1px solid #e1e8ee;
+}
+
+.form-body {
+    min-height: 340px;
+    max-height: 540px;
+    padding: 30px 30px 20px;
+}
+
+.title {
+    font-size: 18px;
+    margin: 0;
+    color: #5e6977;
+}
+
+.card-number,
+.card-name,
+.card-cvv,
+.card-date {
+    font-size: 17px;
+    font-weight: 200;
+    line-height: 19px;
+    text-align: center;
+}
+
+.card-number,
+.card-name,
+.card-date,
+.card-cvv{
+    width: 100%;
+    margin-bottom: 20px;
+    border: 2px solid #e1e8ee;
+    border-radius: 6px;
+}
+
+.date,
+.card-verification {
+    width: 35%;
+}
+
+.card-verification{
+    float: right;
+    width: 145px;
+    padding-left: 20px;
+}
+
+.proceed-btn {
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    border-color: transparent;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background: #7dc855;
+}

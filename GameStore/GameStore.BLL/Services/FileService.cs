@@ -1,39 +1,54 @@
-﻿using System.IO;
-using System.Net;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
+using System.Threading.Tasks;
 using GameStore.BLL.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.BLL.Services
 {
     public class FileService : IFileService
     {
-        public HttpResponseMessage CreateFile()
+        public async Task<IActionResult> CreateFile(ControllerBase controller)
         {
-            MemoryStream stream = new MemoryStream();
+            var path = Path.Combine(
+                     Directory.GetCurrentDirectory(),
+                     "wwwroot",
+                     "game.txt");
 
-            UnicodeEncoding uniEncoding = new UnicodeEncoding();
-
-            byte[] binary = uniEncoding.GetBytes("Hello World!");
-
-            stream.Write(binary, 0, binary.Length);
-
-            HttpResponseMessage result = new HttpResponseMessage(
-                HttpStatusCode.OK)
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(path, FileMode.Open))
             {
-                Content = new ByteArrayContent(stream.ToArray()),
+                await stream.CopyToAsync(memory);
+            }
+
+            memory.Position = 0;
+
+            return controller.File(memory, GetContentType(path), Path.GetFileName(path));
+        }
+
+        private string GetContentType(string path)
+        {
+            var types = GetMimeTypes();
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return types[ext];
+        }
+
+        private Dictionary<string, string> GetMimeTypes()
+        {
+            return new Dictionary<string, string>
+            {
+                {".txt", "text/plain"},
+                {".pdf", "application/pdf"},
+                {".doc", "application/vnd.ms-word"},
+                {".docx", "application/vnd.ms-word"},
+                {".xls", "application/vnd.ms-excel"},
+                {".png", "image/png"},
+                {".jpg", "image/jpeg"},
+                {".jpeg", "image/jpeg"},
+                {".gif", "image/gif"},
+                {".csv", "text/csv"},
             };
-
-            result.Content.Headers.ContentDisposition =
-                new ContentDispositionHeaderValue("attachment")
-                {
-                    FileName = "game.txt",
-                };
-            result.Content.Headers.ContentType =
-                new MediaTypeHeaderValue("application/octet-stream");
-
-            return result;
         }
     }
 }

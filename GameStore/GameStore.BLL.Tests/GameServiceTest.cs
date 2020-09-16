@@ -250,20 +250,20 @@ namespace GameStore.BLL.Tests
                 Comments = new List<DbModels.Comment>(),
             };
 
+            _mapper
+                .Setup(m => m.Map<DbModels.Game>(It.IsAny<BusinessModels.Game>()))
+                .Returns(gameFromDb);
+            _gameRepository
+                .Setup(g => g.GetByKey(It.IsAny<string>()))
+                .Returns(gameFromDb);
             _gameRepository
                 .Setup(g => g.IsPresent(It.IsAny<Guid>()))
                 .Returns(true);
-            _gameRepository.Setup(g => g.GetById(_gameId)).Returns(gameFromDb);
-            _mapper
-                .Setup(m => m.Map<DbModels.Game>(game))
-                .Returns(gameFromDb);
 
-            _gameService.EditGame(game);
+            var result = _gameService.EditGame(game);
 
-            Assert.Equal(gameKey, gameFromDb.Key);
-            Assert.Equal(gameName, gameFromDb.Name);
-            Assert.Single(gameFromDb.GenreGames);
-            Assert.Single(gameFromDb.PlatformGames);
+            _gameRepository.Verify(c => c.Update(It.IsAny<Guid>(), It.IsAny<DbModels.Game>()));
+            Assert.NotNull(result);
         }
 
         [Fact]

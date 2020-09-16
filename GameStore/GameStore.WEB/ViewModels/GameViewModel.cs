@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GameStore.Web.ViewModels
 {
@@ -17,6 +15,8 @@ namespace GameStore.Web.ViewModels
 
         [Display(Name = "Game's description")]
         public string Description { get; set; }
+
+        public string Discount { get; set; }
 
         public IList<CommentViewModel> Comments { get; set; }
 

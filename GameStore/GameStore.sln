@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.BLL.Tests", "Game
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.DAL.Tests", "GameStore.DAL.Tests\GameStore.DAL.Tests.csproj", "{C00D2F2E-9EE6-45DB-A1E0-59A49D7F13A3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.WEB.Tests", "GameStore.WEB.Tests\GameStore.WEB.Tests.csproj", "{6260DB34-975B-433D-8C6D-6681FC855514}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameStore.Web.Tests", "GameStore.WEB.Tests\GameStore.Web.Tests.csproj", "{6260DB34-975B-433D-8C6D-6681FC855514}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7CB9B90B-705F-41DB-8F1B-93278303A2C5}"
 	ProjectSection(SolutionItems) = preProject

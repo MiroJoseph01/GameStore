@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
+using GameStore.BLL.Payments;
 using GameStore.BLL.Services;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
-using GameStore.Web.Util;
 using Moq;
 using Xunit;
 using BusinessModels = GameStore.BLL.Models;
@@ -143,7 +143,7 @@ namespace GameStore.BLL.Tests
                 new DbModels.Order
                 {
                     OrderId = _orders.First().OrderId,
-                    Status = Constants.OpenStatus,
+                    Status = OrderStatuses.Open,
                     CustomerId = _customerId,
                     OrderDetails = _orderDetailsFromDb,
                 },
@@ -151,7 +151,7 @@ namespace GameStore.BLL.Tests
                 new DbModels.Order
                 {
                     OrderId = _orders.Last().OrderId,
-                    Status = Constants.OpenStatus,
+                    Status = OrderStatuses.Open,
                     CustomerId = _customerId,
                 },
             };
@@ -178,12 +178,12 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void AddOrderDetail_PassCustomerIdWithNonExistingOrderAndOrderDetail_VerifyCreatingOrderAndOrderDetail()
         {
-            BusinessModels.Game game = new BusinessModels.Game
+            var game = new BusinessModels.Game
             {
                 Key = "game key",
                 Name = "game name",
+                UnitsInStock = 1,
             };
-
             _orderRepository
                 .Setup(o => o.GetByCustomerId(_customerId))
                 .Returns((IEnumerable<DbModels.Order>)null);
@@ -196,6 +196,9 @@ namespace GameStore.BLL.Tests
             _gameService
                 .Setup(g => g.GetGameByKey(It.IsAny<string>()))
                 .Returns(game);
+            _gameService
+                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Returns(game);
 
             _orderService.AddOrderDetail(_customerId.ToString(), game.Key);
 
@@ -205,7 +208,7 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void AddOrderDetail_PassCustomerIdWithExistingOrderAndNonExistingOrderDetail_VerifyCreatingOrderDetail()
         {
-            BusinessModels.Game game = new BusinessModels.Game
+            var game = new BusinessModels.Game
             {
                 Key = "game key",
                 Name = "game name",
@@ -214,13 +217,15 @@ namespace GameStore.BLL.Tests
                 .Setup(o => o.GetByCustomerId(_customerId))
                 .Returns(_ordersFromDb);
             _mapper
-                .Setup(m => m
-                    .Map<IEnumerable<BusinessModels.Order>>(
+                .Setup(m => m.
+                    Map<IEnumerable<BusinessModels.Order>>(
                         It.IsAny<IEnumerable<DbModels.Order>>()))
                 .Returns(new List<BusinessModels.Order> { _orders.Last() });
             _mapper
                 .Setup(m => m.Map<DbModels.OrderDetail>(_orderDetails.Last()));
-            _gameService.Setup(g => g.GetGameByKey(It.IsAny<string>())).Returns(game);
+            _gameService
+                .Setup(g => g.GetGameByKey(It.IsAny<string>()))
+                .Returns(game);
             _gameService
                 .Setup(g => g.GetGameById(It.IsAny<Guid>()))
                 .Returns(game);
@@ -236,6 +241,7 @@ namespace GameStore.BLL.Tests
                 Key = "game key",
                 Name = "game name",
                 GameId = Guid.NewGuid(),
+                UnitsInStock = 10,
             };
 
             BusinessModels.OrderDetail detail = new BusinessModels.OrderDetail
@@ -274,9 +280,6 @@ namespace GameStore.BLL.Tests
                 },
             };
 
-            //_orderRepository
-            //    .Setup(o => o.GetByCustomerId(_customerId))
-            //    .Returns(new List<DbModels.Order> { _ordersFromDb.First() });
             _orderDetailRepository
                 .Setup(o => o.GetOrderDetailByOrderIdAndProductId(
                         It.IsAny<Guid>(),
@@ -413,10 +416,19 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void GetOrderById_PassOrderId_ReturnsOrder()
         {
-            _orderRepository.Setup(o => o.IsPresent(It.IsAny<Guid>())).Returns(true);
+            var game = new BusinessModels.Game
+            {
+                Key = "Key",
+                Name = "Name",
+                Price = 10.0M,
+            };
+
             _orderRepository
                 .Setup(c => c.GetById(It.IsAny<Guid>()))
                 .Returns(_ordersFromDb.First());
+            _gameService
+                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Returns(game);
             _mapper
                 .Setup(m => m
                     .Map<BusinessModels.Order>(It.IsAny<DbModels.Order>()))
@@ -443,7 +455,17 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void GetAllOrders_ReturnsListOfOrders()
         {
+            var game = new BusinessModels.Game
+            {
+                Key = "Key",
+                Name = "Name",
+                Price = 10.0M,
+            };
+
             _orderRepository.Setup(p => p.GetAll()).Returns(_ordersFromDb);
+            _gameService
+                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Returns(game);
             _mapper
                 .Setup(m => m
                     .Map<IEnumerable<BusinessModels.Order>>(_ordersFromDb))
@@ -479,13 +501,20 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void DeleteOrderDetail_PassOrderDetailModel_VerifyDeleting()
         {
+            var game = new BusinessModels.Game
+            {
+                UnitsInStock = 0,
+            };
+
             _orderDetailRepository
                 .Setup(o => o.IsPresent(It.IsAny<Guid>()))
                 .Returns(true);
             _orderDetailRepository
                 .Setup(g => g.GetById(It.IsAny<Guid>()))
                 .Returns(_orderDetailsFromDb.First());
-
+            _gameService
+                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Returns(game);
             _orderService
                 .DeleteOrderDetail(_orderDetails.First());
 
@@ -668,34 +697,31 @@ namespace GameStore.BLL.Tests
         }
 
         [Fact]
-        public void GetOrderStatusById_PassOrderStatusId_ReturnsOrderStatus()
+        public void GetOrderStatusByName_PassOrderStatusId_ReturnsOrderStatus()
         {
             _orderStatusRepository
-                .Setup(o => o.IsPresent(It.IsAny<Guid>()))
-                .Returns(true);
-            _orderStatusRepository
-                .Setup(c => c.GetById(It.IsAny<Guid>()))
-                .Returns(_orderStatusesFromDb.First());
+                .Setup(c => c.GetAll())
+                .Returns(_orderStatusesFromDb);
             _mapper
                 .Setup(m => m
                     .Map<BusinessModels.OrderStatus>(
                         It.IsAny<DbModels.OrderStatus>()))
                 .Returns(_orderStatuses.First());
 
-            BusinessModels.OrderStatus result = _orderService
-                .GetOrderStatusById(_orderStatuses.First().OrderStatusId);
+            BusinessModels.OrderStatus result =
+                _orderService.GetOrderStatusByName(_orderStatuses.First().Status);
 
             Assert.NotNull(result);
         }
 
         [Fact]
-        public void GetOrderStatusById_PassNonExistingOrderStatusId_ReturnsNull()
+        public void GetOrderStatusByName_PassNonExistingOrderStatusId_ReturnsNull()
         {
             DbModels.OrderStatus genre = _orderStatusesFromDb.First();
             genre.IsRemoved = true;
 
-            BusinessModels.OrderStatus result = _orderService
-                .GetOrderStatusById(_orderStatuses.First().OrderStatusId);
+            BusinessModels.OrderStatus result =
+                _orderService.GetOrderStatusByName(_orderStatuses.First().Status);
 
             Assert.Null(result);
         }

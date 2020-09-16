@@ -26,6 +26,8 @@ namespace GameStore.DAL.Entities
 
         public bool IsRemoved { get; set; }
 
+        public float Discount { get; set; }
+
         public bool Discontinued { get; set; }
 
         public short UnitsInStock { get; set; }

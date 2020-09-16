@@ -1,0 +1,24 @@
+﻿@model IEnumerable<GameStore.Web.ViewModels.PaymentViewModel>
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<h2 class="text-center">Payment Method</h2>
+<div class="container-fluid">
+    <div class="jumbotron">
+        <div class="row vertical-align justify-content-around">
+            @foreach (var payment in Model)
+            {
+            <div class="col-xs-4">
+                <a asp-action="@payment.PaymentMethod" asp-route-id="@payment.OrderId">
+                    @{
+                        var source = $"/img/{payment.PaymentMethod}" + ".png";
+                        <img src=@source width="150" class="img-responsive img-rounded" alt="@payment.PaymentName">
+                    }
+                    <div class="text-center">@payment.PaymentName</div>
+                </a>
+            </div>
+            }
+        </div>
+    </div>
+</div>

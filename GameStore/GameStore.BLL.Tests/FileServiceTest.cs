@@ -1,5 +1,8 @@
 ﻿using System.Net.Http;
+using System.Threading.Tasks;
 using GameStore.BLL.Services;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace GameStore.BLL.Tests
@@ -14,11 +17,11 @@ namespace GameStore.BLL.Tests
         }
 
         [Fact]
-        public void CreateFile_ReturnsHttpResponseMessage()
+        public void CreateFile_ReturnsFile()
         {
-            HttpResponseMessage res = _fileService.CreateFile();
+            var res = _fileService.CreateFile(It.IsAny<ControllerBase>());
 
-            Assert.IsType<HttpResponseMessage>(res);
+            Assert.IsType<Task<IActionResult>>(res);
         }
     }
 }
