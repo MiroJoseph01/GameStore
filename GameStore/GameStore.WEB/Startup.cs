@@ -9,6 +9,7 @@ using GameStore.DAL.Repositories;
 using GameStore.Web.Filters;
 using GameStore.Web.Util;
 using GameStore.Web.Util.AutoMapper;
+using GameStore.Web.Util.Logger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +46,7 @@ namespace GameStore.Web
 
             ConfigureApplicationServices(services);
 
-            services.AddScoped<LoggingFilter>();
+            ConfigureLogger(services);
 
             if (_currentEnvironment.EnvironmentName == "Development")
             {
@@ -64,7 +65,6 @@ namespace GameStore.Web
 
             services.AddMvc(option =>
             {
-                //option.EnableEndpointRouting = false;
                 option.Filters.Add(typeof(LoggingFilter));
                 option.Filters.Add(typeof(ExceptionFilter));
             });
@@ -118,6 +118,8 @@ namespace GameStore.Web
 
             services.AddScoped<IOrderService, OrderService>();
 
+            services.AddScoped<IUserService, UserService>();
+            
             services.AddScoped<IPaymentContext, PaymentContext>();
         }
 
@@ -137,6 +139,16 @@ namespace GameStore.Web
             services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+        }
+
+        private void ConfigureLogger(IServiceCollection services)
+        {
+            services
+                .AddScoped(
+                typeof(IAppLogger<>),
+                typeof(AppLogger<>));
+
+            services.AddScoped<LoggingFilter>();
         }
 
         private void ConfigureAutoMapper(IServiceCollection services)

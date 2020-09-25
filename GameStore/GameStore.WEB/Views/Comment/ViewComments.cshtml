@@ -10,30 +10,6 @@
         <h3>No comments for '@Model.GameName'</h3>
 
         <h4>New Comment</h4>
-        <hr />
-        <div class="row">
-            <div class="col-md-4">
-                <form name="partialform" asp-action="ViewComments">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div>
-                        <input asp-for="ParentCommentId" type="hidden" />
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Name" class="control-label"></label>
-                        <input asp-for="Name" class="form-control" />
-                        <span asp-validation-for="Name" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Body" class="control-label"></label>
-                        <textarea asp-for="Body" class="form-control"></textarea>
-                        <span asp-validation-for="Body" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <input id="update" type="submit" value="Add comment" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
     }
     else
     {
@@ -49,11 +25,42 @@
                     </div>
                     <div>
                         <b>@Html.DisplayNameFor(model => model.Body): </b>
-                        <i>@i.Body</i>
+                        <div>
+                            <textarea cols="50" rows="5" class="form-control" readonly>@i.Body</textarea>
+                        </div>
                     </div>
                     <div>
-                        <input type="hidden" value="@i.CommentId" />
-                        <button class="btn-dark" onclick="document.getElementById('ParentCommentId').value=$(this).prev().attr('value')">Reply</button>
+                        @if (!i.IsRemoved)
+                        {
+                            <input type="hidden" value="@i.CommentId" />
+                            <a class="btn-dark p-1 text-white" id="Answer @i.CommentId"
+                               onclick="Answer(this.id)">
+                                Answer <i>@i.Name</i>
+                            </a>
+                            <input type="hidden" value="@i.Body" />
+                            <a class="btn-dark p-1 text-white" id="Quoute @i.CommentId"
+                               onclick="Quote(this.id)">
+                                Quote
+                            </a>
+                            <input type="hidden" value="@i.CommentId" />
+                            <a class="btn-dark p-1 text-white modal-button">Delete</a>
+                        }
+                        <form asp-action="DeleteComment">
+                            <div id="modal" class="modal">
+                                <div class="modal-content">
+                                    <span id="close" class="close float-right">&times;</span>
+                                    <p>Do you want to delete the comment?</p>
+                                    <input asp-for="GameKey" type="hidden" />
+                                    <input asp-for="DeleteCommentId" type="hidden" />
+                                    <input type="submit" class="btn-danger" value="Yes" />
+                                    <a id="btn-no" class="btn-info btn-no text-white text-center">No</a>
+                                </div>
+                            </div>
+                        </form>
+                        <form asp-action="BanUser" asp-controller="User">
+                            <input type="hidden" name="userId" value="83763329-8e85-4edf-a65e-83986c70edfb" />
+                            <input type="submit" class="btn-dark p-1 text-white" value="Ban User" />
+                        </form>
                     </div>
                     @if (i.Replies != null || i.Replies.Count != 0)
                     {
@@ -66,29 +73,34 @@
 
         <h4>New Comment</h4>
         <hr />
-        <div class="row">
-            <div class="col-md-4">
-                <form name="partialform" asp-action="ViewComments">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div>
-                        <input asp-for="ParentCommentId" type="hidden" />
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Name" class="control-label"></label>
-                        <input asp-for="Name" class="form-control" />
-                        <span asp-validation-for="Name" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="Body" class="control-label"></label>
-                        <textarea asp-for="Body" class="form-control"></textarea>
-                        <span asp-validation-for="Body" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <input id="update" type="submit" value="Add comment" class="btn btn-primary" />
-                    </div>
-                </form>
-            </div>
-        </div>
+
     }
-    <a asp-action="ViewGameDetails" asp-controller="Game" asp-route-key="@Model.GameKey">Back to Game</a>
 }
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="ViewComments">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div>
+                <input asp-for="ParentCommentId" type="hidden" />
+                <input asp-for="QuoteIsPresent" type="hidden" value=@Model.QuoteIsPresent />
+            </div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Body" class="control-label"></label>
+                <textarea asp-for="Body" class="form-control"></textarea>
+                <span asp-validation-for="Body" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input id="update" type="submit" value="Add comment" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+<a asp-action="ViewGameDetails" asp-controller="Game" asp-route-key="@Model.GameKey">Back to Game</a>
+
+<script src="~/js/comments.js"></script>

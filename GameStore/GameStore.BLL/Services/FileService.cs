@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using GameStore.BLL.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +10,7 @@ namespace GameStore.BLL.Services
     {
         public async Task<IActionResult> CreateFile(ControllerBase controller)
         {
-            var path = Path.Combine(
-                     Directory.GetCurrentDirectory(),
-                     "wwwroot",
-                     "game.txt");
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "game.txt");
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))

@@ -41,8 +41,7 @@ namespace GameStore.BLL.Services
         {
             Guid id = Guid.Parse(customerId);
 
-            var orders = _mapper.Map<IEnumerable<BusinessModels.Order>>(
-                    _orderRepository.GetByCustomerId(id));
+            var orders = _mapper.Map<IEnumerable<BusinessModels.Order>>(_orderRepository.GetByCustomerId(id));
 
             if (!(orders is null))
             {
@@ -52,8 +51,7 @@ namespace GameStore.BLL.Services
                     decimal total = 0;
                     foreach (var d in o.OrderDetails)
                     {
-                        BusinessModels.Game game = _gameService
-                            .GetGameById(Guid.Parse(d.ProductId));
+                        BusinessModels.Game game = _gameService.GetGameById(Guid.Parse(d.ProductId));
 
                         d.ProductKey = game.Key;
                         d.ProductName = game.Name;
@@ -80,14 +78,12 @@ namespace GameStore.BLL.Services
         {
             if (!_orderRepository.IsPresent(order.OrderId))
             {
-                throw new ArgumentException(
-                    "Order doesn't exist or has already been deleted");
+                throw new ArgumentException("Order doesn't exist or has already been deleted");
             }
 
             _orderRepository.Delete(order.OrderId);
 
-            DbModels.Order orderFromDb = _orderRepository
-                .GetById(order.OrderId);
+            DbModels.Order orderFromDb = _orderRepository.GetById(order.OrderId);
 
             foreach (DbModels.OrderDetail d in orderFromDb.OrderDetails)
             {
@@ -99,8 +95,7 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.Order UpdateOrder(BusinessModels.Order order)
         {
-            _orderRepository
-                .Update(order.OrderId, _mapper.Map<DbModels.Order>(order));
+            _orderRepository.Update(order.OrderId, _mapper.Map<DbModels.Order>(order));
 
             _unitOfWork.Commit();
 
@@ -132,9 +127,7 @@ namespace GameStore.BLL.Services
 
         public IEnumerable<BusinessModels.Order> GetAllOrders()
         {
-            var orders = _mapper
-                .Map<IEnumerable<BusinessModels.Order>>(
-                _orderRepository.GetAll());
+            var orders = _mapper.Map<IEnumerable<BusinessModels.Order>>(_orderRepository.GetAll());
             if (!(orders is null))
             {
                 foreach (var order in orders)
@@ -188,15 +181,13 @@ namespace GameStore.BLL.Services
         {
             if (!_orderDetailRepository.IsPresent(orderDetail.OrderDetailId))
             {
-                throw new ArgumentException(
-                    "Order Detail doesn't exist or has been already deleted");
+                throw new ArgumentException("Order Detail doesn't exist or has been already deleted");
             }
 
             var orderDetailFromDb = _orderDetailRepository
                 .GetById(orderDetail.OrderDetailId);
 
-            var game = _gameService
-                .GetGameById(Guid.Parse(orderDetailFromDb.ProductId));
+            var game = _gameService.GetGameById(Guid.Parse(orderDetailFromDb.ProductId));
             game.UnitsInStock += orderDetailFromDb.Quantity;
 
             _gameService.EditGame(game);
@@ -206,12 +197,9 @@ namespace GameStore.BLL.Services
             _unitOfWork.Commit();
         }
 
-        public BusinessModels.OrderDetail UpdateOrderDetail(
-            BusinessModels.OrderDetail orderDetail)
+        public BusinessModels.OrderDetail UpdateOrderDetail(BusinessModels.OrderDetail orderDetail)
         {
-            _orderDetailRepository
-                .Update(orderDetail.OrderDetailId, _mapper
-                .Map<DbModels.OrderDetail>(orderDetail));
+            _orderDetailRepository.Update(orderDetail.OrderDetailId, _mapper.Map<DbModels.OrderDetail>(orderDetail));
 
             _unitOfWork.Commit();
 
@@ -220,20 +208,16 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.OrderDetail GetOrderDetailById(Guid orderDetailId)
         {
-            DbModels.OrderDetail orderDetailFromDb = _orderDetailRepository
-                .GetById(orderDetailId);
+            DbModels.OrderDetail orderDetailFromDb = _orderDetailRepository.GetById(orderDetailId);
 
-            var orderDetail = _mapper
-                .Map<BusinessModels.OrderDetail>(orderDetailFromDb);
+            var orderDetail = _mapper.Map<BusinessModels.OrderDetail>(orderDetailFromDb);
 
             return orderDetail;
         }
 
         public IEnumerable<BusinessModels.OrderDetail> GetAllOrderDetails()
         {
-            var orderDetails = _mapper
-                .Map<IEnumerable<BusinessModels.OrderDetail>>(
-                    _orderDetailRepository.GetAll());
+            var orderDetails = _mapper.Map<IEnumerable<BusinessModels.OrderDetail>>(_orderDetailRepository.GetAll());
 
             return orderDetails;
         }
@@ -241,8 +225,7 @@ namespace GameStore.BLL.Services
         public BusinessModels.OrderStatus AddOrderStatus(
             BusinessModels.OrderStatus orderStatus)
         {
-            _orderStatusRepository
-                .Create(_mapper.Map<DbModels.OrderStatus>(orderStatus));
+            _orderStatusRepository.Create(_mapper.Map<DbModels.OrderStatus>(orderStatus));
 
             _unitOfWork.Commit();
 
@@ -253,8 +236,7 @@ namespace GameStore.BLL.Services
         {
             if (!_orderStatusRepository.IsPresent(orderStatus.OrderStatusId))
             {
-                throw new ArgumentException(
-                    "Order Status doesn't exist or has been already deleted");
+                throw new ArgumentException("Order Status doesn't exist or has been already deleted");
             }
 
             _orderStatusRepository.Delete(orderStatus.OrderStatusId);
@@ -262,13 +244,9 @@ namespace GameStore.BLL.Services
             _unitOfWork.Commit();
         }
 
-        public BusinessModels.OrderStatus UpdateOrderStatus(
-            BusinessModels.OrderStatus orderStatus)
+        public BusinessModels.OrderStatus UpdateOrderStatus(BusinessModels.OrderStatus orderStatus)
         {
-            _orderStatusRepository
-                .Update(
-                orderStatus.OrderStatusId,
-                _mapper.Map<DbModels.OrderStatus>(orderStatus));
+            _orderStatusRepository.Update(orderStatus.OrderStatusId, _mapper.Map<DbModels.OrderStatus>(orderStatus));
 
             _unitOfWork.Commit();
 
@@ -277,18 +255,18 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.OrderStatus GetOrderStatusById(Guid orderStatusId)
         {
-            DbModels.OrderStatus orderStatusFromDb = _orderStatusRepository
-                .GetById(orderStatusId);
+            DbModels.OrderStatus orderStatusFromDb = _orderStatusRepository.GetById(orderStatusId);
 
-            var orderStatus = _mapper
-                .Map<BusinessModels.OrderStatus>(orderStatusFromDb);
+            var orderStatus = _mapper.Map<BusinessModels.OrderStatus>(orderStatusFromDb);
 
             return orderStatus;
         }
 
         public BusinessModels.OrderStatus GetOrderStatusByName(string orderStatus)
         {
-            DbModels.OrderStatus orderStatusFromDB = _orderStatusRepository.GetAll().FirstOrDefault(x => x.Status.Equals(orderStatus));
+            DbModels.OrderStatus orderStatusFromDB = _orderStatusRepository
+                .GetAll()
+                .FirstOrDefault(x => x.Status.Equals(orderStatus));
 
             if (orderStatusFromDB is null)
             {
@@ -300,9 +278,7 @@ namespace GameStore.BLL.Services
 
         public IEnumerable<BusinessModels.OrderStatus> GetAllOrderStatuses()
         {
-            var statuses = _mapper
-                .Map<IEnumerable<BusinessModels.OrderStatus>>(
-                _orderStatusRepository.GetAll());
+            var statuses = _mapper.Map<IEnumerable<BusinessModels.OrderStatus>>(_orderStatusRepository.GetAll());
 
             return statuses;
         }
@@ -381,14 +357,9 @@ namespace GameStore.BLL.Services
             return true;
         }
 
-        private void AddDetailToOrder(
-            BusinessModels.Order order,
-            BusinessModels.OrderDetail orderDetail)
+        private void AddDetailToOrder(BusinessModels.Order order, BusinessModels.OrderDetail orderDetail)
         {
-            var detail = _orderDetailRepository
-                .GetOrderDetailByOrderIdAndProductId(
-                    order.OrderId,
-                    orderDetail.ProductId);
+            var detail = _orderDetailRepository.GetOrderDetailByOrderIdAndProductId(order.OrderId, orderDetail.ProductId);
 
             if (detail is null)
             {
@@ -400,29 +371,22 @@ namespace GameStore.BLL.Services
             }
         }
 
-        private void CreateNewOrderDetail(
-            BusinessModels.Order order,
-            BusinessModels.OrderDetail orderDetail)
+        private void CreateNewOrderDetail(BusinessModels.Order order, BusinessModels.OrderDetail orderDetail)
         {
             orderDetail.OrderId = order.OrderId;
 
-            _orderDetailRepository
-                .Create(_mapper.Map<DbModels.OrderDetail>(orderDetail));
+            _orderDetailRepository.Create(_mapper.Map<DbModels.OrderDetail>(orderDetail));
 
             _unitOfWork.Commit();
         }
 
-        private void UpdateOrderDetail(
-            BusinessModels.Order order,
-            DbModels.OrderDetail detail)
+        private void UpdateOrderDetail(BusinessModels.Order order, DbModels.OrderDetail detail)
         {
             detail.OrderId = order.OrderId;
             detail.Price += detail.Price / detail.Quantity;
             detail.Quantity += 1;
 
-            _orderDetailRepository.Update(
-                detail.OrderDetailId,
-                detail);
+            _orderDetailRepository.Update(detail.OrderDetailId, detail);
 
             _unitOfWork.Commit();
         }

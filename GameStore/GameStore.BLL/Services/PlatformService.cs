@@ -25,11 +25,9 @@ namespace GameStore.BLL.Services
             _mapper = mapper;
         }
 
-        public BusinessModels.Platform AddPlatform(
-            BusinessModels.Platform platform)
+        public BusinessModels.Platform AddPlatform(BusinessModels.Platform platform)
         {
-            _platformRepository
-                .Create(_mapper.Map<DbModels.Platform>(platform));
+            _platformRepository.Create(_mapper.Map<DbModels.Platform>(platform));
 
             _unitOfWork.Commit();
 
@@ -40,8 +38,7 @@ namespace GameStore.BLL.Services
         {
             if (_platformRepository.IsPresent(platform.PlatformId))
             {
-                throw new ArgumentException(
-                    "Platform doesn't exist or has already been deleted");
+                throw new ArgumentException("Platform doesn't exist or has already been deleted");
             }
 
             _platformRepository.Delete(platform.PlatformId);
@@ -49,13 +46,9 @@ namespace GameStore.BLL.Services
             _unitOfWork.Commit();
         }
 
-        public BusinessModels.Platform UpdatePlatform(
-            BusinessModels.Platform platform)
+        public BusinessModels.Platform UpdatePlatform(BusinessModels.Platform platform)
         {
-            _platformRepository
-                .Update(
-                platform.PlatformId,
-                _mapper.Map<DbModels.Platform>(platform));
+            _platformRepository.Update(platform.PlatformId, _mapper.Map<DbModels.Platform>(platform));
 
             _unitOfWork.Commit();
 
@@ -64,8 +57,7 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.Platform GetPlatformById(Guid platformId)
         {
-            DbModels.Platform platformFromDb =
-                _platformRepository.GetById(platformId);
+            DbModels.Platform platformFromDb = _platformRepository.GetById(platformId);
 
             var platform = _mapper.Map<BusinessModels.Platform>(platformFromDb);
 
@@ -74,9 +66,7 @@ namespace GameStore.BLL.Services
 
         public IEnumerable<BusinessModels.Platform> GetAllPlatforms()
         {
-            var platforms = _mapper
-                .Map<IEnumerable<BusinessModels.Platform>>(
-                _platformRepository.GetAll());
+            var platforms = _mapper.Map<IEnumerable<BusinessModels.Platform>>(_platformRepository.GetAll());
 
             return platforms;
         }

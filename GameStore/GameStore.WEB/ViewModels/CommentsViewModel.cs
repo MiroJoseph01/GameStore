@@ -13,7 +13,13 @@ namespace GameStore.Web.ViewModels
         [Display(Name = "Text")]
         public string Body { get; set; }
 
+        public bool QuoteIsPresent { get; set; }
+
+        public string Quote { get; set; }
+
         public string ParentCommentId { get; set; }
+
+        public string DeleteCommentId { get; set; }
 
         public IEnumerable<CommentViewModel> Comments { get; set; }
 

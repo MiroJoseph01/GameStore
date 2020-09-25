@@ -15,10 +15,7 @@ namespace GameStore.BLL.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public GenreService(
-            IRepository<DbModels.Genre> genreRepository,
-            IUnitOfWork unitOfWork,
-            IMapper mapper)
+        public GenreService(IRepository<DbModels.Genre> genreRepository, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _genreRepository = genreRepository;
             _unitOfWork = unitOfWork;
@@ -38,8 +35,7 @@ namespace GameStore.BLL.Services
         {
             if (!_genreRepository.IsPresent(genre.GenreId))
             {
-                throw new ArgumentException(
-                    "Genre doesn't exist or has already been deleted");
+                throw new ArgumentException("Genre doesn't exist or has already been deleted");
             }
 
             _genreRepository.Delete(genre.GenreId);
@@ -49,8 +45,7 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.Genre UpdateGenre(BusinessModels.Genre genre)
         {
-            _genreRepository
-                .Update(genre.GenreId, _mapper.Map<DbModels.Genre>(genre));
+            _genreRepository.Update(genre.GenreId, _mapper.Map<DbModels.Genre>(genre));
 
             _unitOfWork.Commit();
 
@@ -68,8 +63,7 @@ namespace GameStore.BLL.Services
 
         public IEnumerable<BusinessModels.Genre> GetAllGenres()
         {
-            var genres = _mapper
-                .Map<IEnumerable<BusinessModels.Genre>>(_genreRepository.GetAll());
+            var genres = _mapper.Map<IEnumerable<BusinessModels.Genre>>(_genreRepository.GetAll());
 
             return genres;
         }

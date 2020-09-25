@@ -19,11 +19,8 @@ namespace GameStore.DAL.Repositories
             Guid orderId,
             string productId)
         {
-            var detail = _dbContext
-                .OrderDetails
-                .FirstOrDefault(
-                    x => x.OrderId
-                    .Equals(orderId) && x.ProductId.Equals(productId));
+            var detail = _dbContext.OrderDetails
+                .FirstOrDefault(x => x.OrderId.Equals(orderId) && x.ProductId.Equals(productId));
 
             return detail;
         }

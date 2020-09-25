@@ -1,0 +1,14 @@
+﻿@model GameStore.Web.ViewModels.BanUserConfirmationViewModel
+
+@{
+    ViewData["Title"] = "BanUserConfirm";
+}
+
+<h2>Ban User Confirm</h2>
+<hr />
+<p>User with id '<i>@Html.DisplayFor(model => model.UserId)</i>' was blocked</p>
+<p>Duration: <i>@Html.DisplayFor(model => model.Duration)</i></p>
+
+<div>
+    @Html.ActionLink("Back to Main Page", "Index", "Game") |
+</div>
