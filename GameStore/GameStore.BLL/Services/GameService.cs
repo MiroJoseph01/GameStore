@@ -17,10 +17,7 @@ namespace GameStore.BLL.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public GameService(
-            IGameRepository gameRepository,
-            IUnitOfWork unitOfWork,
-            IMapper mapper)
+        public GameService(IGameRepository gameRepository, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _gameRepository = gameRepository;
             _unitOfWork = unitOfWork;
@@ -48,9 +45,7 @@ namespace GameStore.BLL.Services
         {
             if (!_gameRepository.IsPresent(game.GameId))
             {
-                throw new ArgumentException(
-                    $"Game with id \'{game.GameId}\' " +
-                    $"has already been deleted or doesn't exist");
+                throw new ArgumentException($"Game with id \'{game.GameId}\' has already been deleted or doesn't exist");
             }
 
             DbModels.Game gameFromDb = _gameRepository.GetById(game.GameId);
@@ -114,8 +109,7 @@ namespace GameStore.BLL.Services
         public IEnumerable<BusinessModels.Game> GetGamesByPlatform(
             BusinessModels.Platform platform)
         {
-            IEnumerable<DbModels.Game> gamesFromDb = _gameRepository
-                .GetGamesOfPlatform(platform.PlatformId);
+            IEnumerable<DbModels.Game> gamesFromDb = _gameRepository.GetGamesOfPlatform(platform.PlatformId);
 
             return Convert(gamesFromDb);
         }
@@ -123,8 +117,7 @@ namespace GameStore.BLL.Services
         public IEnumerable<BusinessModels.Game> GetGamesByPublisher(
             BusinessModels.Publisher publisher)
         {
-            IEnumerable<DbModels.Game> gamesFromDb = _gameRepository
-                .GetGamesOfPublisher(publisher.PublisherId);
+            IEnumerable<DbModels.Game> gamesFromDb = _gameRepository.GetGamesOfPublisher(publisher.PublisherId);
 
             return Convert(gamesFromDb);
         }
@@ -148,19 +141,16 @@ namespace GameStore.BLL.Services
 
         private IList<BusinessModels.Genre> GetGameGenres(Guid id)
         {
-            IEnumerable<DbModels.Genre> genresFromDb = _gameRepository
-                .GetGameGenres(id);
+            IEnumerable<DbModels.Genre> genresFromDb = _gameRepository.GetGameGenres(id);
 
-            var genres = _mapper
-                .Map<IEnumerable<BusinessModels.Genre>>(genresFromDb).ToList();
+            var genres = _mapper.Map<IEnumerable<BusinessModels.Genre>>(genresFromDb).ToList();
 
             return genres;
         }
 
         private IList<BusinessModels.Platform> GetGamePlatforms(Guid id)
         {
-            IEnumerable<DbModels.Platform> platformsFromDb = _gameRepository
-                .GetGamePlatforms(id);
+            IEnumerable<DbModels.Platform> platformsFromDb = _gameRepository.GetGamePlatforms(id);
 
             IList<BusinessModels.Platform> platforms = platformsFromDb
                 .Select(x => new BusinessModels.Platform
@@ -175,11 +165,9 @@ namespace GameStore.BLL.Services
 
         private IList<BusinessModels.Comment> GetGameComments(Guid id)
         {
-            IList<DbModels.Comment> commentsFromDb = _gameRepository
-                .GetById(id).Comments;
+            IList<DbModels.Comment> commentsFromDb = _gameRepository.GetById(id).Comments;
 
-            var comments = _mapper
-                .Map<IList<BusinessModels.Comment>>(commentsFromDb);
+            var comments = _mapper.Map<IList<BusinessModels.Comment>>(commentsFromDb);
 
             return comments;
         }
@@ -212,9 +200,7 @@ namespace GameStore.BLL.Services
         private DbModels.Game Convert(BusinessModels.Game game)
         {
             var gameFromDb = _mapper.Map<DbModels.Game>(game);
-            gameFromDb.PlatformGames = GetGamePlatforms(
-                game.GameId,
-                game.GamePlatforms);
+            gameFromDb.PlatformGames = GetGamePlatforms(game.GameId, game.GamePlatforms);
             gameFromDb.GenreGames = GetGameGenres(game.GameId, game.GameGenres);
 
             return gameFromDb;
@@ -224,24 +210,26 @@ namespace GameStore.BLL.Services
             Guid id,
             IEnumerable<BusinessModels.Genre> genres)
         {
-            List<GameGenre> gameGenresList = genres.Select(x => new GameGenre
-            {
-                GameId = id,
-                GenreId = x.GenreId,
-            }).ToList();
+            List<GameGenre> gameGenresList = genres
+                .Select(x => new GameGenre
+                {
+                    GameId = id,
+                    GenreId = x.GenreId,
+                })
+                .ToList();
 
             return gameGenresList;
         }
 
-        private IList<GamePlatform> GetGamePlatforms(
-            Guid id,
-            IEnumerable<BusinessModels.Platform> platforms)
+        private IList<GamePlatform> GetGamePlatforms(Guid id, IEnumerable<BusinessModels.Platform> platforms)
         {
-            List<GamePlatform> gamePlatformsList = platforms.Select(x => new GamePlatform
-            {
-                GameId = id,
-                PlatformId = x.PlatformId,
-            }).ToList();
+            List<GamePlatform> gamePlatformsList = platforms
+                .Select(x => new GamePlatform
+                {
+                    GameId = id,
+                    PlatformId = x.PlatformId,
+                })
+                .ToList();
 
             return gamePlatformsList;
         }

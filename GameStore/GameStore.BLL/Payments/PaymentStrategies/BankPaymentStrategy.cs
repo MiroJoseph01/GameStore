@@ -56,11 +56,17 @@ namespace GameStore.BLL.Payments.PaymentStrategies
             PdfStringFormat formatLeft = new PdfStringFormat();
             formatLeft.Alignment = PdfTextAlignment.Right;
 
-            graphics.DrawString($"Payment Info", font, PdfBrushes.Black, new RectangleF(-20, 0, page.Size.Width, 30), formatCenter);
+            graphics.DrawString(
+                $"Payment Info", font, PdfBrushes.Black, new RectangleF(-20, 0, page.Size.Width, 30), formatCenter);
             graphics.DrawString($"Order ID: {paymentId}", fontMain, PdfBrushes.Black, new PointF(0, 45));
             graphics.DrawString($"Total: {order.Total}", fontMain, PdfBrushes.Black, new PointF(0, 70));
             pdfGrid.Draw(graphics, new PointF(0, 100));
-            graphics.DrawString($"{DateTime.Now:yyyy-MM-dd} Signature _________", fontMain, PdfBrushes.Black, new RectangleF(0, 500, page.Size.Width - 100, 0), formatLeft);
+            graphics.DrawString(
+                $"{DateTime.Now:yyyy-MM-dd} Signature _________",
+                fontMain,
+                PdfBrushes.Black,
+                new RectangleF(0, 500, page.Size.Width - 100, 0),
+                formatLeft);
 
             MemoryStream stream = new MemoryStream();
 

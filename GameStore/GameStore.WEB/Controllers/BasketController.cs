@@ -40,14 +40,9 @@ namespace GameStore.Web.Controllers
         [Route("/busket")]
         public IActionResult ViewOrder()
         {
-            var orders = _mapper
-                .Map<IEnumerable<BasketViewModel>>(
-                _orderService.GetOrdersByCustomerId(Constants.UserId));
+            var orders = _mapper.Map<IEnumerable<BasketViewModel>>(_orderService.GetOrdersByCustomerId(Constants.UserId));
 
-            var ordersToView = orders
-                .Where(x =>
-                x.OrderStatus == OrderStatuses.Open
-                || x.OrderStatus == OrderStatuses.NotPaid);
+            var ordersToView = orders.Where(x => x.OrderStatus == OrderStatuses.Open || x.OrderStatus == OrderStatuses.NotPaid);
 
             return View(ordersToView);
         }

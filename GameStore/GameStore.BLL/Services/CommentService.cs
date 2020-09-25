@@ -28,21 +28,12 @@ namespace GameStore.BLL.Services
             _mapper = mapper;
         }
 
-        public BusinessModels.Comment AddCommentToGame(
-            BusinessModels.Game game,
-            BusinessModels.Comment comment)
+        public BusinessModels.Comment AddCommentToGame(BusinessModels.Game game, BusinessModels.Comment comment)
         {
-            DbModels.Game gameFromDb = _gameRepository
-                .GetById(game.GameId);
+            DbModels.Game gameFromDb = _gameRepository.GetById(game.GameId);
 
-            DbModels.Comment commentFromDb = new DbModels.Comment
-            {
-                GameId = game.GameId,
-                CommentingGame = gameFromDb,
-                Body = comment.Body,
-                Name = comment.Name,
-                ParentCommentId = comment.ParentCommentId,
-            };
+            var commentFromDb = _mapper.Map<DbModels.Comment>(comment);
+            commentFromDb.CommentingGame = gameFromDb;
 
             _commentRepository.Create(commentFromDb);
 
@@ -55,8 +46,7 @@ namespace GameStore.BLL.Services
         {
             if (!_commentRepository.IsPresent(comment.CommentId))
             {
-                throw new ArgumentException(
-                    "Comment doesn't exist or has already been deleted");
+                throw new ArgumentException("Comment doesn't exist or has already been deleted");
             }
 
             _commentRepository.Delete(comment.CommentId);
@@ -67,9 +57,7 @@ namespace GameStore.BLL.Services
         public BusinessModels.Comment UpdateComment(
             BusinessModels.Comment comment)
         {
-            _commentRepository
-                .Update(comment.CommentId, _mapper
-                .Map<DbModels.Comment>(comment));
+            _commentRepository.Update(comment.CommentId, _mapper.Map<DbModels.Comment>(comment));
 
             _unitOfWork.Commit();
 
@@ -78,8 +66,7 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.Comment GetCommentById(Guid commentId)
         {
-            DbModels.Comment commentFromDb = _commentRepository
-                .GetById(commentId);
+            DbModels.Comment commentFromDb = _commentRepository.GetById(commentId);
 
             var comment = _mapper.Map<BusinessModels.Comment>(commentFromDb);
 
@@ -91,13 +78,21 @@ namespace GameStore.BLL.Services
         {
             DbModels.Game game = _gameRepository.GetByKey(gameKey);
 
-            IEnumerable<DbModels.Comment> commentsFromDb =
-                _commentRepository.GetCommentsByGameId(game.GameId);
+            IEnumerable<DbModels.Comment> commentsFromDb = _commentRepository.GetCommentsByGameId(game.GameId);
 
-            IEnumerable<BusinessModels.Comment> comments = _mapper
-                .Map<IEnumerable<BusinessModels.Comment>>(commentsFromDb);
+            IEnumerable<BusinessModels.Comment> comments = _mapper.Map<IEnumerable<BusinessModels.Comment>>(commentsFromDb);
 
             return comments;
+        }
+
+        public string GetCommentBody(string comment, int start, int end)
+        {
+            return comment.Remove(start, end - start + 8);
+        }
+
+        public string GetCommentQuote(string comment, int start, int end)
+        {
+            return comment.Substring(start + 7, end - start - 7);
         }
     }
 }

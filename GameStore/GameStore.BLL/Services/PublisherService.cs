@@ -26,8 +26,7 @@ namespace GameStore.BLL.Services
             _mapper = mapper;
         }
 
-        public BusinessModels.Publisher CreatePublisher(
-            BusinessModels.Publisher publisher)
+        public BusinessModels.Publisher CreatePublisher(BusinessModels.Publisher publisher)
         {
             var publisherForDB = _mapper
                 .Map<DbModels.Publisher>(publisher);
@@ -42,8 +41,7 @@ namespace GameStore.BLL.Services
         {
             if (!_publisherRepository.IsPresent(publisher.PublisherId))
             {
-                throw new ArgumentException(
-                    "Publisher doesn't exist or has already been deleted");
+                throw new ArgumentException("Publisher doesn't exist or has already been deleted");
             }
 
             _publisherRepository.Delete(publisher.PublisherId);
@@ -54,10 +52,7 @@ namespace GameStore.BLL.Services
         public BusinessModels.Publisher UpdatePublisher(
             BusinessModels.Publisher publisher)
         {
-            _publisherRepository
-                .Update(
-                publisher.PublisherId,
-                _mapper.Map<DbModels.Publisher>(publisher));
+            _publisherRepository.Update(publisher.PublisherId, _mapper.Map<DbModels.Publisher>(publisher));
 
             _unitOfWork.Commit();
 
@@ -66,19 +61,16 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.Publisher GetPublisherById(Guid publisherId)
         {
-            DbModels.Publisher publisherFromDb =
-                _publisherRepository.GetById(publisherId);
+            DbModels.Publisher publisherFromDb = _publisherRepository.GetById(publisherId);
 
             return _mapper.Map<BusinessModels.Publisher>(publisherFromDb);
         }
 
         public IEnumerable<BusinessModels.Publisher> GetAllPublishers()
         {
-            IEnumerable<DbModels.Publisher> publishers =
-                _publisherRepository.GetAll();
+            IEnumerable<DbModels.Publisher> publishers = _publisherRepository.GetAll();
 
-            var publishersResult = _mapper
-                .Map<IEnumerable<BusinessModels.Publisher>>(publishers);
+            var publishersResult = _mapper.Map<IEnumerable<BusinessModels.Publisher>>(publishers);
 
             return publishersResult;
         }
@@ -90,8 +82,7 @@ namespace GameStore.BLL.Services
                 .FirstOrDefault(
                 x => x.CompanyName.ToLower() == publisherName.ToLower());
 
-            var publisherResult = _mapper
-                .Map<BusinessModels.Publisher>(publisher);
+            var publisherResult = _mapper.Map<BusinessModels.Publisher>(publisher);
 
             return publisherResult;
         }

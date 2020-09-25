@@ -236,6 +236,10 @@ namespace GameStore.BLL.Tests
                     Key = GameKey,
                 });
 
+            _mapper
+                .Setup(m => m.Map<DbModels.Comment>(It.IsAny<BusinessModels.Comment>()))
+                .Returns(_commentsFromDb.First());
+
             _commentService.AddCommentToGame(game, newComment);
 
             _commentRepository
@@ -316,6 +320,36 @@ namespace GameStore.BLL.Tests
             var result = _commentService.GetCommentById(_comments.First().CommentId);
 
             Assert.Null(result);
+        }
+
+        [Fact]
+        public void GetCommentBody_PassValidStringAndIndexes_ReturnString()
+        {
+            var commentWithQuote = "<quote>I like</quote>other text";
+            var commentBody = "other text";
+
+            var result = _commentService
+                .GetCommentBody(
+                    commentWithQuote,
+                    commentWithQuote.IndexOf("<quote>"),
+                    commentWithQuote.IndexOf("</quote>"));
+
+            Assert.Equal(commentBody, result);
+        }
+
+        [Fact]
+        public void GetCommentQuote_PassValidStringAndIndexes_ReturnString()
+        {
+            var commentWithQuote = "<quote>I like</quote>other text";
+            var commentQuote = "I like";
+
+            var result = _commentService
+                .GetCommentQuote(
+                    commentWithQuote,
+                    commentWithQuote.IndexOf("<quote>"),
+                    commentWithQuote.IndexOf("</quote>"));
+
+            Assert.Equal(commentQuote, result);
         }
     }
 }

@@ -54,60 +54,37 @@ namespace GameStore.DAL.Repositories
 
         public IEnumerable<Genre> GetGameGenres(Guid id)
         {
-            var genresId = _dbContext.GamesGenres
-                .Where(x => x.GameId.Equals(id))
-                .Select(y => y.GenreId)
-                .ToList();
+            var genresId = _dbContext.GamesGenres.Where(x => x.GameId.Equals(id)).Select(y => y.GenreId).ToList();
 
-            return _dbContext.Genres
-                .Where(x => genresId.Contains(x.GenreId))
-                .ToList();
+            return _dbContext.Genres.Where(x => genresId.Contains(x.GenreId)).ToList();
         }
 
         public IEnumerable<Platform> GetGamePlatforms(Guid id)
         {
-            var platformsId = _dbContext.GamesPlatforms
-                .Where(x => x.GameId.Equals(id))
-                .Select(y => y.PlatformId)
-                .ToList();
+            var platformsId = _dbContext.GamesPlatforms.Where(x => x.GameId.Equals(id)).Select(y => y.PlatformId).ToList();
 
-            return _dbContext.Platforms
-                .Where(x => platformsId.Contains(x.PlatformId))
-                .ToList();
+            return _dbContext.Platforms.Where(x => platformsId.Contains(x.PlatformId)).ToList();
         }
 
         public IEnumerable<Game> GetGamesOfGenre(Guid genreId)
         {
-            var gamesId = _dbContext.GamesGenres
-                .Where(x => x.GenreId.Equals(genreId))
-                .Select(y => y.GameId)
-                .ToList();
+            var gamesId = _dbContext.GamesGenres.Where(x => x.GenreId.Equals(genreId)).Select(y => y.GameId).ToList();
 
-            return _dbContext.Games
-                .Where(x => gamesId.Contains(x.GameId)
-                && !x.IsRemoved)
-                .ToList();
+            return _dbContext.Games.Where(x => gamesId.Contains(x.GameId) && !x.IsRemoved).ToList();
         }
 
         public IEnumerable<Game> GetGamesOfPlatform(Guid platformId)
         {
-            var gamesId = _dbContext.GamesPlatforms
-                .Where(x => x.PlatformId.Equals(platformId))
+            var gamesId = _dbContext.GamesPlatforms.Where(x => x.PlatformId.Equals(platformId))
                 .Select(y => y.GameId)
                 .ToList();
 
-            return _dbContext.Games
-                .Where(x => gamesId.Contains(x.GameId)
-                && !x.IsRemoved)
-                .ToList();
+            return _dbContext.Games.Where(x => gamesId.Contains(x.GameId) && !x.IsRemoved).ToList();
         }
 
         public IEnumerable<Game> GetGamesOfPublisher(Guid publisherId)
         {
-            return _dbContext.Games
-                .Where(x => x.PublisherId.Equals(publisherId)
-                && !x.IsRemoved)
-                .ToList();
+            return _dbContext.Games.Where(x => x.PublisherId.Equals(publisherId) && !x.IsRemoved).ToList();
         }
     }
 }

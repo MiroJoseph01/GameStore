@@ -22,9 +22,7 @@ namespace GameStore.DAL.Repositories
             List<Order> res = _dbContext.Orders
                 .Include(y => y.OrderDetails)
                 .Include(z => z.OrderStatus)
-                .Where(
-                    x => x.CustomerId.Equals(customerId)
-                        && x.IsRemoved == false)
+                .Where(x => x.CustomerId.Equals(customerId) && x.IsRemoved == false)
                 .ToList();
 
             foreach (var o in res)

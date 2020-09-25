@@ -73,8 +73,7 @@ namespace GameStore.Web.Controllers
                 .Map<IList<PlatformViewModel>>(
                     _platformService.GetAllPlatforms());
 
-            IEnumerable<Publisher> publishers = _publisherService
-                .GetAllPublishers();
+            IEnumerable<Publisher> publishers = _publisherService.GetAllPublishers();
             List<SelectListItem> publisherOptions = publishers
                 .Select(x => new SelectListItem()
                 {
@@ -88,8 +87,7 @@ namespace GameStore.Web.Controllers
                 Value = NoPublisher,
             });
 
-            var genres = _mapper
-                .Map<IList<GenreViewModel>>(_genreService.GetAllGenres());
+            var genres = _mapper.Map<IList<GenreViewModel>>(_genreService.GetAllGenres());
             var genreOptions = genres.Select(x => new
             {
                 GenreId = x.GenreId,
@@ -126,8 +124,7 @@ namespace GameStore.Web.Controllers
 
             if (!ModelState.IsValid)
             {
-                var genres = _mapper
-                    .Map<IList<GenreViewModel>>(_genreService.GetAllGenres());
+                var genres = _mapper.Map<IList<GenreViewModel>>(_genreService.GetAllGenres());
 
                 var genreOptions = genres.Select(x => new
                 {
@@ -167,9 +164,7 @@ namespace GameStore.Web.Controllers
                 return View(viewGame);
             }
 
-            IEnumerable<SelectListItem> platformoptions = viewGame
-                .PlatformOptions
-                .Where(x => x.Selected == true);
+            IEnumerable<SelectListItem> platformoptions = viewGame.PlatformOptions.Where(x => x.Selected == true);
             viewGame.PlatformOptions = platformoptions.ToList();
 
             viewGame.GameGenres = viewGame.Genres
@@ -180,8 +175,7 @@ namespace GameStore.Web.Controllers
 
             if (viewGame.PublisherName != NoPublisher)
             {
-                Publisher publisher = _publisherService
-                    .GetPublisherByName(viewGame.PublisherName);
+                Publisher publisher = _publisherService.GetPublisherByName(viewGame.PublisherName);
                 game.PublisherId = publisher.PublisherId;
             }
 
@@ -257,8 +251,9 @@ namespace GameStore.Web.Controllers
                 .Map<PublisherViewModel>(publisher);
 
             publisherForView.PublisherGames = _mapper
-                .Map<IEnumerable<GameViewModel>>(_gameService
-                .GetGamesByPublisher(publisher))
+                .Map<IEnumerable<GameViewModel>>(
+                     _gameService
+                         .GetGamesByPublisher(publisher))
                 .ToList();
 
             return View(publisherForView);

@@ -40,6 +40,8 @@ namespace GameStore.Web.Util.AutoMapperProfiles
 
             CreateMap<DbModels.Comment, BusinessModels.Comment>().ReverseMap();
 
+            CreateMap<BusinessModels.Comment, DbModels.Comment>();
+
             CreateMap<CommentsViewModel, BusinessModels.Comment>();
         }
     }

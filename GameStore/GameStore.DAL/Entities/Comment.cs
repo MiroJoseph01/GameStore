@@ -13,6 +13,8 @@ namespace GameStore.DAL.Entities
 
         public string Body { get; set; }
 
+        public string Quote { get; set; }
+
         public Guid? ParentCommentId { get; set; }
 
         public Guid GameId { get; set; }

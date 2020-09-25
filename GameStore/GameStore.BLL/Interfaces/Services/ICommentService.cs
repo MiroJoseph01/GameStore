@@ -15,5 +15,9 @@ namespace GameStore.BLL.Interfaces
         Comment GetCommentById(Guid commentId);
 
         IEnumerable<Comment> GetAllCommentsByGameKey(string gameKey);
+
+        string GetCommentBody(string comment, int start, int end);
+
+        string GetCommentQuote(string comment, int start, int end);
     }
 }
