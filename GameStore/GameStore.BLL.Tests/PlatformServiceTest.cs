@@ -60,7 +60,9 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void GetAllPlatforms_ReturnsListOfPlatforms()
         {
-            _platformRepository.Setup(p => p.GetAll()).Returns(_platformsFromDb);
+            _platformRepository
+                .Setup(p => p.GetAll())
+                .Returns(_platformsFromDb);
             _mapper
                 .Setup(m => m
                     .Map<IEnumerable<BusinessModels.Platform>>(
@@ -80,7 +82,9 @@ namespace GameStore.BLL.Tests
             List<BusinessModels.Platform> platforms =
                 new List<BusinessModels.Platform>();
 
-            _platformRepository.Setup(g => g.GetAll()).Returns(_platformsFromDb);
+            _platformRepository
+                .Setup(g => g.GetAll())
+                .Returns(_platformsFromDb);
             _mapper
                 .Setup(m => m
                     .Map<IEnumerable<BusinessModels.Platform>>(

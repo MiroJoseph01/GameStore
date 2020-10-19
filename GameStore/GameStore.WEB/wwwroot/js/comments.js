@@ -16,10 +16,10 @@ Quote = function (val) {
 }
 
 //modal window
-var modal = document.getElementById("modal");
-var buttons = document.getElementsByClassName("modal-button");
-var span = document.getElementById("close");
-var buttonNo = document.getElementById("btn-no");
+let modal = document.getElementById("modal");
+let buttons = document.getElementsByClassName("modal-button");
+let span = document.getElementById("close");
+let buttonNo = document.getElementById("btn-no");
 
 [].forEach.call(buttons, function (button) {
     button.onclick = function () {

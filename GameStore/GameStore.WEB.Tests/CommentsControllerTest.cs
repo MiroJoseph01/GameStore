@@ -5,6 +5,7 @@ using AutoMapper;
 using GameStore.BLL.Interfaces;
 using GameStore.BLL.Models;
 using GameStore.Web.Controllers;
+using GameStore.Web.Util;
 using GameStore.Web.Util.Logger;
 using GameStore.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ namespace GameStore.Web.Tests
         private readonly Mock<ICommentService> _commentService;
         private readonly Mock<IAppLogger<CommentController>> _logger;
         private readonly Mock<IMapper> _mapper;
+        private readonly Mock<ICommentHelper> _commentHelper;
 
         private readonly Game _game;
         private readonly List<Comment> _comments;
@@ -35,12 +37,14 @@ namespace GameStore.Web.Tests
             _commentService = new Mock<ICommentService>();
             _logger = new Mock<IAppLogger<CommentController>>();
             _mapper = new Mock<IMapper>();
+            _commentHelper = new Mock<ICommentHelper>();
 
             _commentsController = new CommentController(
                 _gameService.Object,
                 _commentService.Object,
                 _mapper.Object,
-                _logger.Object);
+                _logger.Object,
+                _commentHelper.Object);
 
             _gameId = Guid.NewGuid();
 
@@ -142,7 +146,7 @@ namespace GameStore.Web.Tests
             RedirectToActionResult view = Assert.IsType<RedirectToActionResult>(result);
         }
 
-        [Fact(Skip = "Recursion issue")]
+        [Fact]
         public void ViewComments_PassCommentModelWithQuoteAndEmptyBodyAndGameModel_ReturnsView()
         {
             _gameService.Setup(g => g.GetGameByKey(GameKey)).Returns(_game);
@@ -152,6 +156,12 @@ namespace GameStore.Web.Tests
                 .Returns(_viewComments);
             _commentService.Setup(c => c.GetAllCommentsByGameKey(GameKey))
                .Returns(_comments);
+            _commentHelper
+                .Setup(c => c.QuoteIsPresent(It.IsAny<CommentsViewModel>(), It.IsAny<int>(), It.IsAny<int>()))
+                .Returns(true);
+            _commentHelper
+                .Setup(c => c.ReorderComments(It.IsAny<IEnumerable<CommentViewModel>>()))
+                .Returns(_viewComments);
 
             IActionResult result = _commentsController
                 .ViewComments(_commentsForAdd.Last(), GameKey);
@@ -160,7 +170,7 @@ namespace GameStore.Web.Tests
             CommentsViewModel model = Assert.IsAssignableFrom<CommentsViewModel>(view.Model);
         }
 
-        [Fact(Skip = "Recursion issue")]
+        [Fact]
         public void ViewComments_PassCommentModelWithQuote_HandleExceptionAndReturnView()
         {
             _gameService.Setup(g => g.GetGameByKey(GameKey)).Returns(_game);
@@ -170,6 +180,12 @@ namespace GameStore.Web.Tests
                 .Returns(_viewComments);
             _commentService.Setup(c => c.GetAllCommentsByGameKey(GameKey))
                .Returns(_comments);
+            _commentHelper
+                .Setup(c => c.QuoteIsPresent(It.IsAny<CommentsViewModel>(), It.IsAny<int>(), It.IsAny<int>()))
+                .Returns(true);
+            _commentHelper
+                .Setup(c => c.ReorderComments(It.IsAny<IEnumerable<CommentViewModel>>()))
+                .Returns(_viewComments);
 
             IActionResult result = _commentsController
                 .ViewComments(_commentsForAdd.ElementAt(2), GameKey);
@@ -178,7 +194,7 @@ namespace GameStore.Web.Tests
             CommentsViewModel model = Assert.IsAssignableFrom<CommentsViewModel>(view.Model);
         }
 
-        [Fact(Skip = "Recursion issue")]
+        [Fact]
         public void ViewComments_PassCommentModelWithQuoteAndInvalidTagsAndGameModel_ReturnsView()
         {
             _gameService.Setup(g => g.GetGameByKey(GameKey)).Returns(_game);
@@ -188,16 +204,22 @@ namespace GameStore.Web.Tests
                 .Returns(_viewComments);
             _commentService.Setup(c => c.GetAllCommentsByGameKey(GameKey))
                .Returns(_comments);
+            _commentHelper
+                .Setup(c => c.QuoteIsPresent(It.IsAny<CommentsViewModel>(), It.IsAny<int>(), It.IsAny<int>()))
+                .Returns(true);
+            _commentHelper
+                .Setup(c => c.ReorderComments(It.IsAny<IEnumerable<CommentViewModel>>()))
+                .Returns(_viewComments);
 
             IActionResult result = _commentsController
                 .ViewComments(_commentsForAdd.ElementAt(1), GameKey);
 
             var view = Assert.IsType<ViewResult>(result);
             CommentsViewModel model = Assert.IsAssignableFrom<CommentsViewModel>(view.Model);
-            Assert.Equal(_comments.Count(), model.Comments.Count());
+            Assert.Equal(_viewComments.Count(), model.Comments.Count());
         }
 
-        [Fact(Skip = "Recursion issue")]
+        [Fact]
         public void ViewComments_PassValidGameKey_ReturnsListOfComments()
         {
             _commentService.Setup(c => c.GetAllCommentsByGameKey(GameKey))
@@ -208,12 +230,18 @@ namespace GameStore.Web.Tests
                 .Returns(_viewComments);
             _gameService.Setup(g => g.IsPresent(GameKey)).Returns(true);
             _gameService.Setup(g => g.GetGameByKey(It.IsAny<string>())).Returns(_game);
+            _commentHelper
+                .Setup(c => c.QuoteIsPresent(It.IsAny<CommentsViewModel>(), It.IsAny<int>(), It.IsAny<int>()))
+                .Returns(true);
+            _commentHelper
+                .Setup(c => c.ReorderComments(It.IsAny<IEnumerable<CommentViewModel>>()))
+                .Returns(_viewComments);
 
             IActionResult result = _commentsController.ViewComments(GameKey);
 
             ViewResult view = Assert.IsType<ViewResult>(result);
             CommentsViewModel model = Assert.IsAssignableFrom<CommentsViewModel>(view.Model);
-            Assert.Equal(_comments.Count(), model.Comments.Count());
+            Assert.Equal(_viewComments.Count(), model.Comments.Count());
         }
 
         [Fact]

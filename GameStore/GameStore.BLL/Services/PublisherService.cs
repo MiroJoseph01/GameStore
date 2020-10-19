@@ -86,5 +86,10 @@ namespace GameStore.BLL.Services
 
             return publisherResult;
         }
+
+        public bool IsPresent(string name)
+        {
+            return GetPublisherByName(name) != null;
+        }
     }
 }

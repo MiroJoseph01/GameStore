@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
-namespace GameStore.Web.Util
+namespace GameStore.Web.Util.Filters
 {
     public class ExceptionFilter : IExceptionFilter
     {

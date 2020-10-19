@@ -4,6 +4,8 @@ using System.Linq;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
 using GameStore.BLL.Models;
+using GameStore.DAL.Pipeline;
+using GameStore.DAL.Pipeline.Util;
 using GameStore.Web.Controllers;
 using GameStore.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +24,7 @@ namespace GameStore.Web.Tests
         private readonly Mock<IPlatformService> _platformService;
         private readonly Mock<IPublisherService> _publisherService;
         private readonly Mock<IMapper> _mapper;
+        private readonly Mock<IPipeline> _pipeline;
 
         private readonly List<Game> _games;
         private readonly List<GameViewModel> _gamesVM;
@@ -35,6 +38,9 @@ namespace GameStore.Web.Tests
 
         private readonly List<Publisher> _publishers;
 
+        private readonly IDictionary<OrderOption, OrderOptionModel> _orderOptions;
+        private readonly IDictionary<TimePeriod, TimePeriodModel> _timePeriods;
+
         public GamesControllerTest()
         {
             _gameService = new Mock<IGameService>();
@@ -43,6 +49,7 @@ namespace GameStore.Web.Tests
             _genreService = new Mock<IGenreService>();
             _publisherService = new Mock<IPublisherService>();
             _mapper = new Mock<IMapper>();
+            _pipeline = new Mock<IPipeline>();
 
             _gamesController = new GameController(
                 _gameService.Object,
@@ -50,7 +57,8 @@ namespace GameStore.Web.Tests
                 _genreService.Object,
                 _platformService.Object,
                 _publisherService.Object,
-                _mapper.Object);
+                _mapper.Object,
+                _pipeline.Object);
 
             _games = new List<Game>
             {
@@ -149,19 +157,152 @@ namespace GameStore.Web.Tests
                     HomePage = "link",
                 },
             };
+
+            _orderOptions = new Dictionary<OrderOption, OrderOptionModel>
+            {
+                {
+                    OrderOption.New,
+                    new OrderOptionModel
+                    {
+                        Name = "New",
+                        Text = "Newest",
+                        Func = x => x.OrderByDescending(y => y.Date),
+                    }
+                },
+                {
+                    OrderOption.MostCommented,
+                    new OrderOptionModel
+                    {
+                        Name = "MostCommented",
+                        Text = "Most Commented",
+                        Func = x => x.OrderByDescending(y => y.Comments.Count),
+                    }
+                },
+            };
+
+            _timePeriods = new Dictionary<TimePeriod, TimePeriodModel>
+            {
+                {
+                    TimePeriod.LastWeek,
+                    new TimePeriodModel
+                    {
+                        Text = "Last Week",
+                        Name = "LastWeek",
+                        Date = DateTime.Now.AddDays(-7),
+                    }
+                },
+                {
+                    TimePeriod.LastMonths,
+                    new TimePeriodModel
+                    {
+                        Text = "Last Months",
+                        Name = "LastMonths",
+                        Date = DateTime.Now.AddMonths(-1),
+                    }
+                },
+            };
         }
 
         [Fact]
         public void Index_ReturnsListOfGames()
         {
-            _gameService.Setup(g => g.GetAllGames()).Returns(_games);
-            _mapper.Setup(m => m.Map<IEnumerable<GameViewModel>>(_games)).Returns(_gamesVM);
+            var query = new BLL.Models.QueryModel
+            {
+                PlatformOptions = new List<string>
+                {
+                    "browser",
+                },
 
-            IActionResult result = _gamesController.Index();
+                GenresOptions = new List<string>
+                {
+                   "Action"
+                },
+
+                PublisherOptions = new List<string>
+                {
+                    "Valve"
+                },
+
+                DateFilter = TimePeriod.LastYear,
+                Filter = OrderOption.New,
+                From = 10,
+                To = 30,
+                SearchByGameName = "Game Name",
+                Skip = 1,
+                Take = 10,
+            };
+
+            var shortGames = new List<ShortGameViewModel>
+            {
+                new ShortGameViewModel(),
+            };
+
+            _gameService
+                .Setup(g => g.GetOrderOptions())
+                .Returns(_orderOptions);
+            _gameService
+                .Setup(g => g.GetTimePeriods())
+                .Returns(_timePeriods);
+
+            _pipeline
+                .Setup(p => p.Register(It.IsAny<IFilter<DAL.Entities.Game>>()))
+                .Returns(_pipeline.Object);
+
+            _mapper
+                .Setup(
+                    m => m.Map<IEnumerable<ShortGameViewModel>>(
+                        It.IsAny<List<Game>>()))
+                .Returns(shortGames);
+            _mapper
+                .Setup(m => m.Map<BLL.Models.QueryModel>(It.IsAny<ViewModels.QueryModel>()))
+                .Returns(query);
+
+            IActionResult result = _gamesController.Index(new ViewModels.QueryModel());
 
             ViewResult view = Assert.IsType<ViewResult>(result);
-            IEnumerable<GameViewModel> model = Assert.IsAssignableFrom<IEnumerable<GameViewModel>>(view.Model);
-            Assert.Single(model);
+            var model = Assert.IsAssignableFrom<ShortsGameViewModel>(view.Model);
+        }
+
+        [Fact]
+        public void Index_PassQueryViewModelWitnInvalidValues_ReturnsFilteredListOfGames()
+        {
+            var query = new BLL.Models.QueryModel()
+            {
+                To = 10,
+                From = 20,
+                SearchByGameName = "2",
+                Take = 0,
+                Skip = 1,
+            };
+
+            var shortGames = new List<ShortGameViewModel>
+            {
+                new ShortGameViewModel(),
+                new ShortGameViewModel(),
+            };
+
+            _gameService
+                .Setup(g => g.GetAllGames())
+                .Returns(_games);
+            _gameService
+                .Setup(g => g.GetOrderOptions())
+                .Returns(_orderOptions);
+            _gameService
+                .Setup(g => g.GetTimePeriods())
+                .Returns(_timePeriods);
+            _mapper
+                .Setup(m => m.Map<IEnumerable<ShortGameViewModel>>(
+                    It.IsAny<IEnumerable<Game>>()))
+                .Returns(shortGames);
+            _mapper
+                .Setup(m => m.Map<BLL.Models.QueryModel>(It.IsAny<ViewModels.QueryModel>()))
+                .Returns(query);
+
+            IActionResult result = _gamesController.Index(new ViewModels.QueryModel());
+
+            ViewResult view = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<ShortsGameViewModel>(view.Model);
+            Assert.Equal(model.Games.Count, shortGames.Count);
         }
 
         [Fact]
@@ -197,12 +338,15 @@ namespace GameStore.Web.Tests
         }
 
         [Fact]
-        public void New_PassGameViewModel_VerifyAdding()
+        public void CreateNewGame_PassGameViewModel_VerifyAdding()
         {
             GameCreateViewModel gameCreateVM = _gameCreateVM.First();
             Game game = _games.First();
 
             _gameService.Setup(g => g.GetGameByKey(gameCreateVM.Key))
+                .Returns(game);
+            _mapper
+                .Setup(m => m.Map<Game>(It.IsAny<GameCreateViewModel>()))
                 .Returns(game);
 
             IActionResult result = _gamesController.CreateNewGame(gameCreateVM);
@@ -213,7 +357,7 @@ namespace GameStore.Web.Tests
         }
 
         [Fact]
-        public void New_ReturnsViewForCreatingGame()
+        public void CreateNewGame_ReturnsViewForCreatingGame()
         {
             _platformService.Setup(p => p.GetAllPlatforms()).Returns(_platforms);
             _mapper.Setup(m => m.Map<IList<PlatformViewModel>>(_platforms)).Returns(_platformsVM);
@@ -222,6 +366,24 @@ namespace GameStore.Web.Tests
             _genreService.Setup(g => g.GetAllGenres()).Returns(_genres);
 
             var result = _gamesController.CreateNewGame();
+
+            ViewResult view = Assert.IsType<ViewResult>(result);
+            GameCreateViewModel model = Assert.IsAssignableFrom<GameCreateViewModel>(view.Model);
+        }
+
+        [Fact]
+        public void CreateNewGame_PassInvalidModel_ReturnView()
+        {
+            var game = _gameCreateVM.First();
+            game.PlatformOptions.First().Selected = false;
+
+            _platformService.Setup(p => p.GetAllPlatforms()).Returns(_platforms);
+            _mapper.Setup(m => m.Map<IList<PlatformViewModel>>(_platforms)).Returns(_platformsVM);
+            _publisherService.Setup(p => p.GetAllPublishers()).Returns(_publishers);
+            _mapper.Setup(m => m.Map<IList<GenreViewModel>>(_genres)).Returns(_genresVM);
+            _genreService.Setup(g => g.GetAllGenres()).Returns(_genres);
+
+            var result = _gamesController.CreateNewGame(game);
 
             ViewResult view = Assert.IsType<ViewResult>(result);
             GameCreateViewModel model = Assert.IsAssignableFrom<GameCreateViewModel>(view.Model);
@@ -278,6 +440,84 @@ namespace GameStore.Web.Tests
             var result = _gamesController.Download();
 
             _fileService.Verify(f => f.CreateFile(_gamesController));
+        }
+
+        [Fact]
+        public void ViewPublisher_PassEmptyOrInvalidName_ReturnsNotFound()
+        {
+            string wrongPublisherName = "wrong";
+            _publisherService
+                .Setup(p => p.IsPresent(wrongPublisherName))
+                .Returns(false);
+
+            var result = _gamesController.ViewPublisher("");
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public void ViewPublisher_PassName_ReturnsNotFound()
+        {
+            var publisherView = new PublisherViewModel
+            {
+                CompanyName = "company name",
+                Description = "description",
+                HomePage = "home page",
+                PublisherId = _publishers.First().PublisherId.ToString(),
+            };
+
+            _publisherService
+                .Setup(p => p.IsPresent(_publishers.First().CompanyName))
+                .Returns(true);
+            _publisherService
+                .Setup(p => p.GetPublisherByName(It.IsAny<string>()))
+                .Returns(_publishers.First());
+            _gameService
+                .Setup(g => g.GetGamesByPublisher(It.IsAny<Publisher>()))
+                .Returns((IEnumerable<Game>)null);
+            _mapper
+                .Setup(m => m.Map<PublisherViewModel>(_publishers.First()))
+                .Returns(publisherView);
+            _mapper
+                .Setup(m => m.Map<IEnumerable<GameViewModel>>(_publishers.First()))
+                .Returns((IEnumerable<GameViewModel>)null);
+
+            var result = _gamesController
+                .ViewPublisher(_publishers.First().CompanyName);
+
+            Assert.IsType<ViewResult>(result);
+        }
+
+        [Fact]
+        public void CreateNewPublisher_ReturnsView()
+        {
+            var result = _gamesController.CreateNewPublisher();
+
+            Assert.IsType<ViewResult>(result);
+        }
+
+        [Fact]
+        public void CreateNewPublisher_PassValidModel_ReturnsRedirect()
+        {
+            _mapper
+                .Setup(m => m.Map<Publisher>(It.IsAny<PublisherCreateViewModel>()))
+                .Returns(_publishers.First());
+
+            var result = _gamesController
+                .CreateNewPublisher(It.IsAny<PublisherCreateViewModel>());
+
+            _publisherService.Verify(x => x.CreatePublisher(_publishers.First()));
+            Assert.IsType<RedirectToActionResult>(result);
+        }
+
+        [Fact]
+        public void CreateNewPublisher_PassInalidModel_ReturnsRedirect()
+        {
+            _gamesController.ModelState.AddModelError("HomePage", "Invalid");
+            var result = _gamesController
+                .CreateNewPublisher(It.IsAny<PublisherCreateViewModel>());
+
+            Assert.IsType<ViewResult>(result);
         }
     }
 }

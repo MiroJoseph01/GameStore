@@ -32,5 +32,9 @@ namespace GameStore.Web.ViewModels
         public decimal Price { get; set; }
 
         public string Publisher { get; set; }
+
+        public int Views { get; set; }
+
+        public string Date { get; set; }
     }
 }

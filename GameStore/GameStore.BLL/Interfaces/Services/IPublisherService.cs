@@ -17,5 +17,7 @@ namespace GameStore.BLL.Interfaces
         Publisher GetPublisherById(Guid publisherId);
 
         Publisher CreatePublisher(Publisher publisher);
+
+        bool IsPresent(string name);
     }
 }

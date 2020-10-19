@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using GameStore.DAL.Entities.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -62,6 +63,32 @@ namespace GameStore.DAL.Repositories
             }
 
             _dbContext.Entry(entity).State = EntityState.Modified;
+        }
+
+        public virtual IEnumerable<TEntity> Filter(
+            Expression<Func<TEntity, bool>> filter = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+            int skip = 0,
+            int take = 0)
+        {
+            IQueryable<TEntity> query = _dbContext.Set<TEntity>();
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            if (take != 0)
+            {
+                query = query.Skip(skip).Take(take);
+            }
+
+            return query.ToList();
         }
     }
 }

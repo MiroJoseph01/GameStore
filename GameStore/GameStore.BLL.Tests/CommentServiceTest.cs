@@ -203,7 +203,9 @@ namespace GameStore.BLL.Tests
 
             _gameRepository.Setup(g => g.GetByKey("lol")).Returns(gameList.Last());
 
-            _commentRepository.Setup(c => c.GetAll()).Returns(_commentsFromDb);
+            _commentRepository
+                .Setup(c => c.GetAll())
+                .Returns(_commentsFromDb);
 
             IEnumerable<BusinessModels.Comment> res = _commentService
                 .GetAllCommentsByGameKey("lol");

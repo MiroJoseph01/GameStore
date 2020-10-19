@@ -1,8 +1,8 @@
 ﻿function cc_format(value) {
-    var v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    var matches = v.match(/\d{4,16}/g);
-    var match = matches && matches[0] || ''
-    var parts = []
+    let v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
+    let matches = v.match(/\d{4,16}/g);
+    let match = matches && matches[0] || ''
+    let parts = []
 
     for (i = 0, len = match.length; i < len; i += 4) {
         parts.push(match.substring(i, i + 4))
@@ -16,10 +16,10 @@
 }
 
 function date_format(value) {
-    var v = value.replace(/[^/]\s+/g, '').replace(/[^0-9]/gi, '')
-    var matches = v.match(/\d{2,4}/g);
-    var match = matches && matches[0] || ''
-    var parts = []
+    let v = value.replace(/[^/]\s+/g, '').replace(/[^0-9]/gi, '')
+    let matches = v.match(/\d{2,4}/g);
+    let match = matches && matches[0] || ''
+    let parts = []
     console.log(v)
     for (i = 0, len = match.length; i < len; i += 2) {
         parts.push(match.substring(i, i + 2))
@@ -44,12 +44,12 @@ onload = function () {
 }
 
 function alphaOnly(event) {
-    var key = event.keyCode;
+    let key = event.keyCode;
     return ((key >= 65 && key <= 90) || key == 8 || key == 32);
 };
 
 function digitOnly(event) {
-    var key = event.keyCode;
+    let key = event.keyCode;
     return ((key >= 48 && key <= 57) || (key >= 96 && key <= 105) || key == 8);
 };
 

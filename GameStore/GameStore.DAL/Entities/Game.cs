@@ -34,6 +34,10 @@ namespace GameStore.DAL.Entities
 
         public decimal Price { get; set; }
 
+        public int Views { get; set; }
+
+        public DateTime Date { get; set; }
+
         public Guid? PublisherId { get; set; }
 
         public Publisher Publisher { get; set; }

@@ -49,7 +49,8 @@ namespace GameStore.DAL.Repositories
                 .Include(p => p.Publisher)
                 .Include(z => z.Comments);
 
-            return gameEntities.FirstOrDefault(x => x.Key == key);
+            return gameEntities
+                .FirstOrDefault(x => x.Key == key && !x.IsRemoved);
         }
 
         public IEnumerable<Genre> GetGameGenres(Guid id)

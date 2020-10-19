@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
-namespace GameStore.Web.Filters
+namespace GameStore.Web.Util.Filters
 {
     public class LoggingFilter : IActionFilter
     {

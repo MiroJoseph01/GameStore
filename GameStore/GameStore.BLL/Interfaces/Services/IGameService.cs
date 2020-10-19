@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GameStore.BLL.Models;
+using GameStore.DAL.Pipeline.Util;
 
 namespace GameStore.BLL.Interfaces
 {
@@ -20,12 +21,20 @@ namespace GameStore.BLL.Interfaces
 
         IEnumerable<Game> GetGamesByGenre(Genre genre);
 
-        IEnumerable<Game> GetGamesByPlatform(Platform genre);
+        IEnumerable<Game> GetGamesByPlatform(Platform platform);
 
         IEnumerable<Game> GetGamesByPublisher(Publisher publisher);
 
         bool IsPresent(string gameKey);
 
+        IEnumerable<Game> FilterGames(QueryModel queryModel);
+
         int Count();
+
+        void AddView(string gameKey);
+
+        IDictionary<OrderOption, OrderOptionModel> GetOrderOptions();
+
+        IDictionary<TimePeriod, TimePeriodModel> GetTimePeriods();
     }
 }

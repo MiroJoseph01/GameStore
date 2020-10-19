@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStore.Web.ViewModels
 {
-    public class PublisherCreateModel
+    public class PublisherCreateViewModel
     {
         public string PublisherId { get; set; }
 

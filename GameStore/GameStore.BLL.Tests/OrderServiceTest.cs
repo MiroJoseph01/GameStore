@@ -596,7 +596,8 @@ namespace GameStore.BLL.Tests
         public void GetAllOrderDetails_ReturnsListOfOrderDetails()
         {
             _orderDetailRepository
-                .Setup(p => p.GetAll()).Returns(_orderDetailsFromDb);
+                .Setup(p => p.GetAll())
+                .Returns(_orderDetailsFromDb);
             _mapper
                 .Setup(m => m
                     .Map<IEnumerable<BusinessModels.OrderDetail>>(
