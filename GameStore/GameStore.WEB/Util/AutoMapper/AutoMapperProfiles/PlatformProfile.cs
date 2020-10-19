@@ -10,7 +10,8 @@ namespace GameStore.Web.Util.AutoMapperProfiles
     {
         public PlatformProfile()
         {
-            CreateMap<DbModels.Platform, BusinessModels.Platform>();
+            CreateMap<DbModels.Platform, BusinessModels.Platform>()
+                .ForMember(x => x.PlatformGames, y => y.Ignore());
 
             CreateMap<BusinessModels.Platform, PlatformViewModel>().ReverseMap();
 

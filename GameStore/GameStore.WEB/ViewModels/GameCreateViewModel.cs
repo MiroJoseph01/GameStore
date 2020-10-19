@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -48,6 +49,9 @@ namespace GameStore.Web.ViewModels
 
         [Display(Name = "Genres")]
         public List<string> Genres { get; set; }
+
+        [Required]
+        public DateTime? Date { get; set; }
 
         public MultiSelectList GenreOptions { get; set; }
 

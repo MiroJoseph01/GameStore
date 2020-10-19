@@ -5,11 +5,13 @@ using GameStore.BLL.Services;
 using GameStore.DAL;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
+using GameStore.DAL.Pipeline;
 using GameStore.DAL.Repositories;
-using GameStore.Web.Filters;
 using GameStore.Web.Util;
 using GameStore.Web.Util.AutoMapper;
+using GameStore.Web.Util.Filters;
 using GameStore.Web.Util.Logger;
+using GameStore.Web.Util.ModelBinders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +50,8 @@ namespace GameStore.Web
 
             ConfigureLogger(services);
 
+            services.AddScoped<ICommentHelper, CommentHelper>();
+
             if (_currentEnvironment.EnvironmentName == "Development")
             {
                 services.AddDbContext<GameStoreContext>(i =>
@@ -68,6 +72,13 @@ namespace GameStore.Web
                 option.Filters.Add(typeof(LoggingFilter));
                 option.Filters.Add(typeof(ExceptionFilter));
             });
+
+            services.AddControllersWithViews(opts =>
+            {
+                opts
+                    .ModelBinderProviders
+                    .Insert(0, new QueryModelBinderProvider());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,8 +89,7 @@ namespace GameStore.Web
                 app.UseDeveloperExceptionPage();
             }
 
-            using (
-                IServiceScope serviceScope = app
+            using (IServiceScope serviceScope = app
                     .ApplicationServices
                     .GetService<IServiceScopeFactory>()
                     .CreateScope())
@@ -92,9 +102,9 @@ namespace GameStore.Web
 
             app.UseStaticFiles();
 
-            app.UseRouting();
-
             app.UseStatusCodePagesWithReExecute("/error/{0}");
+
+            app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
@@ -118,8 +128,10 @@ namespace GameStore.Web
 
             services.AddScoped<IOrderService, OrderService>();
 
+            services.AddScoped<IPipeline, SelectionPipeline>();
+
             services.AddScoped<IUserService, UserService>();
-            
+
             services.AddScoped<IPaymentContext, PaymentContext>();
         }
 
@@ -137,6 +149,12 @@ namespace GameStore.Web
             services.AddScoped<IOrderRepository, OrderRepository>();
 
             services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+
+            services.AddScoped<IGenreRepository, GenreRepository>();
+
+            services.AddScoped<IPlatformRepository, PlatformRepository>();
+
+            services.AddScoped<IPublisherRepository, PublisherRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
         }

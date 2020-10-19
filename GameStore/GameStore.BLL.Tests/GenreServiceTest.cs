@@ -66,7 +66,9 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void GetAllGenres_ReturnsListOfGenres()
         {
-            _genreRepository.Setup(p => p.GetAll()).Returns(_genresFromDb);
+            _genreRepository
+                .Setup(p => p.GetAll())
+                .Returns(_genresFromDb);
             _mapper
                 .Setup(m => m
                     .Map<IEnumerable<BusinessModels.Genre>>(_genresFromDb))
@@ -84,7 +86,9 @@ namespace GameStore.BLL.Tests
             List<BusinessModels.Genre> genres =
                 new List<BusinessModels.Genre>();
 
-            _genreRepository.Setup(g => g.GetAll()).Returns(genresFromDb);
+            _genreRepository
+                .Setup(g => g.GetAll())
+                .Returns(genresFromDb);
             _mapper
                 .Setup(m => m
                     .Map<IEnumerable<BusinessModels.Genre>>(

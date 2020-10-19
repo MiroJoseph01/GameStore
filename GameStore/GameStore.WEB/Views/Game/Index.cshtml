@@ -1,5 +1,5 @@
-﻿@model IEnumerable<GameViewModel>
-
+﻿@model ShortsGameViewModel
+@addTagHelper *, GameStore.Web
 @{
     ViewData["Title"] = "Main Page";
 }
@@ -13,50 +13,154 @@
     <a asp-action="CreateNewPublisher">Create publisher</a>
 </p>
 
-@{
-    if (Model.Count() == 0 || Model is null)
-    {
-        <h3>No games yet</h3>
-    }
-    else
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Key)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Name)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Description)
-                    </th>
-                    <th>
-                        Options
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Key)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Name)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Description)
-                        </td>
-                        <td>
-                            @Html.ActionLink("Game Details", "ViewGameDetails", new { item.Key })
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<div class="row">
+    <div class="col-7">
+        @{
+            if (Model.Games.Count() == 0 || Model.Games is null)
+            {
+                <h3>No games yet</h3>
+            }
+            else
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Game's key
+                            </th>
+                            <th>
+                                Game's name
+                            </th>
+                            <th>
+                                Description
+                            </th>
+                            <th>
+                                Options
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Games)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Key)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Description)
+                                </td>
+                                <td>
+                                    @Html.ActionLink("Game Details", "ViewGameDetails", new { item.Key })
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
 
-    }
-}
+            }
+        }
+        <page-link page-model="@Model.PageViewModel" page-action="Index"></page-link>
+    </div>
+    <div class="col-5 bg-light">
+        <form asp-action="Index" method="get" id="filter-form">
+            <div class="form-group">
+                <label asp-for="Query.NumberOfItemsPerPage" class="control-label"></label>
+                <div>
+                    <select asp-for="Query.PageSize" name="PageSize" asp-items="Model.Query.NumberOfItemsPerPage"
+                            onchange="updateItemNumberURLParameter()"></select>
+                </div>
+                <span asp-validation-for="Query.NumberOfItemsPerPage" class="text-danger"></span>
+            </div>
+            <h3 class="text-center">Filters</h3>
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="row">
+                <div class="form-group col-4">
+                    <label asp-for="Query.PlatformOptions" class="control-label"></label>
+                    <ul>
+                        @foreach (var i in Model.Query.PlatformOptions)
+                        {
+                            <li>
+                                <input name="platform" type="checkbox" value="@i.Value" checked="@i.Selected" />
+                                @i.Text
+                            </li>
+                        }
+                    </ul>
+                    <span asp-validation-for="Query.PlatformOptions" class="text-danger"></span>
+                </div>
+                <div class="form-group col-4">
+                    <label asp-for="Query.GenresOptions" class="control-label"></label>
+                    <ul>
+                        @foreach (var i in Model.Query.GenresOptions)
+                        {
+                            <li>
+                                <input name="genre" class="genre-checkbox" type="checkbox" value="@i.Value" checked="@i.Selected" />
+                                @i.Text
+                            </li>
+                        }
+                    </ul>
+                    <span asp-validation-for="Query.GenresOptions" class="text-danger"></span>
+                </div>
+                <div class="form-group col-4">
+                    <label asp-for="Query.PublisherOptions" class="control-label"></label>
+                    <ul>
+                        @foreach (var i in Model.Query.PublisherOptions)
+                        {
+                            <li>
+                                <input name="publisher" class="publisher-checkbox" type="checkbox" value="@i.Value" checked="@i.Selected" />
+                                @i.Text
+                            </li>
+                        }
+                    </ul>
+                    <span asp-validation-for="Query.PublisherOptions" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Query.Filters" class="control-label"></label>
+                <div>
+                    <select asp-for="Query.Filter" name="OrderFilter" asp-items="Model.Query.Filters"></select>
+                </div>
+                <span asp-validation-for="Query.Filters" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div>
+                    <label asp-for="Query.From" class="control-label"></label>:
+                    <input type="number" asp-for="Query.From" name="From" />
+                </div>
+                <div>
+                    <label asp-for="Query.To" class="control-label"></label>:
+                    <input type="number" asp-for="Query.To" name="To" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Query.DateOptions" class="control-label"></label>
+                <ul>
+                    @foreach (var d in Model.Query.DateOptions)
+                    {
+                        <li>
+                            <input type="radio" asp-for="Query.DateFilter" name="DateFilter" value="@d.Value" />
+                            @d.Text
+                        </li>
+                    }
+                </ul>
+                <span asp-validation-for="Query.DateOptions" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Query.SearchByGameName" class="control-label"></label>:
+                <input asp-for="Query.SearchByGameName" name="Game" />
+                <span asp-validation-for="Query.SearchByGameName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="hidden" name="page" value="@Model.PageViewModel.PageNumber" />
+                <input type="hidden" name="IsFiltered" value="true" />
+            </div>
+            <div class="form-group">
+                <a><input type="submit" id="Filter" value="Filter" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="~/js/game-filter.js"></script>

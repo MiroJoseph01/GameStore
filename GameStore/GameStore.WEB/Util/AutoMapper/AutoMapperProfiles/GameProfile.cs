@@ -1,6 +1,6 @@
 ﻿using System;
 using AutoMapper;
-using GameStore.Web.ViewModels;
+using WebModels = GameStore.Web.ViewModels;
 using BusinessModels = GameStore.BLL.Models;
 using DbModels = GameStore.DAL.Entities;
 
@@ -10,7 +10,7 @@ namespace GameStore.Web.Util.AutoMapperProfiles
     {
         public GameProfile()
         {
-            CreateMap<BusinessModels.Game, GameViewModel>()
+            CreateMap<BusinessModels.Game, WebModels.GameViewModel>()
                 .ForMember(
                     x => x.GameId,
                     y => y.MapFrom(z => z.GameId.ToString()))
@@ -25,9 +25,12 @@ namespace GameStore.Web.Util.AutoMapperProfiles
                     y => y.MapFrom(z => z.Publisher.CompanyName))
                 .ForMember(
                     x => x.Discount,
-                    y => y.MapFrom(z => (z.Discount * 100).ToString() + " %"));
+                    y => y.MapFrom(z => (z.Discount * 100).ToString() + " %"))
+                .ForMember(
+                    x => x.Date,
+                    y => y.MapFrom(z => z.Date.ToShortDateString()));
 
-            CreateMap<GameViewModel, BusinessModels.Game>()
+            CreateMap<WebModels.GameViewModel, BusinessModels.Game>()
                 .ForMember(
                     x => x.GameId,
                     y => y.MapFrom(
@@ -40,7 +43,7 @@ namespace GameStore.Web.Util.AutoMapperProfiles
                     x => x.GamePlatforms,
                     y => y.MapFrom(z => z.Platforms));
 
-            CreateMap<GameCreateViewModel, BusinessModels.Game>()
+            CreateMap<WebModels.GameCreateViewModel, BusinessModels.Game>()
                 .ForMember(
                     x => x.GameId,
                     y => y.MapFrom(
@@ -61,6 +64,16 @@ namespace GameStore.Web.Util.AutoMapperProfiles
             CreateMap<BusinessModels.Game, DbModels.Game>()
                 .ForMember(x => x.GenreGames, y => y.Ignore())
                 .ForMember(x => x.PlatformGames, y => y.Ignore());
+
+            CreateMap<BusinessModels.Game, WebModels.ShortGameViewModel>();
+
+            CreateMap<WebModels.QueryModel, BusinessModels.QueryModel>()
+                .ForMember(x => x.Take, y => y.MapFrom(z => z.PageSize))
+                .ForMember(x => x.GenresOptions, y => y.MapFrom(z => z.GenresOptions))
+                .ForMember(x => x.PlatformOptions, y => y.MapFrom(z => z.PlatformOptions))
+                .ForMember(x => x.PublisherOptions, y => y.MapFrom(z => z.PublisherOptions))
+                .ForMember(x => x.From, y => y.MapFrom(z => Convert.ToDecimal(z.From)))
+                .ForMember(x => x.To, y => y.MapFrom(z => Convert.ToDecimal(z.To)));
         }
     }
 }

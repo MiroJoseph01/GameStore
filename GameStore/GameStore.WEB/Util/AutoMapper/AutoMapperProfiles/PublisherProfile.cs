@@ -18,7 +18,7 @@ namespace GameStore.Web.Util.AutoMapperProfiles
                     x => x.PublisherId,
                     y => y.MapFrom(z => z.PublisherId.ToString()));
 
-            CreateMap<PublisherCreateModel, BusinessModels.Publisher>()
+            CreateMap<PublisherCreateViewModel, BusinessModels.Publisher>()
                 .ForMember(
                     x => x.PublisherId,
                     y => y.MapFrom(z => string.IsNullOrEmpty(z.PublisherId) ?

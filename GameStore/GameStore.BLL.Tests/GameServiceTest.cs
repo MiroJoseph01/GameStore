@@ -6,6 +6,8 @@ using GameStore.BLL.Services;
 using GameStore.DAL.Entities.SupportingModels;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
+using GameStore.DAL.Pipeline;
+using GameStore.DAL.Pipeline.Util;
 using Moq;
 using Xunit;
 using BusinessModels = GameStore.BLL.Models;
@@ -19,6 +21,8 @@ namespace GameStore.BLL.Tests
         private readonly Mock<IGameRepository> _gameRepository;
         private readonly Mock<IUnitOfWork> _unitOfWork;
         private readonly Mock<IMapper> _mapper;
+        private readonly Mock<IPipeline> _pipeline;
+        private readonly Mock<IServiceProvider> _serviceProvider;
 
         private readonly List<DbModels.Game> _gameList;
         private readonly List<BusinessModels.Game> _games;
@@ -53,17 +57,23 @@ namespace GameStore.BLL.Tests
             _gameRepository = new Mock<IGameRepository>();
             _unitOfWork = new Mock<IUnitOfWork>();
             _mapper = new Mock<IMapper>();
+            _pipeline = new Mock<IPipeline>();
+            _serviceProvider = new Mock<IServiceProvider>();
 
             _gameService = new GameService(
                 _gameRepository.Object,
                 _unitOfWork.Object,
-                _mapper.Object);
+                _mapper.Object,
+                _pipeline.Object,
+                _serviceProvider.Object);
         }
 
         [Fact]
         public void GetAllGames_ReturnsListOfGames()
         {
-            _gameRepository.Setup(g => g.GetAll()).Returns(_gameList);
+            _gameRepository
+                .Setup(g => g.GetAll())
+                .Returns(_gameList);
             _gameRepository
                 .Setup(g => g.GetById(_gameId))
                 .Returns(_gameList.First());
@@ -76,7 +86,9 @@ namespace GameStore.BLL.Tests
             IEnumerable<BusinessModels.Game> res = _gameService.GetAllGames();
             int count = res.Count();
 
-            _gameRepository.Verify(x => x.GetAll(), Times.Once);
+            _gameRepository
+                .Verify(
+                    x => x.GetAll(), Times.Once);
             Assert.IsType<BusinessModels.Game>(res.First());
             Assert.Equal(_gameList.Count(), count);
         }
@@ -444,11 +456,35 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void Count_ReturnCountOfGames()
         {
-            _gameRepository.Setup(g => g.GetAll()).Returns(_gameList);
+            _gameRepository
+                .Setup(g => g.GetAll())
+                .Returns(_gameList);
 
             var result = _gameService.Count();
 
             Assert.Equal(_gameList.Count, result);
+        }
+
+        [Fact]
+        public void GetOrderOptions_ReturnsListOfOptions()
+        {
+            var listCount = 5;
+
+            var result = _gameService.GetOrderOptions();
+
+            Assert.IsType<Dictionary<OrderOption, OrderOptionModel>>(result);
+            Assert.Equal(listCount, result.Count);
+        }
+
+        [Fact]
+        public void GetTimePeriods_ReturnsListOfPeriods()
+        {
+            var listCount = 6;
+
+            var result = _gameService.GetTimePeriods();
+
+            Assert.IsType<Dictionary<TimePeriod, TimePeriodModel>>(result);
+            Assert.Equal(listCount, result.Count);
         }
     }
 }

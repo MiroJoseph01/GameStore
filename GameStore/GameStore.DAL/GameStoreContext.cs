@@ -132,21 +132,96 @@ namespace GameStore.DAL
                 HomePage = "https://en.cdprojektred.com/",
             };
 
-            var genreWithoutParent = new Genre
+            var action = new Genre
             {
                 GenreId = Guid.NewGuid(),
                 GenreName = "Action",
             };
-            var genreWithParent = new Genre
+            var tps = new Genre
             {
                 GenreId = Guid.NewGuid(),
-                GenreName = "PTS",
-                ParentGenreId = genreWithoutParent.GenreId,
+                GenreName = "TPS",
+                ParentGenreId = action.GenreId,
             };
-            var genreArcade = new Genre
+            var fps = new Genre
             {
                 GenreId = Guid.NewGuid(),
-                GenreName = "Arcade"
+                GenreName = "FPS",
+                ParentGenreId = action.GenreId,
+            };
+            var misc = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "Misc.",
+                ParentGenreId = action.GenreId,
+            };
+            var strategy = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "Strategy",
+            };
+            var rts = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "RTS",
+                ParentGenreId = strategy.GenreId,
+            };
+            var tbs = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "TBS",
+                ParentGenreId = strategy.GenreId,
+            };
+            var rpg = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "RPG",
+            };
+            var sports = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "Sports",
+            };
+            var races = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "Races",
+            };
+            var rally = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "Rally",
+                ParentGenreId = races.GenreId,
+            };
+            var arcade = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "Arcade",
+                ParentGenreId = races.GenreId,
+            };
+            var formula = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "Formula",
+                ParentGenreId = races.GenreId,
+            };
+            var offRoad = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "Off road",
+                ParentGenreId = races.GenreId,
+            };
+
+            var adventrue = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "Adventrue",
+            };
+
+            var puzzleAndSkill = new Genre
+            {
+                GenreId = Guid.NewGuid(),
+                GenreName = "PuzzleAndSkill",
             };
 
             var platform1 = new Platform
@@ -178,7 +253,8 @@ namespace GameStore.DAL
                 Key = "mario",
                 Price = 21,
                 UnitsInStock = 7,
-                PublisherId = publisher1.PublisherId
+                PublisherId = publisher1.PublisherId,
+                Date = DateTime.ParseExact("2018-09-12", "yyyy-MM-dd", null),
             };
             var game2 = new Game
             {
@@ -188,7 +264,9 @@ namespace GameStore.DAL
                 Key = "dota2",
                 Price = 9,
                 UnitsInStock = 12,
-                PublisherId = publisher1.PublisherId
+                PublisherId = publisher1.PublisherId,
+                Date = DateTime.ParseExact("2017-09-12", "yyyy-MM-dd", null),
+                Views = 30,
             };
             var game3 = new Game
             {
@@ -198,7 +276,9 @@ namespace GameStore.DAL
                 Key = "contr_strike",
                 Price = 10,
                 UnitsInStock = 2,
-                PublisherId = publisher1.PublisherId
+                PublisherId = publisher1.PublisherId,
+                Date = DateTime.ParseExact("2019-09-12", "yyyy-MM-dd", null),
+                Views = 1,
             };
             var game4 = new Game
             {
@@ -208,7 +288,9 @@ namespace GameStore.DAL
                 Key = "my_litle_pony",
                 Price = 15,
                 UnitsInStock = 7,
-                PublisherId = publisher2.PublisherId
+                PublisherId = publisher2.PublisherId,
+                Date = DateTime.ParseExact("2020-08-12", "yyyy-MM-dd", null),
+                Views = 10,
             };
             var game5 = new Game
             {
@@ -219,6 +301,8 @@ namespace GameStore.DAL
                 Price = 2,
                 UnitsInStock = 3,
                 PublisherId = publisher2.PublisherId,
+                Date = DateTime.ParseExact("2018-09-05", "yyyy-MM-dd", null),
+                Views = 100,
             };
 
             var gameGenre = new List<GameGenre>
@@ -226,32 +310,32 @@ namespace GameStore.DAL
                 new GameGenre
                 {
                     GameId = game1.GameId,
-                    GenreId = genreArcade.GenreId,
+                    GenreId = arcade.GenreId,
                 },
                 new GameGenre
                 {
                     GameId = game1.GameId,
-                    GenreId = genreWithoutParent.GenreId,
+                    GenreId = action.GenreId,
                 },
                 new GameGenre
                 {
                     GameId = game2.GameId,
-                    GenreId = genreWithoutParent.GenreId,
+                    GenreId = action.GenreId,
                 },
                 new GameGenre
                 {
                     GameId = game3.GameId,
-                    GenreId = genreWithParent.GenreId,
+                    GenreId = tps.GenreId,
                 },
                 new GameGenre
                 {
                     GameId = game4.GameId,
-                    GenreId = genreArcade.GenreId,
+                    GenreId = arcade.GenreId,
                 },
                 new GameGenre
                 {
                     GameId = game5.GameId,
-                    GenreId = genreWithoutParent.GenreId,
+                    GenreId = action.GenreId,
                 },
             };
 
@@ -287,6 +371,38 @@ namespace GameStore.DAL
                     PlatformId = platform1.PlatformId,
                 },
             };
+
+            var games = new List<Game>();
+
+            for (var i = 1; i <= 20; i++)
+            {
+                var g = new Game
+                {
+                    GameId = Guid.NewGuid(),
+                    Name = "Game " + i,
+                    Description = "Game Description " + i,
+                    Key = "game" + i,
+                    Price = i,
+                    UnitsInStock = (short)i,
+                    PublisherId = publisher1.PublisherId,
+                    Date = DateTime.Now.AddMonths(-i),
+                    Views = 100 + i,
+                };
+
+                games.Add(g);
+
+                gameGenre.Add(new GameGenre
+                {
+                    GameId = g.GameId,
+                    GenreId = arcade.GenreId,
+                });
+
+                gamePlatform.Add(new GamePlatform
+                {
+                    GameId = g.GameId,
+                    PlatformId = platform1.PlatformId,
+                });
+            }
 
             Guid customerId = Guid.NewGuid();
 
@@ -355,13 +471,18 @@ namespace GameStore.DAL
             builder.Entity<Publisher>().HasData(publisher1, publisher2);
 
             builder.Entity<Genre>()
-                .HasData(genreWithoutParent, genreWithParent, genreArcade);
+                .HasData(
+                strategy, rts, tbs, rpg, sports, races, rally, arcade,
+                formula, offRoad, action, fps, tps, misc, adventrue, puzzleAndSkill);
 
             builder.Entity<Platform>()
                 .HasData(platform1, platform2, platform3, platform4);
 
             builder.Entity<Game>()
                 .HasData(game1, game2, game3, game4, game5);
+
+            builder.Entity<Game>()
+                .HasData(games);
 
             builder.Entity<GameGenre>().HasData(gameGenre);
 
