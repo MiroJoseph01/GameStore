@@ -1,21 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GameStore.DAL.Entities;
+using GameStore.DAL.Pipeline;
+using GameStore.DAL.Pipeline.Util;
 
 namespace GameStore.DAL.Interfaces.Repositories
 {
     public interface IGameRepository : IRepository<Game>
     {
-        IEnumerable<Genre> GetGameGenres(Guid gameId);
+        bool Update(string id, Game entity, short ordered = 0);
 
-        IEnumerable<Platform> GetGamePlatforms(Guid gameId);
+        IEnumerable<Genre> GetGameGenres(string gameId);
 
-        IEnumerable<Game> GetGamesOfGenre(Guid genreId);
+        IEnumerable<Platform> GetGamePlatforms(string gameId);
 
-        IEnumerable<Game> GetGamesOfPlatform(Guid platformId);
+        Publisher GetGamePublisher(string gameId);
 
-        IEnumerable<Game> GetGamesOfPublisher(Guid publisherId);
+        IEnumerable<Game> GetGamesOfGenre(string genreId);
+
+        IEnumerable<Game> GetGamesOfPlatform(string platformId);
+
+        IEnumerable<Game> GetGamesOfPublisher(string publisherId);
 
         Game GetByKey(string key);
+
+        void AddView(string id);
+
+        IEnumerable<Game> Filter(FilterModel model);
+
+        IDictionary<OrderOption, OrderOptionModel> GetOrderOptions();
+
+        IDictionary<TimePeriod, TimePeriodModel> GetTimePeriods();
     }
 }

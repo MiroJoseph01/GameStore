@@ -1,4 +1,4 @@
-﻿@model IEnumerable<GameStore.Web.ViewModels.BasketViewModel>
+﻿@model GameStore.Web.ViewModels.GeneralBasketViewModel
 
 @{
     ViewData["Title"] = "Order";
@@ -9,12 +9,12 @@
     <hr />
 
     @{
-        if (Model.Count() == 0)
+        if (Model.Orders.Count() == 0)
         {
             <h5>No items yet</h5>
         }
         else
-        { @foreach (var i in Model)
+        { @foreach (var i in Model.Orders.Where(x => x.OrderStatus == "Open" || x.OrderStatus == "NotPaid"))
             {
                 @if (i.OrderDetails.Count == 0)
                 {
@@ -24,13 +24,13 @@
                 {
                     <dl class="row">
                         <dt class="col-sm-2">
-                            @Html.DisplayNameFor(model => model.OrderStatus)
+                            OrderStatus
                         </dt>
                         <dd class="col-sm-10">
                             @i.OrderStatus
                         </dd>
                         <dt class="col-sm-2">
-                            @Html.DisplayNameFor(model => model.Total)
+                            Total
                             <i>(consideriing on discounts)</i>
                         </dt>
                         <dd class="col-sm-10">
@@ -72,12 +72,12 @@
                             @{ if (i.OrderStatus == "Open")
                                 {
 
-                                    <a asp-action="ViewPayment" class="btn-outline-primary" asp-route-id="@i.OrderId">Make Order</a>
+                                    <a asp-action="ViewDetails" class="btn-outline-primary" asp-route-id="@i.OrderId">Make Order</a>
 
                                 }
                                 else
                                 {
-                                    <a asp-action="ViewPayment" class="btn-outline-secondary" asp-route-id="@i.OrderId">Pay Order</a>
+                                    <a asp-action="ViewDetails" class="btn-outline-secondary" asp-route-id="@i.OrderId">Pay Order</a>
                                 }
                             }
                         </div>
@@ -85,9 +85,135 @@
                 }
                 <br />
             }
+        <form asp-action="ViewOrder">
+            <div class="form-body">
+                <h5>Filter by order date</h5>
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input class="form-control" type="hidden" asp-for="FilterModel.CustomerId" name="CustomerId" value="@Model.Orders.First().CustomerId" />
+                <input class="form-control" type="date" asp-for="FilterModel.MinDate" name="MinDate" />
+                <input class="form-control" type="date" asp-for="FilterModel.MaxDate" name="MaxDate" />
+                <input class="form-control" type="submit" value="Search" />
+            </div>
+        </form>
+        @foreach (var i in Model.Orders.Where(x => x.OrderStatus == "Paid"))
+        {
+            <div class="card card-body">
+                <dl class="row">
+                    <dt class="col-sm-2 card-title">
+                        Order Id
+                    </dt>
+                    <dd class="col-sm-10">
+                        @i.OrderId
+                    </dd>
+                    <dt class="col-sm-2">
+                        Order Status
+                    </dt>
+                    <dd class="col-sm-10">
+                        @i.OrderStatus
+                    </dd>
+                    <dt class="col-sm-2">
+                        Total
+                        <i>(consideriing on discounts)</i>
+                    </dt>
+                    <dd class="col-sm-10">
+                        @i.Total
+                    </dd>
+                    @if (!string.IsNullOrWhiteSpace(i.OrderDate))
+                    {
+                        <dt class="col-sm-2">
+                            Order Date
+                        </dt>
+                        <dd class="col-sm-10">
+                            @i.OrderDate
+                        </dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(i.RequiredDate))
+                    {
+                        <dt class="col-sm-2">
+                            Required Date
+                        </dt>
+                        <dd class="col-sm-10">
+                            @i.RequiredDate
+                        </dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(i.ShippedDate))
+                    {
+                        <dt class="col-sm-2">
+                            Shipped Date
+                        </dt>
+                        <dd class="col-sm-10">
+                            @i.ShippedDate
+                        </dd>
+                    }
+                    <dt class="col-sm-2">
+                        Freight
+                    </dt>
+                    <dd class="col-sm-10">
+                        @i.Freight
+                    </dd>
+                    @if (!string.IsNullOrWhiteSpace(i.ShipName)
+                   || !string.IsNullOrWhiteSpace(i.ShipAddress)
+                   || !string.IsNullOrWhiteSpace(i.ShipCity)
+                   || !string.IsNullOrWhiteSpace(i.ShipRegion)
+                   || !string.IsNullOrWhiteSpace(i.ShipCountry))
+                    {
+                        <dt class="col-sm-2">
+                            Shipp Info
+                        </dt>
+                        <dd class="col-sm-10">
+                            |@i.ShipName|@i.ShipAddress|@i.ShipCity|@i.ShipRegion|@i.ShipCountry|
+                        </dd>
+                    }
+                </dl>
+                <button class="acc btn-default" onclick="acc(this)">Details</button>
+                <div class="accD dn">
+                    @foreach (var d in i.OrderDetails)
+                    {
+                        <div class="card mb-1">
+                            <div class="card-header">
+                                <b>Product Name: </b><i>@d.ProductName </i>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-text">
+                                    <b>Quantity: </b><i>@d.Quantity </i>
+                                </div>
+                                <div class="card-text">
+                                    <b>Price: </b><i>@d.Price </i>
+                                </div>
+                                <div class="card-text">
+                                    @{ var discount = d.Discount * 100;}
+                                    <b> Discount: </b><i> @discount %</i>
+                                </div>
+                                <div class="card-text">
+                                    @{ var priceWithDis = d.Price - (d.Price * (decimal)d.Discount);}
+                                    <b>Price with discount: </b><i>@priceWithDis </i>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     }
     <div>
         <a asp-action="Index" asp-controller="Game">Back to List</a>
     </div>
     }
 </div>
+<script>
+    window.acc = (e) => {
+        let q = document.querySelectorAll(".acc"),
+            w = document.querySelectorAll(".accD");
+        q.forEach((e2, l) => {
+            if (e == e2) {
+                if (!e.classList.contains("accCl")) {
+                    e.classList.add("accCl");
+                    w[l].classList.remove("dn")
+                } else {
+                    e.classList.remove("accCl");
+                    w[l].classList.add("dn")
+                }
+            }
+        })
+    };
+</script>

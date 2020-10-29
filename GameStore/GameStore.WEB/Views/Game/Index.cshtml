@@ -14,7 +14,7 @@
 </p>
 
 <div class="row">
-    <div class="col-7">
+    <div class="col-8">
         @{
             if (Model.Games.Count() == 0 || Model.Games is null)
             {
@@ -64,8 +64,9 @@
         }
         <page-link page-model="@Model.PageViewModel" page-action="Index"></page-link>
     </div>
-    <div class="col-5 bg-light">
+    <div class="col-4 bg-light">
         <form asp-action="Index" method="get" id="filter-form">
+            <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Query.NumberOfItemsPerPage" class="control-label"></label>
                 <div>
@@ -77,7 +78,7 @@
             <h3 class="text-center">Filters</h3>
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="row">
-                <div class="form-group col-4">
+                <div class="form-group col-3">
                     <label asp-for="Query.PlatformOptions" class="control-label"></label>
                     <ul>
                         @foreach (var i in Model.Query.PlatformOptions)
@@ -90,7 +91,7 @@
                     </ul>
                     <span asp-validation-for="Query.PlatformOptions" class="text-danger"></span>
                 </div>
-                <div class="form-group col-4">
+                <div class="form-group col-3">
                     <label asp-for="Query.GenresOptions" class="control-label"></label>
                     <ul>
                         @foreach (var i in Model.Query.GenresOptions)
@@ -103,7 +104,7 @@
                     </ul>
                     <span asp-validation-for="Query.GenresOptions" class="text-danger"></span>
                 </div>
-                <div class="form-group col-4">
+                <div class="form-group col-6">
                     <label asp-for="Query.PublisherOptions" class="control-label"></label>
                     <ul>
                         @foreach (var i in Model.Query.PublisherOptions)

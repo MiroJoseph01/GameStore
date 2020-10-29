@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
 using BusinessModels = GameStore.BLL.Models;
@@ -27,6 +27,8 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.Platform AddPlatform(BusinessModels.Platform platform)
         {
+            platform.PlatformId = Guid.NewGuid().ToString();
+
             _platformRepository.Create(_mapper.Map<DbModels.Platform>(platform));
 
             _unitOfWork.Commit();
@@ -55,7 +57,7 @@ namespace GameStore.BLL.Services
             return platform;
         }
 
-        public BusinessModels.Platform GetPlatformById(Guid platformId)
+        public BusinessModels.Platform GetPlatformById(string platformId)
         {
             DbModels.Platform platformFromDb = _platformRepository.GetById(platformId);
 
@@ -66,7 +68,9 @@ namespace GameStore.BLL.Services
 
         public IEnumerable<BusinessModels.Platform> GetAllPlatforms()
         {
-            var platforms = _mapper.Map<IEnumerable<BusinessModels.Platform>>(_platformRepository.GetAll());
+            var platforms = _mapper
+                .Map<IEnumerable<BusinessModels.Platform>>(
+                _platformRepository.GetAll());
 
             return platforms;
         }

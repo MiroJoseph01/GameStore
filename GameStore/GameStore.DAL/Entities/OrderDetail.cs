@@ -1,11 +1,10 @@
-﻿using System;
-using GameStore.DAL.Entities.Interfaces;
+﻿using GameStore.DAL.Entities.Interfaces;
 
 namespace GameStore.DAL.Entities
 {
     public class OrderDetail : ISoftDelete
     {
-        public Guid OrderDetailId { get; set; }
+        public string OrderDetailId { get; set; }
 
         public string ProductId { get; set; }
 
@@ -15,7 +14,7 @@ namespace GameStore.DAL.Entities
 
         public float Discount { get; set; }
 
-        public Guid OrderId { get; set; }
+        public string OrderId { get; set; }
 
         public Order Order { get; set; }
 

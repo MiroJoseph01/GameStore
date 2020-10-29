@@ -1,10 +1,9 @@
-﻿using System;
-using GameStore.BLL.Payments;
+﻿using GameStore.BLL.Payments;
 
 namespace GameStore.BLL.Interfaces
 {
     public interface IPaymentStrategy
     {
-        PaymentInfo Pay(Guid paymentId);
+        PaymentInfo Pay(string paymentId);
     }
 }

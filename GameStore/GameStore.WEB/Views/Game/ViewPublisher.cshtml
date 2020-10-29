@@ -1,7 +1,7 @@
 ﻿@model GameStore.Web.ViewModels.PublisherViewModel
 
 @{
-    ViewData["Title"] = "Publisher";
+    ViewData["Title"] = Model.CompanyName;
 }
 
 
@@ -15,18 +15,63 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.CompanyName)
         </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Description)
+            </dt>
+
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+        }
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.HomePage)
         </dt>
         <dd class="col-sm-10">
             | <a href="@Model.HomePage">link</a> |
         </dd>
+        @if (!string.IsNullOrWhiteSpace(Model.Fax))
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Fax)
+            </dt>
+            <dd class="col-sm-10">
+                | @Model.Fax |
+            </dd>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.Phone))
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Phone)
+            </dt>
+            <dd class="col-sm-10">
+                | @Model.Phone |
+            </dd>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.ContactTitle) || !string.IsNullOrWhiteSpace(Model.ContactName))
+        {
+            <dt class="col-sm-2">
+                Contact details
+            </dt>
+            <dd class="col-sm-10">
+                | @Model.ContactTitle: @Model.ContactName|
+            </dd>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Country)
+          || !string.IsNullOrWhiteSpace(Model.PostalCode)
+          || !string.IsNullOrWhiteSpace(Model.Region)
+          || !string.IsNullOrWhiteSpace(Model.City)
+          || !string.IsNullOrWhiteSpace(Model.Address))
+         {
+            <dt class="col-sm-2">
+                Geo information
+            </dt>
+            <dd class="col-sm-10">
+                | @Model.Country | @Model.PostalCode | @Model.Region | @Model.City | @Model.Address |
+            </dd>
+        }
         <dt>
             @Html.DisplayNameFor(model => model.PublisherGames)
         </dt>

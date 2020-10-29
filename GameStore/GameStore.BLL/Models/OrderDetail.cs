@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace GameStore.BLL.Models
+﻿namespace GameStore.BLL.Models
 {
     public class OrderDetail
     {
-        public Guid OrderDetailId { get; set; }
+        public string OrderDetailId { get; set; }
 
         public string ProductId { get; set; }
 
@@ -18,6 +16,6 @@ namespace GameStore.BLL.Models
 
         public float Discount { get; set; }
 
-        public Guid OrderId { get; set; }
+        public string OrderId { get; set; }
     }
 }

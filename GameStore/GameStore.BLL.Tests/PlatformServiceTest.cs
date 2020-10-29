@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Services;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
@@ -37,9 +37,9 @@ namespace GameStore.BLL.Tests
             _platforms = new List<BusinessModels.Platform>
             {
                 new BusinessModels.Platform
-                { PlatformId = Guid.NewGuid(), PlatformName = "Platform1" },
+                { PlatformId = Guid.NewGuid().ToString(), PlatformName = "Platform1" },
                 new BusinessModels.Platform
-                { PlatformId = Guid.NewGuid(), PlatformName = "Platform2" },
+                { PlatformId = Guid.NewGuid().ToString(), PlatformName = "Platform2" },
             };
 
             _platformsFromDb = new List<DbModels.Platform>
@@ -115,7 +115,7 @@ namespace GameStore.BLL.Tests
         public void DeletePlatform_PassPlatformModel()
         {
             _platformRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(_platformsFromDb.First());
 
             _platformService.DeletePlatform(_platforms.First());
@@ -131,10 +131,10 @@ namespace GameStore.BLL.Tests
             platform.IsRemoved = true;
 
             _platformRepository
-                .Setup(p => p.IsPresent(It.IsAny<Guid>()))
+                .Setup(p => p.IsPresent(It.IsAny<string>()))
                 .Returns(true);
             _platformRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(platform);
 
             Assert
@@ -160,7 +160,7 @@ namespace GameStore.BLL.Tests
 
             _platformRepository
                 .Verify(c => c
-                    .Update(It.IsAny<Guid>(), It.IsAny<DbModels.Platform>()));
+                    .Update(It.IsAny<string>(), It.IsAny<DbModels.Platform>()));
             Assert.NotNull(result);
         }
 
@@ -168,10 +168,10 @@ namespace GameStore.BLL.Tests
         public void GetPlatformById_PassPlatformId_ReturnsPlatform()
         {
             _platformRepository
-                .Setup(g => g.IsPresent(It.IsAny<Guid>()))
+                .Setup(g => g.IsPresent(It.IsAny<string>()))
                 .Returns(true);
             _platformRepository
-                .Setup(c => c.GetById(It.IsAny<Guid>()))
+                .Setup(c => c.GetById(It.IsAny<string>()))
                 .Returns(_platformsFromDb.First());
             _mapper
                 .Setup(m => m
@@ -189,7 +189,7 @@ namespace GameStore.BLL.Tests
         public void GetPlatformById_PassNonExistingPlatformId_ReturnsNull()
         {
             _platformRepository
-                .Setup(g => g.IsPresent(It.IsAny<Guid>()))
+                .Setup(g => g.IsPresent(It.IsAny<string>()))
                 .Returns(false);
             var platform = _platformsFromDb.First();
             platform.IsRemoved = true;

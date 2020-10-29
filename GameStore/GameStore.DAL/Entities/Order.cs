@@ -6,9 +6,9 @@ namespace GameStore.DAL.Entities
 {
     public class Order : ISoftDelete
     {
-        public Guid OrderId { get; set; }
+        public string OrderId { get; set; }
 
-        public Guid CustomerId { get; set; }
+        public string CustomerId { get; set; }
 
         public string Status { get; set; }
 
@@ -17,5 +17,29 @@ namespace GameStore.DAL.Entities
         public virtual IList<OrderDetail> OrderDetails { get; set; }
 
         public OrderStatus OrderStatus { get; set; }
+
+        public int EmployeeID { get; set; }
+
+        public DateTime OrderDate { get; set; }
+
+        public DateTime RequiredDate { get; set; }
+
+        public DateTime ShippedDate { get; set; }
+
+        public string ShipVia { get; set; }
+
+        public double Freight { get; set; }
+
+        public string ShipName { get; set; }
+
+        public string ShipAddress { get; set; }
+
+        public string ShipCity { get; set; }
+
+        public string ShipRegion { get; set; }
+
+        public string ShipPostalCode { get; set; }
+
+        public string ShipCountry { get; set; }
     }
 }

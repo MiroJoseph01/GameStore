@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.BLL.Services

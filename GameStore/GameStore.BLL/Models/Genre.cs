@@ -1,13 +1,11 @@
-﻿using System;
-
-namespace GameStore.BLL.Models
+﻿namespace GameStore.BLL.Models
 {
     public class Genre
     {
-        public Guid GenreId { get; set; }
+        public string GenreId { get; set; }
 
         public string GenreName { get; set; }
 
-        public Guid? ParentGenreId { get; set; }
+        public string ParentGenreId { get; set; }
     }
 }

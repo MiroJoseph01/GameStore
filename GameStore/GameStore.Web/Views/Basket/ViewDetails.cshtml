@@ -1,0 +1,63 @@
+﻿@model GameStore.Web.ViewModels.BasketViewModel
+
+@{
+    ViewData["Title"] = "ViewDetails";
+}
+
+<h1>Shippping Details</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="ViewDetails">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input asp-for="OrderId" type="hidden" />
+            <input asp-for="CustomerId" type="hidden" />
+            <div class="form-group">
+                <label asp-for="ShipName" class="control-label"></label>
+                <input asp-for="ShipName" class="form-control" />
+                <span asp-validation-for="ShipName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShipAddress" class="control-label"></label>
+                <input asp-for="ShipAddress" class="form-control" />
+                <span asp-validation-for="ShipAddress" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShipCity" class="control-label"></label>
+                <input asp-for="ShipCity" class="form-control" />
+                <span asp-validation-for="ShipCity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShipRegion" class="control-label"></label>
+                <input asp-for="ShipRegion" class="form-control" />
+                <span asp-validation-for="ShipRegion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShipPostalCode" class="control-label"></label>
+                <input asp-for="ShipPostalCode" class="form-control" />
+                <span asp-validation-for="ShipPostalCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShipCountry" class="control-label"></label>
+                <input asp-for="ShipCountry" class="form-control" />
+                <span asp-validation-for="ShipCountry" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShipOptions" class="control-label"></label>
+                <div>
+                    <select asp-for="ShipVia" asp-items="Model.ShipOptions" class="form-control"></select>
+                </div>
+                <span asp-validation-for="ShipVia" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Add details to order" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="ViewOrders">Back to List</a>
+</div>
+

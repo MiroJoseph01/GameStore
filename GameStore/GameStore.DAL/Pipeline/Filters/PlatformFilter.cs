@@ -10,7 +10,7 @@ namespace GameStore.DAL.Pipeline.Filters
 {
     public class PlatformFilter : IFilter<Game>
     {
-        private readonly IEnumerable<Guid> _platformIds;
+        private readonly IEnumerable<string> _platformIds;
         private readonly IPlatformRepository _platformRepository;
 
         public PlatformFilter(IEnumerable<string> platform, IServiceProvider serviceProvider)

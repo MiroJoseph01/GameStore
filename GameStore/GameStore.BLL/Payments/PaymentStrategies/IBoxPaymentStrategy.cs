@@ -1,5 +1,5 @@
-﻿using System;
-using GameStore.BLL.Interfaces;
+﻿using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 
 namespace GameStore.BLL.Payments.PaymentStrategies
 {
@@ -12,7 +12,7 @@ namespace GameStore.BLL.Payments.PaymentStrategies
             _orderService = orderService;
         }
 
-        public PaymentInfo Pay(Guid paymentId)
+        public PaymentInfo Pay(string paymentId)
         {
             var paymentInfo = new PaymentInfo()
             {

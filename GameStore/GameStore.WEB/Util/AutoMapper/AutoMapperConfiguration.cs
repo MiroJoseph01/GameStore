@@ -1,8 +1,10 @@
-﻿using AutoMapper;
+﻿using System.Diagnostics.CodeAnalysis;
+using AutoMapper;
 using GameStore.Web.Util.AutoMapperProfiles;
 
 namespace GameStore.Web.Util.AutoMapper
 {
+    [ExcludeFromCodeCoverage]
     public static class AutoMapperConfiguration
     {
         public static IMapper Configure()

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GameStore.BLL.Models;
 
-namespace GameStore.BLL.Interfaces
+namespace GameStore.BLL.Interfaces.Services
 {
     public interface IPlatformService
     {
@@ -12,7 +11,7 @@ namespace GameStore.BLL.Interfaces
 
         Platform UpdatePlatform(Platform platform);
 
-        Platform GetPlatformById(Guid platformId);
+        Platform GetPlatformById(string platformId);
 
         IEnumerable<Platform> GetAllPlatforms();
     }

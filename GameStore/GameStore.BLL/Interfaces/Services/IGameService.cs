@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GameStore.BLL.Models;
 using GameStore.DAL.Pipeline.Util;
 
-namespace GameStore.BLL.Interfaces
+namespace GameStore.BLL.Interfaces.Services
 {
     public interface IGameService
     {
-        Game EditGame(Game game);
+        Game EditGame(Game game, short quantity = 0);
 
         void CreateGame(Game game);
 
         Game GetGameByKey(string key);
 
-        Game GetGameById(Guid gameId);
+        Game GetGameById(string gameId);
 
         IEnumerable<Game> GetAllGames();
 

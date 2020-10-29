@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Models;
 using GameStore.DAL.Pipeline;
 using GameStore.DAL.Pipeline.Util;
@@ -64,7 +64,7 @@ namespace GameStore.Web.Tests
             {
                 new Game
                 {
-                    GameId = Guid.NewGuid(),
+                    GameId = Guid.NewGuid().ToString(),
                     Key = "mario",
                     Name = "Mario",
                 },
@@ -115,7 +115,7 @@ namespace GameStore.Web.Tests
             {
                 new Platform
                 {
-                    PlatformId = Guid.NewGuid(),
+                    PlatformId = Guid.NewGuid().ToString(),
                     PlatformName = "platform",
                 },
             };
@@ -133,7 +133,7 @@ namespace GameStore.Web.Tests
             {
                 new Genre
                 {
-                    GenreId = Guid.NewGuid(),
+                    GenreId = Guid.NewGuid().ToString(),
                     GenreName = "Genre",
                 },
             };
@@ -151,7 +151,7 @@ namespace GameStore.Web.Tests
             {
                 new Publisher
                 {
-                    PublisherId = Guid.NewGuid(),
+                    PublisherId = Guid.NewGuid().ToString(),
                     Description = "Description",
                     CompanyName = "Name",
                     HomePage = "link",
@@ -234,7 +234,7 @@ namespace GameStore.Web.Tests
 
             var shortGames = new List<ShortGameViewModel>
             {
-                new ShortGameViewModel(),
+                new ShortGameViewModel()
             };
 
             _gameService
@@ -395,13 +395,13 @@ namespace GameStore.Web.Tests
             GameViewModel gameViewModel = _gamesVM.First();
             Game game = _games.First();
 
-            _gameService.Setup(g => g.EditGame(It.IsAny<Game>()))
+            _gameService.Setup(g => g.EditGame(It.IsAny<Game>(), 0))
                 .Returns(game);
             _mapper.Setup(m => m.Map<Game>(_gamesVM));
 
             IActionResult result = _gamesController.Update(gameViewModel);
 
-            _gameService.Verify(g => g.EditGame(It.IsAny<Game>()));
+            _gameService.Verify(g => g.EditGame(It.IsAny<Game>(), 0));
 
             RedirectToActionResult view = Assert.IsType<RedirectToActionResult>(result);
         }
@@ -440,6 +440,16 @@ namespace GameStore.Web.Tests
             var result = _gamesController.Download();
 
             _fileService.Verify(f => f.CreateFile(_gamesController));
+        }
+
+        [Fact]
+        public void CreateNewPublisher_PassInalidModel_ReturnsRedirect()
+        {
+            _gamesController.ModelState.AddModelError("HomePage", "Invalid");
+            var result = _gamesController
+                .CreateNewPublisher(It.IsAny<PublisherCreateViewModel>());
+
+            Assert.IsType<ViewResult>(result);
         }
 
         [Fact]
@@ -508,16 +518,6 @@ namespace GameStore.Web.Tests
 
             _publisherService.Verify(x => x.CreatePublisher(_publishers.First()));
             Assert.IsType<RedirectToActionResult>(result);
-        }
-
-        [Fact]
-        public void CreateNewPublisher_PassInalidModel_ReturnsRedirect()
-        {
-            _gamesController.ModelState.AddModelError("HomePage", "Invalid");
-            var result = _gamesController
-                .CreateNewPublisher(It.IsAny<PublisherCreateViewModel>());
-
-            Assert.IsType<ViewResult>(result);
         }
     }
 }

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.DAL.Entities.SupportingModels;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
 using GameStore.DAL.Pipeline;
-using GameStore.DAL.Pipeline.Filters;
 using GameStore.DAL.Pipeline.Util;
 using BusinessModels = GameStore.BLL.Models;
 using DbModels = GameStore.DAL.Entities;
@@ -17,134 +15,21 @@ namespace GameStore.BLL.Services
 {
     public class GameService : IGameService
     {
-        private readonly IGameRepository _gameRepository;
+        private readonly IGameRepositoryFacade _gameRepository;
+        private readonly IViewRepository _viewRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IPipeline _pipeline;
-        private readonly IServiceProvider _serviceProvider;
-
-        private readonly IDictionary<OrderOption, OrderOptionModel> _orderOptions;
-        private readonly IDictionary<TimePeriod, TimePeriodModel> _timePeriods;
 
         public GameService(
-            IGameRepository gameRepository,
+            IGameRepositoryFacade gameRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IPipeline pipeline,
-            IServiceProvider serviceProvider)
+            IViewRepository viewRepository)
         {
             _gameRepository = gameRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _pipeline = pipeline;
-            _serviceProvider = serviceProvider;
-
-            _orderOptions = new Dictionary<OrderOption, OrderOptionModel>
-            {
-                {
-                    OrderOption.New,
-                    new OrderOptionModel
-                    {
-                        Name = "New",
-                        Text = "Newest",
-                        Func = x => x.OrderByDescending(y => y.Date),
-                    }
-                },
-                {
-                    OrderOption.MostCommented,
-                    new OrderOptionModel
-                    {
-                        Name = "MostCommented",
-                        Text = "Most Commented",
-                        Func = x => x.OrderByDescending(y => y.Comments.Count),
-                    }
-                },
-                {
-                    OrderOption.MostPopular,
-                    new OrderOptionModel
-                    {
-                        Text = "Most Popular",
-                        Name = "MostPopular",
-                        Func = x => x.OrderByDescending(y => y.Views),
-                    }
-                },
-                {
-                    OrderOption.PriceAsc,
-                    new OrderOptionModel
-                    {
-                        Text = "Cheap first",
-                        Name = "PriceAsc",
-                        Func = x => x.OrderBy(y => y.Price),
-                    }
-                },
-                {
-                    OrderOption.PriceDesc,
-                    new OrderOptionModel
-                    {
-                        Text = "Expensive First",
-                        Name = "PriceDesc",
-                        Func = x => x.OrderByDescending(y => y.Price),
-                    }
-                },
-            };
-
-            _timePeriods = new Dictionary<TimePeriod, TimePeriodModel>
-            {
-                {
-                    TimePeriod.LastWeek,
-                    new TimePeriodModel
-                    {
-                        Text = "Last Week",
-                        Name = "LastWeek",
-                        Date = DateTime.Now.AddDays(-7),
-                    }
-                },
-                {
-                    TimePeriod.LastMonths,
-                    new TimePeriodModel
-                    {
-                        Text = "Last Months",
-                        Name = "LastMonths",
-                        Date = DateTime.Now.AddMonths(-1),
-                    }
-                },
-                {
-                    TimePeriod.LastYear,
-                    new TimePeriodModel
-                    {
-                        Text = "Last Year",
-                        Name = "LastYear",
-                        Date = DateTime.Now.AddYears(-1),
-                    }
-                },
-                {
-                    TimePeriod.LastTwoYears,
-                    new TimePeriodModel
-                    {
-                        Text = "Last two years",
-                        Name = "LastTwoYears",
-                        Date = DateTime.Now.AddYears(-2),
-                    }
-                },
-                {
-                    TimePeriod.LastThreeYears,
-                    new TimePeriodModel
-                    {
-                        Text = "Last three years",
-                        Name = "LastThreeYears",
-                        Date = DateTime.Now.AddYears(-3),
-                    }
-                },
-                {
-                    TimePeriod.AllTime,
-                    new TimePeriodModel
-                    {
-                        Text = "All Time",
-                        Name = "AllTime",
-                        Date = null,
-                    }
-                },
-            };
+            _viewRepository = viewRepository;
         }
 
         public void CreateGame(BusinessModels.Game game)
@@ -154,10 +39,7 @@ namespace GameStore.BLL.Services
                 game.Key = game.Name.ToLower().Replace(" ", "_");
             }
 
-            if (!game.GamePlatforms.Any())
-            {
-                throw new ArgumentException("Platform is required");
-            }
+            game.GameId = Guid.NewGuid().ToString();
 
             _gameRepository.Create(Convert(game));
 
@@ -171,14 +53,12 @@ namespace GameStore.BLL.Services
                 throw new ArgumentException($"Game with id \'{game.GameId}\' has already been deleted or doesn't exist");
             }
 
-            DbModels.Game gameFromDb = _gameRepository.GetById(game.GameId);
-
-            gameFromDb.IsRemoved = true;
+            _gameRepository.Delete(game.GameId);
 
             _unitOfWork.Commit();
         }
 
-        public BusinessModels.Game EditGame(BusinessModels.Game game)
+        public BusinessModels.Game EditGame(BusinessModels.Game game, short quantity = 0)
         {
             if (!_gameRepository.IsPresent(game.GameId))
             {
@@ -187,9 +67,14 @@ namespace GameStore.BLL.Services
 
             var gameToUpdate = Convert(game);
 
-            _gameRepository.Update(game.GameId, gameToUpdate);
+            var quantityIsCorrect = _gameRepository.Update(game.GameId, gameToUpdate, quantity);
 
             _unitOfWork.Commit();
+
+            if (!quantityIsCorrect)
+            {
+                return null;
+            }
 
             return game;
         }
@@ -213,7 +98,7 @@ namespace GameStore.BLL.Services
             return Convert(gameFromDb);
         }
 
-        public BusinessModels.Game GetGameById(Guid id)
+        public BusinessModels.Game GetGameById(string id)
         {
             DbModels.Game gameFromDb = _gameRepository.GetById(id);
 
@@ -259,45 +144,37 @@ namespace GameStore.BLL.Services
 
         public int Count()
         {
-            return _gameRepository.GetAll().Count();
+            int count = _gameRepository.GetAll().Count();
+
+            return count;
         }
 
         public void AddView(string gameKey)
         {
-            var gameFromDb = _gameRepository.GetByKey(gameKey);
-
-            gameFromDb.Views += 1;
-
-            _gameRepository.Update(gameFromDb.GameId, gameFromDb);
+            _gameRepository.AddView(gameKey);
 
             _unitOfWork.Commit();
         }
 
         public IEnumerable<BusinessModels.Game> FilterGames(BusinessModels.QueryModel queryModel)
         {
-            var exp = ConfigureFilters(queryModel);
-
-            var order = _orderOptions[queryModel.Filter].Func;
+            var filterModel = _mapper.Map<FilterModel>(queryModel);
 
             return Convert(
-                _gameRepository.Filter(
-                    exp,
-                    order,
-                    queryModel.Skip,
-                    queryModel.Take));
+                _gameRepository.Filter(filterModel));
         }
 
         public IDictionary<OrderOption, OrderOptionModel> GetOrderOptions()
         {
-            return _orderOptions;
+            return _gameRepository.GetOrderOptions();
         }
 
         public IDictionary<TimePeriod, TimePeriodModel> GetTimePeriods()
         {
-            return _timePeriods;
+            return _gameRepository.GetTimePeriods();
         }
 
-        private IList<BusinessModels.Genre> GetGameGenres(Guid id)
+        private IList<BusinessModels.Genre> GetGameGenres(string id)
         {
             IEnumerable<DbModels.Genre> genresFromDb = _gameRepository.GetGameGenres(id);
 
@@ -306,7 +183,16 @@ namespace GameStore.BLL.Services
             return genres;
         }
 
-        private IList<BusinessModels.Platform> GetGamePlatforms(Guid id)
+        private BusinessModels.Publisher GetGamePublisher(string id)
+        {
+            DbModels.Publisher publisherFromDb = _gameRepository.GetGamePublisher(id);
+
+            var publisher = _mapper.Map<BusinessModels.Publisher>(publisherFromDb);
+
+            return publisher;
+        }
+
+        private IList<BusinessModels.Platform> GetGamePlatforms(string id)
         {
             IEnumerable<DbModels.Platform> platformsFromDb = _gameRepository.GetGamePlatforms(id);
 
@@ -321,11 +207,16 @@ namespace GameStore.BLL.Services
             return platforms;
         }
 
-        private IList<BusinessModels.Comment> GetGameComments(Guid id)
+        private IList<BusinessModels.Comment> GetGameComments(string id)
         {
-            IList<DbModels.Comment> commentsFromDb = _gameRepository.GetById(id).Comments;
+            var comments = new List<BusinessModels.Comment>();
 
-            var comments = _mapper.Map<IList<BusinessModels.Comment>>(commentsFromDb);
+            if (_gameRepository.IsPresent(id))
+            {
+                IList<DbModels.Comment> commentsFromDb = _gameRepository.GetById(id).Comments;
+
+                comments = _mapper.Map<IList<BusinessModels.Comment>>(commentsFromDb).ToList();
+            }
 
             return comments;
         }
@@ -340,6 +231,8 @@ namespace GameStore.BLL.Services
                 g.GameGenres = GetGameGenres(g.GameId);
                 g.GamePlatforms = GetGamePlatforms(g.GameId);
                 g.Comments = GetGameComments(g.GameId);
+                g.Publisher = GetGamePublisher(g.GameId);
+                g.Views = _viewRepository.GetViewsByGameId(g.GameId);
             }
 
             return games;
@@ -347,10 +240,17 @@ namespace GameStore.BLL.Services
 
         private BusinessModels.Game Convert(DbModels.Game gameFromDb)
         {
-            var game = _mapper.Map<BusinessModels.Game>(gameFromDb);
-            game.GameGenres = GetGameGenres(game.GameId);
-            game.GamePlatforms = GetGamePlatforms(game.GameId);
-            game.Comments = GetGameComments(game.GameId);
+            BusinessModels.Game game = null;
+
+            if (gameFromDb != null)
+            {
+                game = _mapper.Map<BusinessModels.Game>(gameFromDb);
+                game.GameGenres = GetGameGenres(game.GameId);
+                game.GamePlatforms = GetGamePlatforms(game.GameId);
+                game.Comments = GetGameComments(game.GameId);
+                game.Publisher = GetGamePublisher(game.GameId);
+                game.Views = _viewRepository.GetViewsByGameId(game.GameId);
+            }
 
             return game;
         }
@@ -364,9 +264,7 @@ namespace GameStore.BLL.Services
             return gameFromDb;
         }
 
-        private IList<GameGenre> GetGameGenres(
-            Guid id,
-            IEnumerable<BusinessModels.Genre> genres)
+        private IList<GameGenre> GetGameGenres(string id, IEnumerable<BusinessModels.Genre> genres)
         {
             List<GameGenre> gameGenresList = genres
                 .Select(x => new GameGenre
@@ -379,7 +277,7 @@ namespace GameStore.BLL.Services
             return gameGenresList;
         }
 
-        private IList<GamePlatform> GetGamePlatforms(Guid id, IEnumerable<BusinessModels.Platform> platforms)
+        private IList<GamePlatform> GetGamePlatforms(string id, IEnumerable<BusinessModels.Platform> platforms)
         {
             List<GamePlatform> gamePlatformsList = platforms
                 .Select(x => new GamePlatform
@@ -390,21 +288,6 @@ namespace GameStore.BLL.Services
                 .ToList();
 
             return gamePlatformsList;
-        }
-
-        private Expression<Func<DbModels.Game, bool>> ConfigureFilters(BusinessModels.QueryModel query)
-        {
-            var date = _timePeriods[query.DateFilter].Date;
-
-            _pipeline
-                .Register(new PlatformFilter(query.PlatformOptions, _serviceProvider))
-                .Register(new GenreFilter(query.GenresOptions, _serviceProvider))
-                .Register(new PublisherFilter(query.PublisherOptions, _serviceProvider))
-                .Register(new PriceFilter(query.From, query.To))
-                .Register(new NameFilter(query.SearchByGameName))
-                .Register(new DateFilter(date));
-
-            return _pipeline.Process(x => true);
         }
     }
 }

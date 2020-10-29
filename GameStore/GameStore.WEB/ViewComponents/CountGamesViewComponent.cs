@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameStore.Web.ViewComponents

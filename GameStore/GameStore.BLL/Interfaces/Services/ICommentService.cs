@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GameStore.BLL.Models;
 
-namespace GameStore.BLL.Interfaces
+namespace GameStore.BLL.Interfaces.Services
 {
     public interface ICommentService
     {
@@ -12,7 +11,7 @@ namespace GameStore.BLL.Interfaces
 
         Comment UpdateComment(Comment comment);
 
-        Comment GetCommentById(Guid commentId);
+        Comment GetCommentById(string commentId);
 
         IEnumerable<Comment> GetAllCommentsByGameKey(string gameKey);
 

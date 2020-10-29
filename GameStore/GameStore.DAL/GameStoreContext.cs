@@ -1,20 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using GameStore.DAL.Entities;
 using GameStore.DAL.Entities.SupportingModels;
+using GameStore.DAL.Repositories.Mongo.Util;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
+using MongoEntities = GameStore.DAL.Entities.MongoEntities;
 
 namespace GameStore.DAL
 {
     public class GameStoreContext : DbContext
     {
+        private readonly IMongoDatabase _mongoDatabase;
+
         public GameStoreContext()
         {
         }
 
-        public GameStoreContext(DbContextOptions<GameStoreContext> options)
+        public GameStoreContext(DbContextOptions<GameStoreContext> options, IOptions<MongoSettings> mongoOptions)
             : base(options)
         {
+            _mongoDatabase = new MongoClient(mongoOptions.Value.ConnectionString).GetDatabase(mongoOptions.Value.Name);
         }
 
         public DbSet<Game> Games { get; set; }
@@ -36,6 +44,10 @@ namespace GameStore.DAL
         public DbSet<Order> Orders { get; set; }
 
         public DbSet<OrderStatus> OrderStatus { get; set; }
+
+        public DbSet<DeletedGame> DeletedGames { get; set; }
+
+        public DbSet<View> Views { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -117,137 +129,153 @@ namespace GameStore.DAL
 
         private void Seed(ModelBuilder builder)
         {
+            #region Publisher Initialization
+
             var publisher1 = new Publisher
             {
-                PublisherId = Guid.NewGuid(),
+                PublisherId = Guid.NewGuid().ToString(),
                 CompanyName = "Valve",
                 Description = "Steam",
                 HomePage = "https://store.steampowered.com/",
             };
             var publisher2 = new Publisher
             {
-                PublisherId = Guid.NewGuid(),
+                PublisherId = Guid.NewGuid().ToString(),
                 CompanyName = "CDProject RED",
                 Description = "Steam",
                 HomePage = "https://en.cdprojektred.com/",
             };
 
+            #endregion
+
+            #region Genre Initialization
+
             var action = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Action",
             };
             var tps = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "TPS",
                 ParentGenreId = action.GenreId,
             };
             var fps = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "FPS",
                 ParentGenreId = action.GenreId,
             };
             var misc = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Misc.",
                 ParentGenreId = action.GenreId,
             };
             var strategy = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Strategy",
             };
             var rts = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "RTS",
                 ParentGenreId = strategy.GenreId,
             };
             var tbs = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "TBS",
                 ParentGenreId = strategy.GenreId,
             };
             var rpg = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "RPG",
             };
             var sports = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Sports",
             };
             var races = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Races",
             };
             var rally = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Rally",
                 ParentGenreId = races.GenreId,
             };
             var arcade = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Arcade",
                 ParentGenreId = races.GenreId,
             };
             var formula = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Formula",
                 ParentGenreId = races.GenreId,
             };
             var offRoad = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Off road",
                 ParentGenreId = races.GenreId,
             };
 
             var adventrue = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "Adventrue",
             };
 
             var puzzleAndSkill = new Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
                 GenreName = "PuzzleAndSkill",
             };
 
+            #endregion
+
+            #region Platform Initialization
+
             var platform1 = new Platform
             {
-                PlatformId = Guid.NewGuid(),
+                PlatformId = Guid.NewGuid().ToString(),
                 PlatformName = "mobile"
             };
             var platform2 = new Platform
             {
-                PlatformId = Guid.NewGuid(),
+                PlatformId = Guid.NewGuid().ToString(),
                 PlatformName = "browser"
             };
             var platform3 = new Platform
             {
-                PlatformId = Guid.NewGuid(),
+                PlatformId = Guid.NewGuid().ToString(),
                 PlatformName = "desktop"
             };
             var platform4 = new Platform
             {
-                PlatformId = Guid.NewGuid(),
+                PlatformId = Guid.NewGuid().ToString(),
                 PlatformName = "play station"
             };
 
+            #endregion
+
+            #region Game Initialization
+
+            var gameViews = new List<View>();
+
             var game1 = new Game
             {
-                GameId = Guid.NewGuid(),
+                GameId = Guid.NewGuid().ToString(),
                 Name = "Mario",
                 Description = "OldSchool",
                 Key = "mario",
@@ -256,9 +284,10 @@ namespace GameStore.DAL
                 PublisherId = publisher1.PublisherId,
                 Date = DateTime.ParseExact("2018-09-12", "yyyy-MM-dd", null),
             };
+            gameViews.Add(new View { Id = Guid.NewGuid().ToString(), GameId = game1.GameId, Views = 10, });
             var game2 = new Game
             {
-                GameId = Guid.NewGuid(),
+                GameId = Guid.NewGuid().ToString(),
                 Name = "Dota2",
                 Description = "MMORPG",
                 Key = "dota2",
@@ -266,11 +295,11 @@ namespace GameStore.DAL
                 UnitsInStock = 12,
                 PublisherId = publisher1.PublisherId,
                 Date = DateTime.ParseExact("2017-09-12", "yyyy-MM-dd", null),
-                Views = 30,
             };
+            gameViews.Add(new View { Id = Guid.NewGuid().ToString(), GameId = game2.GameId, Views = 20, });
             var game3 = new Game
             {
-                GameId = Guid.NewGuid(),
+                GameId = Guid.NewGuid().ToString(),
                 Name = "Cont Strike",
                 Description = "Shooter",
                 Key = "contr_strike",
@@ -278,11 +307,11 @@ namespace GameStore.DAL
                 UnitsInStock = 2,
                 PublisherId = publisher1.PublisherId,
                 Date = DateTime.ParseExact("2019-09-12", "yyyy-MM-dd", null),
-                Views = 1,
             };
+            gameViews.Add(new View { Id = Guid.NewGuid().ToString(), GameId = game3.GameId, Views = 30, });
             var game4 = new Game
             {
-                GameId = Guid.NewGuid(),
+                GameId = Guid.NewGuid().ToString(),
                 Name = "My little pony",
                 Description = "for children",
                 Key = "my_litle_pony",
@@ -290,11 +319,11 @@ namespace GameStore.DAL
                 UnitsInStock = 7,
                 PublisherId = publisher2.PublisherId,
                 Date = DateTime.ParseExact("2020-08-12", "yyyy-MM-dd", null),
-                Views = 10,
             };
+            gameViews.Add(new View { Id = Guid.NewGuid().ToString(), GameId = game4.GameId, Views = 40, });
             var game5 = new Game
             {
-                GameId = Guid.NewGuid(),
+                GameId = Guid.NewGuid().ToString(),
                 Name = "Garden 2",
                 Description = "farming",
                 Key = "garden_2",
@@ -302,8 +331,10 @@ namespace GameStore.DAL
                 UnitsInStock = 3,
                 PublisherId = publisher2.PublisherId,
                 Date = DateTime.ParseExact("2018-09-05", "yyyy-MM-dd", null),
-                Views = 100,
             };
+            gameViews.Add(new View { Id = Guid.NewGuid().ToString(), GameId = game5.GameId, Views = 50, });
+
+            #region GameGenre and GamePlatform Initialization
 
             var gameGenre = new List<GameGenre>
             {
@@ -372,13 +403,15 @@ namespace GameStore.DAL
                 },
             };
 
+            #endregion
+
             var games = new List<Game>();
 
             for (var i = 1; i <= 20; i++)
             {
                 var g = new Game
                 {
-                    GameId = Guid.NewGuid(),
+                    GameId = Guid.NewGuid().ToString(),
                     Name = "Game " + i,
                     Description = "Game Description " + i,
                     Key = "game" + i,
@@ -386,7 +419,6 @@ namespace GameStore.DAL
                     UnitsInStock = (short)i,
                     PublisherId = publisher1.PublisherId,
                     Date = DateTime.Now.AddMonths(-i),
-                    Views = 100 + i,
                 };
 
                 games.Add(g);
@@ -402,45 +434,54 @@ namespace GameStore.DAL
                     GameId = g.GameId,
                     PlatformId = platform1.PlatformId,
                 });
+
+                gameViews.Add(new View { Id = Guid.NewGuid().ToString(), GameId = g.GameId, Views = 100 + i, });
             }
 
-            Guid customerId = Guid.NewGuid();
+            #endregion
+
+            #region OrderStatus Initialization
+
+            var customerId = Guid.NewGuid().ToString();
 
             var orderStatus1 = new OrderStatus
             {
-                OrderStatusId = Guid.NewGuid(),
+                OrderStatusId = Guid.NewGuid().ToString(),
                 Status = "Open",
             };
 
             OrderStatus orderStatus2 = new OrderStatus
             {
-                OrderStatusId = Guid.NewGuid(),
+                OrderStatusId = Guid.NewGuid().ToString(),
                 Status = "Paid",
             };
 
             OrderStatus orderStatus3 = new OrderStatus
             {
-                OrderStatusId = Guid.NewGuid(),
+                OrderStatusId = Guid.NewGuid().ToString(),
                 Status = "NotPaid",
             };
+            #endregion
+
+            #region Order and OrderDetail Initialization
 
             var order1 = new Order
             {
                 CustomerId = customerId,
-                OrderId = Guid.NewGuid(),
+                OrderId = Guid.NewGuid().ToString(),
                 Status = orderStatus1.Status,
             };
 
             var order2 = new Order
             {
                 CustomerId = customerId,
-                OrderId = Guid.NewGuid(),
+                OrderId = Guid.NewGuid().ToString(),
                 Status = orderStatus2.Status,
             };
 
             var orderDetail1 = new OrderDetail
             {
-                OrderDetailId = Guid.NewGuid(),
+                OrderDetailId = Guid.NewGuid().ToString(),
                 Price = game1.Price * 2,
                 Quantity = 2,
                 Discount = 0,
@@ -450,7 +491,7 @@ namespace GameStore.DAL
 
             var orderDetail2 = new OrderDetail
             {
-                OrderDetailId = Guid.NewGuid(),
+                OrderDetailId = Guid.NewGuid().ToString(),
                 Price = game2.Price * 2,
                 Quantity = 2,
                 Discount = 0,
@@ -460,13 +501,30 @@ namespace GameStore.DAL
 
             var orderDetail3 = new OrderDetail
             {
-                OrderDetailId = Guid.NewGuid(),
+                OrderDetailId = Guid.NewGuid().ToString(),
                 Price = game3.Price * 1,
                 Quantity = 1,
                 Discount = 0,
                 ProductId = game3.GameId.ToString(),
                 OrderId = order2.OrderId,
             };
+
+            #endregion
+
+            #region View Initialization for Entities from Mongo
+
+            var gamesCollection = _mongoDatabase
+                .GetCollection<MongoEntities.Product>(
+                    RepositoryHelper.GetDescription(typeof(MongoEntities.Product)));
+
+            var gamesForViews = gamesCollection.Find(x => true).ToList();
+
+            var views = gamesForViews
+                .Select(x => new View { Id = Guid.NewGuid().ToString(), GameId = x.ProductId.ToString() });
+
+            #endregion
+
+            #region Apply Initialization
 
             builder.Entity<Publisher>().HasData(publisher1, publisher2);
 
@@ -495,6 +553,12 @@ namespace GameStore.DAL
                 .HasData(orderDetail1, orderDetail2, orderDetail3);
 
             builder.Entity<Order>().HasData(order1, order2);
+
+            builder.Entity<View>().HasData(gameViews);
+
+            builder.Entity<View>().HasData(views);
+
+            #endregion
         }
     }
 }

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.DAL.Pipeline;
 using GameStore.Web.Util;
 using Microsoft.AspNetCore.Mvc;
@@ -221,7 +221,13 @@ namespace GameStore.Web.Controllers
 
             if (totalPages < queryViewModel.Page)
             {
-                return NotFound();
+                return View(new WebModels.ShortsGameViewModel(_gameService)
+                {
+                    Games = new List<WebModels.ShortGameViewModel>(),
+                    Query = queryViewModel,
+
+                    PageViewModel = new WebModels.PageViewModel(1, 1),
+                });
             }
 
             queryToFilter.Take = queryModel.PageSize;
@@ -232,7 +238,7 @@ namespace GameStore.Web.Controllers
             games = _mapper
                         .Map<IEnumerable<WebModels.ShortGameViewModel>>(
                            fromDB)
-                        .ToList();
+                            .ToList();
 
             var gameView = new WebModels.ShortsGameViewModel(_gameService)
             {
@@ -366,7 +372,7 @@ namespace GameStore.Web.Controllers
 
         [HttpPost]
         [Route("games/update")]
-        public IActionResult Update(WebModels.GameViewModel game)
+        public IActionResult Update([FromBody] WebModels.GameViewModel game)
         {
             if (!ModelState.IsValid)
             {

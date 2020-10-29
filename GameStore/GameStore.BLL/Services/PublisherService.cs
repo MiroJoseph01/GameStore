@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
 using BusinessModels = GameStore.BLL.Models;
@@ -12,12 +12,12 @@ namespace GameStore.BLL.Services
 {
     public class PublisherService : IPublisherService
     {
-        private readonly IRepository<DbModels.Publisher> _publisherRepository;
+        private readonly IPublisherRepositoryFacade _publisherRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public PublisherService(
-            IRepository<DbModels.Publisher> publisherRepository,
+            IPublisherRepositoryFacade publisherRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper)
         {
@@ -30,6 +30,8 @@ namespace GameStore.BLL.Services
         {
             var publisherForDB = _mapper
                 .Map<DbModels.Publisher>(publisher);
+
+            publisherForDB.PublisherId = Guid.NewGuid().ToString();
 
             _publisherRepository.Create(publisherForDB);
             _unitOfWork.Commit();
@@ -59,7 +61,7 @@ namespace GameStore.BLL.Services
             return publisher;
         }
 
-        public BusinessModels.Publisher GetPublisherById(Guid publisherId)
+        public BusinessModels.Publisher GetPublisherById(string publisherId)
         {
             DbModels.Publisher publisherFromDb = _publisherRepository.GetById(publisherId);
 

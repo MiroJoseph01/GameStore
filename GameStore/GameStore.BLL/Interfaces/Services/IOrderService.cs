@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using GameStore.BLL.Models;
-using GameStore.BLL.Payments;
 
-namespace GameStore.BLL.Interfaces
+namespace GameStore.BLL.Interfaces.Services
 {
     public interface IOrderService
     {
@@ -17,13 +16,13 @@ namespace GameStore.BLL.Interfaces
 
         IEnumerable<OrderStatus> GetAllOrderStatuses();
 
-        void AddOrderDetail(string customerId, string gameKey);
+        bool AddOrderDetail(string customerId, string gameKey);
 
         void DeleteOrderDetail(OrderDetail orderDetail);
 
         OrderDetail UpdateOrderDetail(OrderDetail orderDetail);
 
-        OrderDetail GetOrderDetailById(Guid orderDetailId);
+        OrderDetail GetOrderDetailById(string orderDetailId);
 
         IEnumerable<OrderDetail> GetAllOrderDetails();
 
@@ -33,7 +32,7 @@ namespace GameStore.BLL.Interfaces
 
         Order UpdateOrder(Order order);
 
-        Order GetOrderById(Guid orderId);
+        Order GetOrderById(string orderId);
 
         IEnumerable<Order> GetAllOrders();
 
@@ -41,10 +40,12 @@ namespace GameStore.BLL.Interfaces
 
         bool DateIsCorrect(string dateFromCard);
 
-        string GenrerateShortPaymentId(Guid id);
+        string GenrerateShortPaymentId(string id);
 
-        void UpdateStatusOfOrder(Guid paymentId, string status);
+        void UpdateStatusOfOrder(string paymentId, string status);
 
-        bool OrderIsPaid(Guid id);
+        bool OrderIsPaid(string id);
+
+        IEnumerable<Order> FilterByDate(DateTime minDate, DateTime maxDate, string customerId);
     }
 }

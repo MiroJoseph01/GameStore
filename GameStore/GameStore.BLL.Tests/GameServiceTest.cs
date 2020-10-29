@@ -6,7 +6,6 @@ using GameStore.BLL.Services;
 using GameStore.DAL.Entities.SupportingModels;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
-using GameStore.DAL.Pipeline;
 using GameStore.DAL.Pipeline.Util;
 using Moq;
 using Xunit;
@@ -17,16 +16,16 @@ namespace GameStore.BLL.Tests
 {
     public class GameServiceTest
     {
+        private const string GameId = "457a3d66-24f2-487e-a816-a21531e6a019";
+
         private readonly GameService _gameService;
-        private readonly Mock<IGameRepository> _gameRepository;
+        private readonly Mock<IGameRepositoryFacade> _gameRepository;
         private readonly Mock<IUnitOfWork> _unitOfWork;
         private readonly Mock<IMapper> _mapper;
-        private readonly Mock<IPipeline> _pipeline;
-        private readonly Mock<IServiceProvider> _serviceProvider;
+        private readonly Mock<IViewRepository> _viewRepository;
 
         private readonly List<DbModels.Game> _gameList;
         private readonly List<BusinessModels.Game> _games;
-        private Guid _gameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019");
 
         public GameServiceTest()
         {
@@ -34,7 +33,7 @@ namespace GameStore.BLL.Tests
             {
                 new BusinessModels.Game
                 {
-                    GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
+                    GameId = "457a3d66-24f2-487e-a816-a21531e6a019",
                     Key = "mario",
                     Comments = new List<BusinessModels.Comment>(),
                     GameGenres = new List<BusinessModels.Genre>(),
@@ -46,7 +45,7 @@ namespace GameStore.BLL.Tests
             {
                 new DbModels.Game
                 {
-                    GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
+                    GameId = "457a3d66-24f2-487e-a816-a21531e6a019",
                     Key = "mario",
                     Comments = new List<DbModels.Comment>(),
                     GenreGames = new List<GameGenre>(),
@@ -54,18 +53,16 @@ namespace GameStore.BLL.Tests
                 },
             };
 
-            _gameRepository = new Mock<IGameRepository>();
+            _gameRepository = new Mock<IGameRepositoryFacade>();
             _unitOfWork = new Mock<IUnitOfWork>();
             _mapper = new Mock<IMapper>();
-            _pipeline = new Mock<IPipeline>();
-            _serviceProvider = new Mock<IServiceProvider>();
+            _viewRepository = new Mock<IViewRepository>();
 
             _gameService = new GameService(
                 _gameRepository.Object,
                 _unitOfWork.Object,
                 _mapper.Object,
-                _pipeline.Object,
-                _serviceProvider.Object);
+                _viewRepository.Object);
         }
 
         [Fact]
@@ -75,7 +72,7 @@ namespace GameStore.BLL.Tests
                 .Setup(g => g.GetAll())
                 .Returns(_gameList);
             _gameRepository
-                .Setup(g => g.GetById(_gameId))
+                .Setup(g => g.GetById(GameId))
                 .Returns(_gameList.First());
             _mapper
                 .Setup(m => m
@@ -112,13 +109,13 @@ namespace GameStore.BLL.Tests
         }
 
         [Fact]
-        public void GeGametByKey_PassValidGameKey_ReturnsGameModel()
+        public void GetGametByKey_PassValidGameKey_ReturnsGameModel()
         {
             _gameRepository
                 .Setup(g => g.GetByKey(It.IsAny<string>()))
                 .Returns(_gameList.First());
             _gameRepository
-                .Setup(g => g.GetById(_gameId))
+                .Setup(g => g.GetById(GameId))
                 .Returns(_gameList.First());
             _mapper
                 .Setup(m => m.Map<BusinessModels.Game>(It.IsAny<DbModels.Game>()))
@@ -146,7 +143,7 @@ namespace GameStore.BLL.Tests
         {
             BusinessModels.Game game = new BusinessModels.Game
             {
-                GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
+                GameId = "457a3d66-24f2-487e-a816-a21531e6a019",
                 Key = "mario",
                 Comments = new List<BusinessModels.Comment>(),
                 Description = It.IsAny<string>(),
@@ -155,14 +152,14 @@ namespace GameStore.BLL.Tests
                 {
                     new BusinessModels.Platform
                     {
-                        PlatformName = "browser", PlatformId = Guid.NewGuid(),
+                        PlatformName = "browser", PlatformId = Guid.NewGuid().ToString(),
                     },
                 },
                 GameGenres = new List<BusinessModels.Genre>
                 {
                     new BusinessModels.Genre
                     {
-                        GenreName = "action", GenreId = Guid.NewGuid(),
+                        GenreName = "action", GenreId = Guid.NewGuid().ToString(),
                     },
                 },
             };
@@ -176,23 +173,6 @@ namespace GameStore.BLL.Tests
             _gameService.CreateGame(game);
 
             _gameRepository.Verify(x => x.Create(It.IsAny<DbModels.Game>()));
-        }
-
-        [Fact]
-        public void CreateGame_PassGameModelWithoutPlatform_ThrowsException()
-        {
-            BusinessModels.Game game = new BusinessModels.Game
-            {
-                GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
-                Key = "mario",
-                Comments = null,
-                GameGenres = new List<BusinessModels.Genre>(),
-                Description = It.IsAny<string>(),
-                Name = "Mario",
-                GamePlatforms = new List<BusinessModels.Platform>(),
-            };
-
-            Assert.Throws<ArgumentException>(() => _gameService.CreateGame(game));
         }
 
         [Fact]
@@ -211,7 +191,7 @@ namespace GameStore.BLL.Tests
 
             BusinessModels.Game game = new BusinessModels.Game
             {
-                GameId = _gameId,
+                GameId = GameId,
                 Key = gameKey,
                 Name = gameName,
                 Comments = new List<BusinessModels.Comment>(),
@@ -219,7 +199,7 @@ namespace GameStore.BLL.Tests
                 {
                     new BusinessModels.Genre
                     {
-                        GenreId = Guid.Parse("357a3d66-24f2-487e-a816-a21531e6a019"),
+                        GenreId = "357a3d66-24f2-487e-a816-a21531e6a019",
                         GenreName = "action",
                     },
                 },
@@ -227,7 +207,7 @@ namespace GameStore.BLL.Tests
                 {
                     new BusinessModels.Platform
                     {
-                        PlatformId = Guid.Parse("357a3d66-24f2-487e-a816-a21531e6a019"),
+                        PlatformId = "357a3d66-24f2-487e-a816-a21531e6a019",
                         PlatformName = "mobile",
                     },
                 },
@@ -235,28 +215,28 @@ namespace GameStore.BLL.Tests
 
             DbModels.Game gameFromDb = new DbModels.Game
             {
-                GameId = _gameId,
+                GameId = GameId,
                 Key = gameKey,
                 Name = gameName,
                 GenreGames = new List<GameGenre>
                 {
                     new GameGenre
                     {
-                        GameId = _gameId,
-                        GenreId = Guid.NewGuid(),
+                        GameId = GameId,
+                        GenreId = Guid.NewGuid().ToString(),
                     },
                     new GameGenre
                     {
-                        GameId = _gameId,
-                        GenreId = Guid.Parse("357a3d66-24f2-487e-a816-a21531e6a019"),
+                        GameId = GameId,
+                        GenreId = "357a3d66-24f2-487e-a816-a21531e6a019",
                     },
                 },
                 PlatformGames = new List<GamePlatform>
                 {
                     new GamePlatform
                     {
-                        GameId = _gameId,
-                        PlatformId = Guid.Parse("257a3d66-24f2-487e-a816-a21531e6a019"),
+                        GameId = GameId,
+                        PlatformId = "257a3d66-24f2-487e-a816-a21531e6a019",
                     },
                 },
                 Comments = new List<DbModels.Comment>(),
@@ -269,12 +249,16 @@ namespace GameStore.BLL.Tests
                 .Setup(g => g.GetByKey(It.IsAny<string>()))
                 .Returns(gameFromDb);
             _gameRepository
-                .Setup(g => g.IsPresent(It.IsAny<Guid>()))
+                .Setup(g => g.IsPresent(It.IsAny<string>()))
+                .Returns(true);
+            _gameRepository
+                .Setup(g => g.Update(It.IsAny<string>(), It.IsAny<DbModels.Game>(), 0))
                 .Returns(true);
 
             var result = _gameService.EditGame(game);
 
-            _gameRepository.Verify(c => c.Update(It.IsAny<Guid>(), It.IsAny<DbModels.Game>()));
+            _gameRepository.Verify(c => c.Update(It.IsAny<string>(), It.IsAny<DbModels.Game>(), 0));
+
             Assert.NotNull(result);
         }
 
@@ -283,14 +267,14 @@ namespace GameStore.BLL.Tests
         {
             BusinessModels.Game game = new BusinessModels.Game
             {
-                GameId = _gameId,
+                GameId = GameId,
                 Key = "mario",
                 Name = "Mario",
                 GameGenres = new List<BusinessModels.Genre>
                 {
                     new BusinessModels.Genre
                     {
-                        GenreId = Guid.Parse("357a3d66-24f2-487e-a816-a21531e6a019"),
+                        GenreId = "357a3d66-24f2-487e-a816-a21531e6a019",
                         GenreName = "action",
                     },
                 },
@@ -298,7 +282,7 @@ namespace GameStore.BLL.Tests
 
             DbModels.Game gameFromDb = new DbModels.Game
             {
-                GameId = _gameId,
+                GameId = GameId,
                 Key = "NotMario",
                 Name = "NotMario",
                 GenreGames = new List<GameGenre>(),
@@ -306,12 +290,12 @@ namespace GameStore.BLL.Tests
                 {
                     new GamePlatform
                     {
-                        GameId = _gameId,
-                        PlatformId = Guid.Parse("257a3d66-24f2-487e-a816-a21531e6a019"),
+                        GameId = GameId,
+                        PlatformId = "257a3d66-24f2-487e-a816-a21531e6a019",
                     },
                 },
             };
-            _gameRepository.Setup(g => g.GetById(_gameId))
+            _gameRepository.Setup(g => g.GetById(GameId))
                 .Returns(_gameList.First());
 
             Assert.Throws<ArgumentException>(() => _gameService.EditGame(game));
@@ -330,14 +314,14 @@ namespace GameStore.BLL.Tests
         {
             BusinessModels.Game game = new BusinessModels.Game
             {
-                GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
+                GameId = "457a3d66-24f2-487e-a816-a21531e6a019",
                 Key = "mario",
                 Name = "Mario",
             };
 
             DbModels.Game gameFromDb = new DbModels.Game
             {
-                GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
+                GameId = "457a3d66-24f2-487e-a816-a21531e6a019",
                 Key = "mario",
                 IsRemoved = true,
                 Name = "Mario",
@@ -345,7 +329,7 @@ namespace GameStore.BLL.Tests
 
             _gameRepository
                 .Setup(g => g
-                    .GetById(Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019")))
+                    .GetById("457a3d66-24f2-487e-a816-a21531e6a019"))
                 .Returns(gameFromDb);
 
             Assert.Throws<ArgumentException>(() => _gameService.DeleteGame(game));
@@ -356,7 +340,7 @@ namespace GameStore.BLL.Tests
         {
             BusinessModels.Genre genre = new BusinessModels.Genre
             {
-                GenreId = Guid.NewGuid(),
+                GenreId = Guid.NewGuid().ToString(),
             };
 
             DbModels.Genre genreFromDb = new DbModels.Genre
@@ -366,7 +350,7 @@ namespace GameStore.BLL.Tests
 
             DbModels.Game gameFromDb = new DbModels.Game
             {
-                GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
+                GameId = "457a3d66-24f2-487e-a816-a21531e6a019",
                 Key = "mario",
                 IsRemoved = true,
                 Name = "Mario",
@@ -374,7 +358,7 @@ namespace GameStore.BLL.Tests
                 {
                     new GameGenre
                     {
-                        GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
+                        GameId = "457a3d66-24f2-487e-a816-a21531e6a019",
                         GenreId = genre.GenreId,
                     },
                 },
@@ -393,7 +377,7 @@ namespace GameStore.BLL.Tests
                 .Setup(g => g.GetGamesOfGenre(genre.GenreId))
                 .Returns(new List<DbModels.Game> { gameFromDb });
             _gameRepository
-                 .Setup(g => g.GetById(_gameId))
+                 .Setup(g => g.GetById(GameId))
                  .Returns(_gameList.First());
 
             BusinessModels.Game res = _gameService
@@ -407,7 +391,7 @@ namespace GameStore.BLL.Tests
         {
             BusinessModels.Platform platform = new BusinessModels.Platform
             {
-                PlatformId = Guid.NewGuid(),
+                PlatformId = Guid.NewGuid().ToString(),
             };
 
             DbModels.Platform platformFromDb = new DbModels.Platform
@@ -417,7 +401,7 @@ namespace GameStore.BLL.Tests
 
             DbModels.Game gameFromDb = new DbModels.Game
             {
-                GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
+                GameId = "457a3d66-24f2-487e-a816-a21531e6a019",
                 Key = "mario",
                 IsRemoved = true,
                 Name = "Mario",
@@ -425,7 +409,7 @@ namespace GameStore.BLL.Tests
                 {
                     new GamePlatform
                     {
-                        GameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019"),
+                        GameId = "457a3d66-24f2-487e-a816-a21531e6a019",
                         PlatformId = platform.PlatformId,
                     },
                 },
@@ -444,7 +428,7 @@ namespace GameStore.BLL.Tests
                 .Setup(g => g.GetGamesOfPlatform(platform.PlatformId))
                 .Returns(new List<DbModels.Game> { gameFromDb });
             _gameRepository
-                .Setup(g => g.GetById(_gameId))
+                .Setup(g => g.GetById(GameId))
                 .Returns(_gameList.First());
 
             BusinessModels.Game res = _gameService
@@ -468,23 +452,25 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void GetOrderOptions_ReturnsListOfOptions()
         {
-            var listCount = 5;
+            var dictionary = new Dictionary<OrderOption, OrderOptionModel>();
+
+            _gameRepository.Setup(g => g.GetOrderOptions()).Returns(dictionary);
 
             var result = _gameService.GetOrderOptions();
 
             Assert.IsType<Dictionary<OrderOption, OrderOptionModel>>(result);
-            Assert.Equal(listCount, result.Count);
         }
 
         [Fact]
         public void GetTimePeriods_ReturnsListOfPeriods()
         {
-            var listCount = 6;
+            var dictionary = new Dictionary<TimePeriod, TimePeriodModel>();
+
+            _gameRepository.Setup(g => g.GetTimePeriods()).Returns(dictionary);
 
             var result = _gameService.GetTimePeriods();
 
             Assert.IsType<Dictionary<TimePeriod, TimePeriodModel>>(result);
-            Assert.Equal(listCount, result.Count);
         }
     }
 }
