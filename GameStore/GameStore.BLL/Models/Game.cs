@@ -11,7 +11,7 @@ namespace GameStore.BLL.Models
             GamePlatforms = new List<Platform>();
         }
 
-        public Guid GameId { get; set; }
+        public string GameId { get; set; }
 
         public string Key { get; set; }
 
@@ -31,7 +31,7 @@ namespace GameStore.BLL.Models
 
         public DateTime Date { get; set; }
 
-        public Guid? PublisherId { get; set; }
+        public string PublisherId { get; set; }
 
         public Publisher Publisher { get; set; }
 

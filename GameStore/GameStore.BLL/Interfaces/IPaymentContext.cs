@@ -1,5 +1,4 @@
-﻿using System;
-using GameStore.BLL.Payments;
+﻿using GameStore.BLL.Payments;
 
 namespace GameStore.BLL.Interfaces
 {
@@ -7,6 +6,6 @@ namespace GameStore.BLL.Interfaces
     {
         void SetStrategy(IPaymentStrategy strategy);
 
-        PaymentInfo ProcessPayment(Guid id);
+        PaymentInfo ProcessPayment(string id);
     }
 }

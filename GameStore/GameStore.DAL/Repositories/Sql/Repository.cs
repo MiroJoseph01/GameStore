@@ -1,24 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using GameStore.DAL.Entities.Interfaces;
+using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace GameStore.DAL.Repositories
+namespace GameStore.DAL.Repositories.Sql
 {
     public class Repository<TEntity> : IRepository<TEntity>
         where TEntity : class, ISoftDelete
     {
         private readonly GameStoreContext _dbContext;
+        private readonly IEntityStateLogger<TEntity> _entityStateLogger;
 
-        public Repository(GameStoreContext dbContext)
+        public Repository(GameStoreContext dbContext, IEntityStateLogger<TEntity> entityStateLogger)
         {
             _dbContext = dbContext;
+            _entityStateLogger = entityStateLogger;
         }
 
-        public bool IsPresent(Guid id)
+        public bool IsPresent(string id)
         {
             var entity = GetById(id);
 
@@ -28,13 +29,17 @@ namespace GameStore.DAL.Repositories
         public virtual void Create(TEntity entity)
         {
             _dbContext.Set<TEntity>().Add(entity);
+
+            _entityStateLogger.LogInsert(entity);
         }
 
-        public virtual void Delete(Guid id)
+        public virtual void Delete(string id)
         {
             TEntity entity = GetById(id);
 
             entity.IsRemoved = true;
+
+            _entityStateLogger.LogDelete(entity);
         }
 
         public virtual IEnumerable<TEntity> GetAll()
@@ -44,16 +49,19 @@ namespace GameStore.DAL.Repositories
                 .ToList();
         }
 
-        public virtual TEntity GetById(Guid id)
+        public virtual TEntity GetById(string id)
         {
             TEntity entity = _dbContext.Set<TEntity>().Find(id);
 
-            TEntity result = entity.IsRemoved == false ? entity : null;
+            if (entity is null || entity.IsRemoved)
+            {
+                return null;
+            }
 
-            return result;
+            return entity;
         }
 
-        public virtual void Update(Guid id, TEntity entity)
+        public virtual void Update(string id, TEntity entity)
         {
             TEntity entityForUpdate = GetById(id);
 
@@ -63,32 +71,8 @@ namespace GameStore.DAL.Repositories
             }
 
             _dbContext.Entry(entity).State = EntityState.Modified;
-        }
 
-        public virtual IEnumerable<TEntity> Filter(
-            Expression<Func<TEntity, bool>> filter = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
-            int skip = 0,
-            int take = 0)
-        {
-            IQueryable<TEntity> query = _dbContext.Set<TEntity>();
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            if (orderBy != null)
-            {
-                query = orderBy(query);
-            }
-
-            if (take != 0)
-            {
-                query = query.Skip(skip).Take(take);
-            }
-
-            return query.ToList();
+            _entityStateLogger.LogUpdate(entityForUpdate, entity);
         }
     }
 }

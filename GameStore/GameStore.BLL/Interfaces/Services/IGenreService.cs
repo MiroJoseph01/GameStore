@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GameStore.BLL.Models;
 
-namespace GameStore.BLL.Interfaces
+namespace GameStore.BLL.Interfaces.Services
 {
     public interface IGenreService
     {
@@ -12,7 +11,7 @@ namespace GameStore.BLL.Interfaces
 
         Genre UpdateGenre(Genre genre);
 
-        Genre GetGenreById(Guid genreId);
+        Genre GetGenreById(string genreId);
 
         IEnumerable<Genre> GetAllGenres();
     }

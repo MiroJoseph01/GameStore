@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Xunit;
 
-namespace GameStore.WEB.Tests
+namespace GameStore.Web.Tests
 {
     public class QueryModelBinderTest
     {

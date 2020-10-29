@@ -2,6 +2,7 @@
 using System.Data;
 using System.IO;
 using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using Syncfusion.Drawing;
 using Syncfusion.Pdf;
@@ -19,7 +20,7 @@ namespace GameStore.BLL.Payments.PaymentStrategies
             _orderService = orderService;
         }
 
-        public PaymentInfo Pay(Guid paymentId)
+        public PaymentInfo Pay(string paymentId)
         {
             var order = _orderService.GetOrderById(paymentId);
 

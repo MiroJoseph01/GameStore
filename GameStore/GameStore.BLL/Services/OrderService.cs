@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Payments;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
@@ -14,7 +14,7 @@ namespace GameStore.BLL.Services
     public class OrderService : IOrderService
     {
         private readonly IGameService _gameService;
-        private readonly IOrderRepository _orderRepository;
+        private readonly IOrderRepositoryFacade _orderRepository;
         private readonly IOrderDetailRepository _orderDetailRepository;
         private readonly IRepository<DbModels.OrderStatus> _orderStatusRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -22,7 +22,7 @@ namespace GameStore.BLL.Services
 
         public OrderService(
             IGameService gameService,
-            IOrderRepository orderRepository,
+            IOrderRepositoryFacade orderRepository,
             IOrderDetailRepository orderDetailRepository,
             IRepository<DbModels.OrderStatus> orderStatusRepository,
             IUnitOfWork unitOfWork,
@@ -39,9 +39,7 @@ namespace GameStore.BLL.Services
         public IEnumerable<BusinessModels.Order> GetOrdersByCustomerId(
             string customerId)
         {
-            Guid id = Guid.Parse(customerId);
-
-            var orders = _mapper.Map<IEnumerable<BusinessModels.Order>>(_orderRepository.GetByCustomerId(id));
+            var orders = _mapper.Map<IEnumerable<BusinessModels.Order>>(_orderRepository.GetByCustomerId(customerId));
 
             if (!(orders is null))
             {
@@ -51,10 +49,14 @@ namespace GameStore.BLL.Services
                     decimal total = 0;
                     foreach (var d in o.OrderDetails)
                     {
-                        BusinessModels.Game game = _gameService.GetGameById(Guid.Parse(d.ProductId));
+                        BusinessModels.Game game = _gameService.GetGameById(d.ProductId);
 
-                        d.ProductKey = game.Key;
-                        d.ProductName = game.Name;
+                        if (game != null)
+                        {
+                            d.ProductKey = game.Key;
+                            d.ProductName = game.Name;
+                        }
+
                         total += d.Price - (d.Price * (decimal)d.Discount);
                     }
 
@@ -67,6 +69,8 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.Order AddOrder(BusinessModels.Order order)
         {
+            order.OrderId = Guid.NewGuid().ToString();
+
             _orderRepository.Create(_mapper.Map<DbModels.Order>(order));
 
             _unitOfWork.Commit();
@@ -102,7 +106,7 @@ namespace GameStore.BLL.Services
             return order;
         }
 
-        public BusinessModels.Order GetOrderById(Guid orderId)
+        public BusinessModels.Order GetOrderById(string orderId)
         {
             DbModels.Order orderFromDb = _orderRepository.GetById(orderId);
 
@@ -113,7 +117,7 @@ namespace GameStore.BLL.Services
                 decimal total = 0;
                 foreach (var g in order.OrderDetails)
                 {
-                    BusinessModels.Game game = _gameService.GetGameById(Guid.Parse(g.ProductId));
+                    BusinessModels.Game game = _gameService.GetGameById(g.ProductId);
                     g.ProductKey = game.Key;
                     g.ProductName = game.Name;
                     total += g.Price - (g.Price * (decimal)g.Discount);
@@ -135,7 +139,7 @@ namespace GameStore.BLL.Services
                     decimal total = 0;
                     foreach (var g in order.OrderDetails)
                     {
-                        var game = _gameService.GetGameById(Guid.Parse(g.ProductId));
+                        var game = _gameService.GetGameById(g.ProductId);
                         g.ProductKey = game.Key;
                         g.ProductName = game.Name;
                         total += g.Price - (g.Price * (decimal)g.Discount);
@@ -148,19 +152,26 @@ namespace GameStore.BLL.Services
             return orders;
         }
 
-        public void AddOrderDetail(string customerId, string gameKey)
+        public bool AddOrderDetail(string customerId, string gameKey)
         {
             var game = _gameService.GetGameByKey(gameKey);
 
             var orderDetail = new BusinessModels.OrderDetail
             {
-                ProductId = game.GameId.ToString(),
+                ProductId = game.GameId,
                 ProductKey = game.Key,
                 ProductName = game.Name,
                 Price = game.Price,
                 Quantity = 1,
                 Discount = game.Discount,
             };
+
+            var success = UpdateGameQuantity(orderDetail, -1);
+
+            if (!success)
+            {
+                return false;
+            }
 
             BusinessModels.Order order = GetOrdersByCustomerId(customerId)
                 .FirstOrDefault(x => x.Status == OrderStatuses.Open);
@@ -174,7 +185,7 @@ namespace GameStore.BLL.Services
                 AddDetailToOrder(order, orderDetail);
             }
 
-            UpdateGameQuantity(orderDetail);
+            return success;
         }
 
         public void DeleteOrderDetail(BusinessModels.OrderDetail orderDetail)
@@ -187,10 +198,9 @@ namespace GameStore.BLL.Services
             var orderDetailFromDb = _orderDetailRepository
                 .GetById(orderDetail.OrderDetailId);
 
-            var game = _gameService.GetGameById(Guid.Parse(orderDetailFromDb.ProductId));
-            game.UnitsInStock += orderDetailFromDb.Quantity;
+            var game = _gameService.GetGameById(orderDetailFromDb.ProductId);
 
-            _gameService.EditGame(game);
+            _gameService.EditGame(game, orderDetailFromDb.Quantity);
 
             _orderDetailRepository.Delete(orderDetail.OrderDetailId);
 
@@ -206,7 +216,7 @@ namespace GameStore.BLL.Services
             return orderDetail;
         }
 
-        public BusinessModels.OrderDetail GetOrderDetailById(Guid orderDetailId)
+        public BusinessModels.OrderDetail GetOrderDetailById(string orderDetailId)
         {
             DbModels.OrderDetail orderDetailFromDb = _orderDetailRepository.GetById(orderDetailId);
 
@@ -225,6 +235,8 @@ namespace GameStore.BLL.Services
         public BusinessModels.OrderStatus AddOrderStatus(
             BusinessModels.OrderStatus orderStatus)
         {
+            orderStatus.OrderStatusId = Guid.NewGuid().ToString();
+
             _orderStatusRepository.Create(_mapper.Map<DbModels.OrderStatus>(orderStatus));
 
             _unitOfWork.Commit();
@@ -253,7 +265,7 @@ namespace GameStore.BLL.Services
             return orderStatus;
         }
 
-        public BusinessModels.OrderStatus GetOrderStatusById(Guid orderStatusId)
+        public BusinessModels.OrderStatus GetOrderStatusById(string orderStatusId)
         {
             DbModels.OrderStatus orderStatusFromDb = _orderStatusRepository.GetById(orderStatusId);
 
@@ -285,6 +297,11 @@ namespace GameStore.BLL.Services
 
         public bool DateIsCorrect(string dateFromCard)
         {
+            if (string.IsNullOrWhiteSpace(dateFromCard))
+            {
+                return false;
+            }
+
             var date = dateFromCard.Split('/');
             var month = short.Parse(date[0]);
             var year = short.Parse(date[1]);
@@ -305,12 +322,12 @@ namespace GameStore.BLL.Services
             return true;
         }
 
-        public string GenrerateShortPaymentId(Guid id)
+        public string GenrerateShortPaymentId(string id)
         {
             return id.ToString().Substring(0, 9);
         }
 
-        public void UpdateStatusOfOrder(Guid paymentId, string status)
+        public void UpdateStatusOfOrder(string paymentId, string status)
         {
             var order = GetOrderById(paymentId);
 
@@ -322,16 +339,39 @@ namespace GameStore.BLL.Services
             UpdateOrder(order);
         }
 
-        public bool OrderIsPaid(Guid id)
+        public bool OrderIsPaid(string id)
         {
             return _orderRepository.GetById(id).Status == OrderStatuses.Paid;
         }
 
-        private void UpdateGameQuantity(BusinessModels.OrderDetail order)
+        public IEnumerable<BusinessModels.Order> FilterByDate(DateTime minDate, DateTime maxDate, string customerId)
         {
-            var game = _gameService.GetGameById(Guid.Parse(order.ProductId));
+            var activeOrders = GetOrdersByCustomerId(customerId)
+                .Where(x => x.Status == "Open" || x.Status == "NotPaid")
+                .ToList();
+
+            var orders = GetOrdersByCustomerId(customerId)
+                .Where(x => x.Status == OrderStatuses.Paid && x.OrderDate > minDate && x.OrderDate < maxDate)
+                .ToList();
+
+            activeOrders.AddRange(orders);
+
+            return activeOrders;
+        }
+
+        private bool UpdateGameQuantity(BusinessModels.OrderDetail order, short quantity)
+        {
+            var game = _gameService.GetGameById(order.ProductId);
             game.UnitsInStock = (short)(game.UnitsInStock - order.Quantity);
-            _gameService.EditGame(game);
+
+            var updatedGame = _gameService.EditGame(game, quantity);
+
+            if (updatedGame is null)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private bool SaveOrderWithDetail(
@@ -345,10 +385,12 @@ namespace GameStore.BLL.Services
                 {
                     orderDetail,
                 },
-                CustomerId = Guid.Parse(customerId),
-                OrderId = Guid.NewGuid(),
+                CustomerId = customerId,
+                OrderId = Guid.NewGuid().ToString(),
             };
             orderDetail.OrderId = order.OrderId;
+
+            orderDetail.OrderDetailId = Guid.NewGuid().ToString();
 
             _orderRepository.Create(_mapper.Map<DbModels.Order>(order));
 
@@ -374,6 +416,8 @@ namespace GameStore.BLL.Services
         private void CreateNewOrderDetail(BusinessModels.Order order, BusinessModels.OrderDetail orderDetail)
         {
             orderDetail.OrderId = order.OrderId;
+
+            orderDetail.OrderDetailId = Guid.NewGuid().ToString();
 
             _orderDetailRepository.Create(_mapper.Map<DbModels.OrderDetail>(orderDetail));
 

@@ -1,19 +1,19 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
-using WebModels = GameStore.Web.ViewModels;
+using GameStore.DAL.Pipeline;
 using BusinessModels = GameStore.BLL.Models;
 using DbModels = GameStore.DAL.Entities;
+using WebModels = GameStore.Web.ViewModels;
 
 namespace GameStore.Web.Util.AutoMapperProfiles
 {
+    [ExcludeFromCodeCoverage]
     public class GameProfile : Profile
     {
         public GameProfile()
         {
             CreateMap<BusinessModels.Game, WebModels.GameViewModel>()
-                .ForMember(
-                    x => x.GameId,
-                    y => y.MapFrom(z => z.GameId.ToString()))
                 .ForMember(
                     x => x.Genres,
                     y => y.MapFrom(z => z.GameGenres))
@@ -32,11 +32,6 @@ namespace GameStore.Web.Util.AutoMapperProfiles
 
             CreateMap<WebModels.GameViewModel, BusinessModels.Game>()
                 .ForMember(
-                    x => x.GameId,
-                    y => y.MapFrom(
-                        z => string.IsNullOrEmpty(z.GameId) ?
-                            Guid.Empty : Guid.Parse(z.GameId)))
-                .ForMember(
                     x => x.GameGenres,
                     y => y.MapFrom(z => z.Genres))
                 .ForMember(
@@ -44,11 +39,6 @@ namespace GameStore.Web.Util.AutoMapperProfiles
                     y => y.MapFrom(z => z.Platforms));
 
             CreateMap<WebModels.GameCreateViewModel, BusinessModels.Game>()
-                .ForMember(
-                    x => x.GameId,
-                    y => y.MapFrom(
-                        z => string.IsNullOrEmpty(z.GameId) ?
-                            Guid.Empty : Guid.Parse(z.GameId)))
                 .ForMember(
                     x => x.GameGenres,
                     y => y.MapFrom(z => z.GameGenres))
@@ -74,6 +64,10 @@ namespace GameStore.Web.Util.AutoMapperProfiles
                 .ForMember(x => x.PublisherOptions, y => y.MapFrom(z => z.PublisherOptions))
                 .ForMember(x => x.From, y => y.MapFrom(z => Convert.ToDecimal(z.From)))
                 .ForMember(x => x.To, y => y.MapFrom(z => Convert.ToDecimal(z.To)));
+
+            CreateMap<BusinessModels.QueryModel, FilterModel>();
+
+            CreateMap<DbModels.Game, DbModels.Game>();
         }
     }
 }

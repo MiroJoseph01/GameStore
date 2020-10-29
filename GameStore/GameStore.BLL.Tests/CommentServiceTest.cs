@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Services;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
@@ -16,24 +16,23 @@ namespace GameStore.BLL.Tests
     public class CommentServiceTest
     {
         private const string GameKey = "mario";
+        private const string GameId = "457a3d66-24f2-487e-a816-a21531e6a019";
 
         private readonly ICommentService _commentService;
         private readonly Mock<IGameService> _gameService;
         private readonly Mock<ICommentRepository> _commentRepository;
-        private readonly Mock<IGameRepository> _gameRepository;
+        private readonly Mock<IGameRepositoryFacade> _gameRepository;
         private readonly Mock<IUnitOfWork> _unitOfWork;
         private readonly Mock<IMapper> _mapper;
 
         private readonly List<DbModels.Comment> _commentsFromDb;
         private readonly List<BusinessModels.Comment> _comments;
 
-        private readonly Guid _gameId = Guid.Parse("457a3d66-24f2-487e-a816-a21531e6a019");
-
         public CommentServiceTest()
         {
             _commentRepository = new Mock<ICommentRepository>();
 
-            _gameRepository = new Mock<IGameRepository>();
+            _gameRepository = new Mock<IGameRepositoryFacade>();
 
             _gameService = new Mock<IGameService>();
 
@@ -53,13 +52,13 @@ namespace GameStore.BLL.Tests
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
-                    CommentId = Guid.NewGuid(),
+                    CommentId = Guid.NewGuid().ToString(),
                     CommentingGame = new DbModels.Game
                     {
-                        GameId = _gameId,
+                        GameId = GameId,
                         Key = GameKey,
                     },
-                    GameId = _gameId,
+                    GameId = GameId,
                     ParentCommentId = null,
                 },
 
@@ -67,12 +66,12 @@ namespace GameStore.BLL.Tests
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
-                    CommentId = Guid.NewGuid(),
+                    CommentId = Guid.NewGuid().ToString(),
                     CommentingGame = new DbModels.Game
                     {
                         Key = "contr_strike",
                     },
-                    GameId = Guid.NewGuid(),
+                    GameId = Guid.NewGuid().ToString(),
                     ParentCommentId = null,
                 },
 
@@ -80,12 +79,12 @@ namespace GameStore.BLL.Tests
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
-                    CommentId = Guid.NewGuid(),
+                    CommentId = Guid.NewGuid().ToString(),
                     CommentingGame = new DbModels.Game
                     {
                         Key = "lol",
                     },
-                    GameId = Guid.NewGuid(),
+                    GameId = Guid.NewGuid().ToString(),
                     ParentCommentId = null,
                 },
             };
@@ -96,8 +95,8 @@ namespace GameStore.BLL.Tests
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
-                    CommentId = Guid.NewGuid(),
-                    GameId = _gameId,
+                    CommentId = Guid.NewGuid().ToString(),
+                    GameId = GameId,
                     ParentCommentId = null,
                 },
 
@@ -105,8 +104,8 @@ namespace GameStore.BLL.Tests
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
-                    CommentId = Guid.NewGuid(),
-                    GameId = Guid.NewGuid(),
+                    CommentId = Guid.NewGuid().ToString(),
+                    GameId = Guid.NewGuid().ToString(),
                     ParentCommentId = null,
                 },
             };
@@ -119,13 +118,13 @@ namespace GameStore.BLL.Tests
             {
                 new DbModels.Game
                 {
-                    GameId = _gameId,
+                    GameId = GameId,
                     Key = GameKey,
                 },
 
                 new DbModels.Game
                 {
-                    GameId = Guid.Empty,
+                    GameId = Guid.Empty.ToString(),
                     Key = "lol",
                 },
             };
@@ -137,8 +136,8 @@ namespace GameStore.BLL.Tests
                 .Setup(g => g.GetByKey(GameKey))
                 .Returns(gameList.First());
             _commentRepository
-                .Setup(c => c.GetCommentsByGameId(_gameId))
-                .Returns(_commentsFromDb.Where(y => y.GameId.Equals(_gameId)));
+                .Setup(c => c.GetCommentsByGameId(GameId))
+                .Returns(_commentsFromDb.Where(y => y.GameId.Equals(GameId)));
             _mapper
                 .Setup(m => m
                     .Map<IEnumerable<BusinessModels.Comment>>(
@@ -150,7 +149,7 @@ namespace GameStore.BLL.Tests
 
             Assert
                 .Equal(
-                    _comments.Where(y => y.GameId.Equals(_gameId)).Count(),
+                    _comments.Where(y => y.GameId.Equals(GameId)).Count(),
                     res);
         }
 
@@ -163,13 +162,13 @@ namespace GameStore.BLL.Tests
                 {
                     Name = "Comment Name",
                     Body = "Comment Body",
-                    CommentId = Guid.NewGuid(),
+                    CommentId = Guid.NewGuid().ToString(),
                     CommentingGame = new DbModels.Game
                     {
-                        GameId = _gameId,
+                        GameId = GameId,
                         Key = GameKey,
                     },
-                    GameId = _gameId,
+                    GameId = GameId,
                     ParentCommentId = null,
                 },
             };
@@ -181,13 +180,13 @@ namespace GameStore.BLL.Tests
             {
                 new DbModels.Game
                 {
-                    GameId = _gameId,
+                    GameId = GameId,
                     Key = GameKey,
                 },
 
                 new DbModels.Game
                 {
-                    GameId = Guid.NewGuid(),
+                    GameId = Guid.NewGuid().ToString(),
                     Key = "lol",
                 },
             };
@@ -218,7 +217,7 @@ namespace GameStore.BLL.Tests
         {
             BusinessModels.Game game = new BusinessModels.Game
             {
-                GameId = _gameId,
+                GameId = GameId,
                 Key = GameKey,
             };
 
@@ -226,15 +225,15 @@ namespace GameStore.BLL.Tests
             {
                 Name = "Comment Name",
                 Body = "Comment Body",
-                CommentId = Guid.NewGuid(),
-                GameId = _gameId,
+                CommentId = Guid.NewGuid().ToString(),
+                GameId = GameId,
                 ParentCommentId = null,
             };
 
-            _gameRepository.Setup(g => g.GetById(_gameId))
+            _gameRepository.Setup(g => g.GetById(GameId))
                 .Returns(new DbModels.Game
                 {
-                    GameId = _gameId,
+                    GameId = GameId,
                     Key = GameKey,
                 });
 
@@ -244,24 +243,24 @@ namespace GameStore.BLL.Tests
 
             _commentService.AddCommentToGame(game, newComment);
 
-            _commentRepository
-                .Verify(x => x.Create(It.IsAny<DbModels.Comment>()), Times.Once);
+            _gameRepository
+                .Verify(x => x.Update(It.IsAny<string>(), It.IsAny<DbModels.Game>(), 0), Times.Once);
         }
 
         [Fact]
         public void DeleteComment_PassComment_VerifyDeleting()
         {
             _commentRepository
-                .Setup(c => c.IsPresent(It.IsAny<Guid>()))
+                .Setup(c => c.IsPresent(It.IsAny<string>()))
                 .Returns(true);
 
             _commentRepository
-                .Setup(c => c.GetById(It.IsAny<Guid>()))
+                .Setup(c => c.GetById(It.IsAny<string>()))
                 .Returns(_commentsFromDb.First());
 
             _commentService.DeleteComment(_comments.First());
 
-            _commentRepository.Verify(c => c.Delete(It.IsAny<Guid>()));
+            _commentRepository.Verify(c => c.Delete(It.IsAny<string>()));
         }
 
         [Fact]
@@ -292,7 +291,7 @@ namespace GameStore.BLL.Tests
             var result = _commentService.UpdateComment(_comments.First());
 
             _commentRepository.Verify(c => c
-                .Update(It.IsAny<Guid>(), It.IsAny<DbModels.Comment>()));
+                .Update(It.IsAny<string>(), It.IsAny<DbModels.Comment>()));
             Assert.NotNull(result);
         }
 
@@ -300,7 +299,7 @@ namespace GameStore.BLL.Tests
         public void GetCommentById_PassCommentId_ReturnsComment()
         {
             _commentRepository
-                .Setup(c => c.GetById(It.IsAny<Guid>()))
+                .Setup(c => c.GetById(It.IsAny<string>()))
                 .Returns(_commentsFromDb.First());
             _mapper
                 .Setup(m => m

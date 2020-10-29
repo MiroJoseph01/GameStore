@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
 using BusinessModels = GameStore.BLL.Models;
@@ -11,13 +11,13 @@ namespace GameStore.BLL.Services
 {
     public class CommentService : ICommentService
     {
-        private readonly IGameRepository _gameRepository;
+        private readonly IGameRepositoryFacade _gameRepository;
         private readonly ICommentRepository _commentRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public CommentService(
-            IGameRepository gameRepository,
+            IGameRepositoryFacade gameRepository,
             ICommentRepository commentRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper)
@@ -30,12 +30,19 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.Comment AddCommentToGame(BusinessModels.Game game, BusinessModels.Comment comment)
         {
-            DbModels.Game gameFromDb = _gameRepository.GetById(game.GameId);
+            var gameFromDb = _gameRepository.GetById(game.GameId);
 
-            var commentFromDb = _mapper.Map<DbModels.Comment>(comment);
-            commentFromDb.CommentingGame = gameFromDb;
+            gameFromDb.Comments.Add(new DbModels.Comment
+            {
+                CommentId = Guid.NewGuid().ToString(),
+                Body = comment.Body,
+                Quote = comment.Quote,
+                Name = comment.Name,
+                GameId = game.GameId,
+                ParentCommentId = comment.ParentCommentId,
+            });
 
-            _commentRepository.Create(commentFromDb);
+            _gameRepository.Update(game.GameId, gameFromDb);
 
             _unitOfWork.Commit();
 
@@ -64,7 +71,7 @@ namespace GameStore.BLL.Services
             return comment;
         }
 
-        public BusinessModels.Comment GetCommentById(Guid commentId)
+        public BusinessModels.Comment GetCommentById(string commentId)
         {
             DbModels.Comment commentFromDb = _commentRepository.GetById(commentId);
 

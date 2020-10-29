@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameStore.DAL.Entities;
-using GameStore.DAL.Repositories;
+using GameStore.DAL.Interfaces;
+using GameStore.DAL.Repositories.Sql;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
@@ -14,21 +15,23 @@ namespace GameStore.DAL.Tests
         private readonly CommentRepository _commentRepository;
         private readonly Mock<DbSet<Comment>> _dbComments;
         private readonly Mock<GameStoreContext> _gameStoreContext;
+        private readonly Mock<IEntityStateLogger<Comment>> _logger;
 
         public CommentRepositoryTest()
         {
             _gameStoreContext = new Mock<GameStoreContext>();
+            _logger = new Mock<IEntityStateLogger<Comment>>();
 
             _dbComments = new Mock<DbSet<Comment>>();
 
-            _commentRepository = new CommentRepository(_gameStoreContext.Object);
+            _commentRepository = new CommentRepository(_gameStoreContext.Object, _logger.Object);
         }
 
         [Fact]
         public void Create_PassCommentModel_VerifyAdding()
         {
-            Guid commentId = Guid.NewGuid();
-            Guid gameId = Guid.NewGuid();
+            var commentId = Guid.NewGuid().ToString();
+            var gameId = Guid.NewGuid().ToString();
 
             Comment comment = new Comment
             {
@@ -64,8 +67,8 @@ namespace GameStore.DAL.Tests
         [Fact]
         public void GetById_PassCorrectGameId_ReturnsCommentModel()
         {
-            Guid gameId = Guid.NewGuid();
-            Guid commentId = Guid.NewGuid();
+            var gameId = Guid.NewGuid().ToString();
+            var commentId = Guid.NewGuid().ToString();
 
             Game game = new Game
             {
@@ -97,8 +100,8 @@ namespace GameStore.DAL.Tests
         [Fact]
         public void GetById_PassWrongCommentId_ThrowsNullReferenceException()
         {
-            Guid gameId = Guid.NewGuid();
-            Guid commentId = Guid.NewGuid();
+            var gameId = Guid.NewGuid().ToString();
+            var commentId = Guid.NewGuid().ToString();
 
             Game game = new Game
             {
@@ -119,14 +122,14 @@ namespace GameStore.DAL.Tests
 
             _dbComments.Setup(c => c.Find(commentId)).Returns(comment);
 
-            Assert.Throws<NullReferenceException>(() => _commentRepository.GetById(Guid.NewGuid()));
+            Assert.Throws<NullReferenceException>(() => _commentRepository.GetById(Guid.NewGuid().ToString()));
         }
 
         [Fact]
         public void GetAll_ReturnsListOfComments()
         {
-            Guid gameId = Guid.NewGuid();
-            Guid commentId = Guid.NewGuid();
+            var gameId = Guid.NewGuid().ToString();
+            var commentId = Guid.NewGuid().ToString();
 
             Game game = new Game
             {
@@ -162,8 +165,8 @@ namespace GameStore.DAL.Tests
         [Fact]
         public void GetCommentsByGameId_PassCorrectGameId_ReturnsListOfComments()
         {
-            Guid gameId = Guid.NewGuid();
-            Guid commentId = Guid.NewGuid();
+            var gameId = Guid.NewGuid().ToString();
+            var commentId = Guid.NewGuid().ToString();
 
             Game game = new Game
             {

@@ -1,12 +1,11 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using GameStore.DAL.Entities.Interfaces;
 
 namespace GameStore.DAL.Entities
 {
     public class Comment : ISoftDelete
     {
-        public Guid CommentId { get; set; }
+        public string CommentId { get; set; }
 
         [Required]
         public string Name { get; set; }
@@ -15,9 +14,9 @@ namespace GameStore.DAL.Entities
 
         public string Quote { get; set; }
 
-        public Guid? ParentCommentId { get; set; }
+        public string ParentCommentId { get; set; }
 
-        public Guid GameId { get; set; }
+        public string GameId { get; set; }
 
         public bool IsRemoved { get; set; }
 

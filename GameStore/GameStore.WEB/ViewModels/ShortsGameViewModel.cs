@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 
 namespace GameStore.Web.ViewModels
 {

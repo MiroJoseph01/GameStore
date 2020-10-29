@@ -10,18 +10,23 @@ namespace GameStore.DAL.Pipeline.Filters
 {
     public class GenreFilter : IFilter<Game>
     {
-        private readonly IEnumerable<Guid> _genreIds;
+        private readonly IEnumerable<string> _genreIds;
         private readonly IGenreRepository _genreRepository;
 
         public GenreFilter(IEnumerable<string> genres, IServiceProvider serviceProvider)
         {
             _genreRepository = serviceProvider.GetRequiredService<IGenreRepository>();
             _genreIds = _genreRepository.GetGenreIdsByNames(genres);
+
+            if (genres.Count() == 0 && _genreIds.Count() == 0)
+            {
+                _genreIds = null;
+            }
         }
 
         public Expression<Func<Game, bool>> Execute(Expression<Func<Game, bool>> expression)
         {
-            if (_genreIds is null || _genreIds.Count() == 0)
+            if (_genreIds == null)
             {
                 return expression;
             }

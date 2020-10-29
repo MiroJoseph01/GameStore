@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Models;
 using GameStore.Web.Util;
 using GameStore.Web.Util.Logger;
@@ -144,7 +144,7 @@ namespace GameStore.Web.Controllers
         [Route("/comment/delete")]
         public IActionResult DeleteComment(CommentsViewModel commentsViewModel)
         {
-            var commentToDelete = new Comment { CommentId = Guid.Parse(commentsViewModel.DeleteCommentId) };
+            var commentToDelete = new Comment { CommentId = commentsViewModel.DeleteCommentId };
 
             _commentService.DeleteComment(commentToDelete);
 

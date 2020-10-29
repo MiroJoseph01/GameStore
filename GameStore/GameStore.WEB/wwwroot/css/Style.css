@@ -48,3 +48,7 @@
 .btn-no {
     cursor: pointer;
 }
+
+.dn {
+    display: none
+}

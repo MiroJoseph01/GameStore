@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using AutoMapper;
 using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Models;
 using GameStore.BLL.Payments;
 using GameStore.Web.Controllers;
@@ -17,17 +18,16 @@ namespace GameStore.Web.Tests
 {
     public class BasketControllerTest
     {
-        private readonly Guid _customerId = Guid
-            .Parse("83763329-8e85-4edf-a65e-83986c70edfb");
+        private const string _customerId = "83763329-8e85-4edf-a65e-83986c70edfb";
 
-        private readonly Guid _orderId = Guid
-            .Parse("11763329-8e85-4edf-a65e-83986c70edfb");
+        private const string _orderId = "11763329-8e85-4edf-a65e-83986c70edfb";
 
         private readonly BasketController _basketController;
         private readonly Mock<IGameService> _gameService;
         private readonly Mock<IOrderService> _orderService;
         private readonly Mock<IMapper> _mapper;
         private readonly Mock<IPaymentContext> _paymentContext;
+        private readonly Mock<IShipperService> _shipperService;
 
         private readonly List<Order> _orders;
         private readonly List<OrderStatus> _orderStatuses;
@@ -42,24 +42,26 @@ namespace GameStore.Web.Tests
             _mapper = new Mock<IMapper>();
             _paymentContext = new Mock<IPaymentContext>();
             _configuration = new Mock<IConfiguration>();
+            _shipperService = new Mock<IShipperService>();
 
             _basketController = new BasketController(
                 _gameService.Object,
                 _orderService.Object,
                 _mapper.Object,
                 _paymentContext.Object,
-                _configuration.Object);
+                _configuration.Object,
+                _shipperService.Object);
 
             _orderStatuses = new List<OrderStatus>
             {
                 new OrderStatus
                 {
-                    OrderStatusId = Guid.NewGuid(),
+                    OrderStatusId = Guid.NewGuid().ToString(),
                     Status = "Open",
                 },
                 new OrderStatus
                 {
-                    OrderStatusId = Guid.NewGuid(),
+                    OrderStatusId = Guid.NewGuid().ToString(),
                     Status = "Paid",
                 },
             };
@@ -72,7 +74,7 @@ namespace GameStore.Web.Tests
                     ProductName = "Product Name1",
                     ProductKey = "product_name1",
                     Discount = 0.5f,
-                    OrderDetailId = Guid.NewGuid(),
+                    OrderDetailId = Guid.NewGuid().ToString(),
                     Price = 100,
                     Quantity = 4,
                     OrderId = _orderId,
@@ -83,7 +85,7 @@ namespace GameStore.Web.Tests
                     ProductName = "Product Name2",
                     ProductKey = "product_name2",
                     Discount = 0.5f,
-                    OrderDetailId = Guid.NewGuid(),
+                    OrderDetailId = Guid.NewGuid().ToString(),
                     Price = 90,
                     Quantity = 3,
                     OrderId = _orderId,
@@ -94,7 +96,7 @@ namespace GameStore.Web.Tests
             {
                 new Order
                 {
-                OrderId = Guid.NewGuid(),
+                OrderId = Guid.NewGuid().ToString(),
                 CustomerId = _customerId,
                 Status = "Open",
                 OrderStatus = _orderStatuses.First(),
@@ -149,7 +151,7 @@ namespace GameStore.Web.Tests
         }
 
         [Fact]
-        public void Order_ReturnsOrderWithDetails()
+        public void ViewOrder_ReturnsOrderWithDetails()
         {
             _orderService
                 .Setup(o => o.GetOrdersByCustomerId(It.IsAny<string>()))
@@ -162,7 +164,7 @@ namespace GameStore.Web.Tests
 
             ViewResult view = Assert.IsType<ViewResult>(result);
             var model = Assert
-                .IsAssignableFrom<IEnumerable<BasketViewModel>>(view.Model);
+                .IsAssignableFrom<GeneralBasketViewModel>(view.Model);
         }
 
         [Fact]
@@ -206,7 +208,7 @@ namespace GameStore.Web.Tests
                 .Setup(o => o.GetAllOrderDetails())
                 .Returns(_orderDetails);
             _gameService
-                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Setup(g => g.GetGameById(It.IsAny<string>()))
                 .Returns(game);
 
             var payment = new PaymentViewModel
@@ -235,7 +237,7 @@ namespace GameStore.Web.Tests
             };
 
             _paymentContext
-                .Setup(p => p.ProcessPayment(It.IsAny<Guid>()))
+                .Setup(p => p.ProcessPayment(It.IsAny<string>()))
                 .Returns(info);
 
             var result = _basketController.PayWithBank(_orderId.ToString());
@@ -326,6 +328,81 @@ namespace GameStore.Web.Tests
 
             _orderService.Verify(o => o.DeleteOrderDetail(It.IsAny<OrderDetail>()));
             Assert.IsType<RedirectToActionResult>(result);
+        }
+
+        [Fact]
+        public void ViewDetails_PassId_ReturnsViewWithForm()
+        {
+            _orderService.Setup(o => o.GetOrderById(It.IsAny<string>())).Returns(_orders.First());
+            _mapper.Setup(m => m.Map<BasketViewModel>(It.IsAny<Order>())).Returns(_basketViews.First());
+
+            var result = _basketController.ViewDetails(It.IsAny<string>());
+
+            ViewResult view = Assert.IsType<ViewResult>(result);
+            Assert.IsAssignableFrom<BasketViewModel>(view.Model);
+        }
+
+        [Fact]
+        public void ViewDetails_PassModel_RedirectToAction()
+        {
+            var correctModel = new BasketViewModel
+            {
+                CustomerId = Guid.NewGuid().ToString(),
+                OrderId = Guid.NewGuid().ToString(),
+                OrderDate = DateTime.Now.ToString(),
+                Freight = 10,
+                ShipCity = "City",
+                OrderDetails = null,
+                ShipAddress = "Address to ship",
+                ShipVia = "1",
+            };
+
+            _orderService.Setup(o => o.GetOrderById(It.IsAny<string>())).Returns(_orders.First());
+            _shipperService.Setup(s => s.GetAllShippers()).Returns(new List<Shipper>
+            {
+                new Shipper
+                {
+                    ShipperID = "1",
+                    CompanyName = "Name",
+                    Phone = "66-555",
+                },
+            });
+
+            var result = _basketController.ViewDetails(correctModel, It.IsAny<string>());
+
+            _orderService.Verify(x => x.UpdateOrder(It.IsAny<Order>()));
+
+            Assert.IsType<RedirectToActionResult>(result);
+        }
+
+        [Fact]
+        public void ViewDetails_PassUnvalidModel_RedirectToAction()
+        {
+            var incorrectModel = new BasketViewModel
+            {
+                CustomerId = Guid.NewGuid().ToString(),
+                OrderId = Guid.NewGuid().ToString(),
+                OrderDate = DateTime.Now.ToString(),
+                Freight = 10,
+                ShipCity = "City",
+                OrderDetails = null,
+                ShipAddress = "Address to ship",
+                ShipVia = "-1",
+            };
+
+            _shipperService.Setup(s => s.GetAllShippers()).Returns(new List<Shipper>
+            {
+                new Shipper
+                {
+                    ShipperID = "1",
+                    CompanyName = "Name",
+                    Phone = "66-555",
+                },
+            });
+
+            var result = _basketController.ViewDetails(incorrectModel, It.IsAny<string>());
+
+            Assert.IsType<ViewResult>(result);
         }
     }
 }

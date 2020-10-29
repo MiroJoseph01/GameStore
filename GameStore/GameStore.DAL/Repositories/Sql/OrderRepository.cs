@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using GameStore.DAL.Entities;
+using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace GameStore.DAL.Repositories
+namespace GameStore.DAL.Repositories.Sql
 {
     public class OrderRepository : Repository<Order>, IOrderRepository
     {
         private readonly GameStoreContext _dbContext;
 
-        public OrderRepository(GameStoreContext dbContext)
-            : base(dbContext)
+        public OrderRepository(GameStoreContext dbContext, IEntityStateLogger<Order> stateLogger)
+            : base(dbContext, stateLogger)
         {
             _dbContext = dbContext;
         }
 
-        public IEnumerable<Order> GetByCustomerId(Guid customerId)
+        public IEnumerable<Order> GetByCustomerId(string customerId)
         {
             List<Order> res = _dbContext.Orders
                 .Include(y => y.OrderDetails)
@@ -33,14 +33,14 @@ namespace GameStore.DAL.Repositories
             return res;
         }
 
-        public override Order GetById(Guid id)
+        public override Order GetById(string id)
         {
             var res = _dbContext.Orders
                 .Include(y => y.OrderDetails)
                 .Include(z => z.OrderStatus)
-                .FirstOrDefault(x => x.OrderId.Equals(id) && x.IsRemoved == false);
+                .FirstOrDefault(x => x.OrderId.Equals(id) && !x.IsRemoved);
 
-            res.OrderDetails = res.OrderDetails.Where(x => x.IsRemoved == false).ToList();
+            res.OrderDetails = res.OrderDetails.Where(x => !x.IsRemoved).ToList();
 
             return res;
         }

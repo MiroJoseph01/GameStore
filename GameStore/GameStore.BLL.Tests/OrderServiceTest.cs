@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Payments;
 using GameStore.BLL.Services;
 using GameStore.DAL.Interfaces;
@@ -16,9 +16,11 @@ namespace GameStore.BLL.Tests
 {
     public class OrderServiceTest
     {
+        private readonly string _customerId = Guid.NewGuid().ToString();
+
         private readonly OrderService _orderService;
         private readonly Mock<IGameService> _gameService;
-        private readonly Mock<IOrderRepository> _orderRepository;
+        private readonly Mock<IOrderRepositoryFacade> _orderRepository;
         private readonly Mock<IOrderDetailRepository> _orderDetailRepository;
         private readonly Mock<IRepository<DbModels.OrderStatus>> _orderStatusRepository;
         private readonly Mock<IUnitOfWork> _unitOfWork;
@@ -33,12 +35,10 @@ namespace GameStore.BLL.Tests
         private readonly List<BusinessModels.OrderStatus> _orderStatuses;
         private readonly List<DbModels.OrderStatus> _orderStatusesFromDb;
 
-        private readonly Guid _customerId = Guid.NewGuid();
-
         public OrderServiceTest()
         {
             _gameService = new Mock<IGameService>();
-            _orderRepository = new Mock<IOrderRepository>();
+            _orderRepository = new Mock<IOrderRepositoryFacade>();
             _orderDetailRepository = new Mock<IOrderDetailRepository>();
             _orderStatusRepository = new Mock<IRepository<DbModels.OrderStatus>>();
             _unitOfWork = new Mock<IUnitOfWork>();
@@ -56,7 +56,7 @@ namespace GameStore.BLL.Tests
             {
                 new BusinessModels.OrderDetail
                 {
-                    OrderDetailId = Guid.NewGuid(),
+                    OrderDetailId = Guid.NewGuid().ToString(),
                     ProductName = "Product Name 1",
                     Price = 10,
                     Discount = 0.5f,
@@ -67,7 +67,7 @@ namespace GameStore.BLL.Tests
 
                 new BusinessModels.OrderDetail
                 {
-                    OrderDetailId = Guid.NewGuid(),
+                    OrderDetailId = Guid.NewGuid().ToString(),
                     ProductName = "Product Name 2",
                     Price = 20,
                     Discount = 0.5f,
@@ -78,7 +78,7 @@ namespace GameStore.BLL.Tests
 
                 new BusinessModels.OrderDetail
                 {
-                    OrderDetailId = Guid.NewGuid(),
+                    OrderDetailId = Guid.NewGuid().ToString(),
                     ProductName = "Product Name 3",
                     Price = 20,
                     Discount = 0.5f,
@@ -122,7 +122,7 @@ namespace GameStore.BLL.Tests
             {
                 new BusinessModels.Order
                 {
-                    OrderId = Guid.NewGuid(),
+                    OrderId = Guid.NewGuid().ToString(),
                     Status = "Open",
                     CustomerId = _customerId,
                     OrderDetails = _orderDetails,
@@ -130,7 +130,7 @@ namespace GameStore.BLL.Tests
 
                 new BusinessModels.Order
                 {
-                    OrderId = Guid.NewGuid(),
+                    OrderId = Guid.NewGuid().ToString(),
                     Status = "Submitted",
                     CustomerId = _customerId,
                     OrderDetails =
@@ -160,7 +160,7 @@ namespace GameStore.BLL.Tests
             {
                 new BusinessModels.OrderStatus
                 {
-                    OrderStatusId = Guid.NewGuid(),
+                    OrderStatusId = Guid.NewGuid().ToString(),
                     Status = "Open",
                 },
             };
@@ -169,7 +169,7 @@ namespace GameStore.BLL.Tests
             {
                 new DbModels.OrderStatus
                 {
-                    OrderStatusId = Guid.NewGuid(),
+                    OrderStatusId = Guid.NewGuid().ToString(),
                     Status = "Open",
                 },
             };
@@ -183,6 +183,7 @@ namespace GameStore.BLL.Tests
                 Key = "game key",
                 Name = "game name",
                 UnitsInStock = 1,
+                GameId = "Game Id",
             };
             _orderRepository
                 .Setup(o => o.GetByCustomerId(_customerId))
@@ -197,7 +198,10 @@ namespace GameStore.BLL.Tests
                 .Setup(g => g.GetGameByKey(It.IsAny<string>()))
                 .Returns(game);
             _gameService
-                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Setup(g => g.GetGameById(It.IsAny<string>()))
+                .Returns(game);
+            _gameService
+                .Setup(g => g.EditGame(It.IsAny<BusinessModels.Game>(), It.IsAny<short>()))
                 .Returns(game);
 
             _orderService.AddOrderDetail(_customerId.ToString(), game.Key);
@@ -212,6 +216,7 @@ namespace GameStore.BLL.Tests
             {
                 Key = "game key",
                 Name = "game name",
+                GameId = "Game Id",
             };
             _orderRepository
                 .Setup(o => o.GetByCustomerId(_customerId))
@@ -227,7 +232,7 @@ namespace GameStore.BLL.Tests
                 .Setup(g => g.GetGameByKey(It.IsAny<string>()))
                 .Returns(game);
             _gameService
-                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Setup(g => g.GetGameById(It.IsAny<string>()))
                 .Returns(game);
 
             _orderService.AddOrderDetail(_customerId.ToString(), game.Key);
@@ -240,13 +245,13 @@ namespace GameStore.BLL.Tests
             {
                 Key = "game key",
                 Name = "game name",
-                GameId = Guid.NewGuid(),
+                GameId = Guid.NewGuid().ToString(),
                 UnitsInStock = 10,
             };
 
             BusinessModels.OrderDetail detail = new BusinessModels.OrderDetail
             {
-                OrderDetailId = Guid.NewGuid(),
+                OrderDetailId = Guid.NewGuid().ToString(),
                 OrderId = _orders.First().OrderId,
                 ProductName = "Product Name 1",
                 Price = 10,
@@ -270,7 +275,7 @@ namespace GameStore.BLL.Tests
             {
                 new BusinessModels.Order
                 {
-                    OrderId = Guid.NewGuid(),
+                    OrderId = Guid.NewGuid().ToString(),
                     Status = "Open",
                     CustomerId = _customerId,
                     OrderDetails = new List<BusinessModels.OrderDetail>
@@ -282,7 +287,7 @@ namespace GameStore.BLL.Tests
 
             _orderDetailRepository
                 .Setup(o => o.GetOrderDetailByOrderIdAndProductId(
-                        It.IsAny<Guid>(),
+                        It.IsAny<string>(),
                         It.IsAny<string>()))
                 .Returns(detailFromDb);
             _mapper
@@ -295,13 +300,17 @@ namespace GameStore.BLL.Tests
             _gameService
                 .Setup(g => g.GetGameByKey(It.IsAny<string>()))
                 .Returns(game);
-            _gameService.Setup(g => g.GetGameById(It.IsAny<Guid>())).Returns(game);
+            _gameService
+                .Setup(g => g.EditGame(It.IsAny<BusinessModels.Game>(), It.IsAny<short>()))
+                .Returns(game);
+
+            _gameService.Setup(g => g.GetGameById(It.IsAny<string>())).Returns(game);
 
             _orderService.AddOrderDetail(_customerId.ToString(), game.Key);
 
             _orderDetailRepository
                 .Verify(o => o
-                    .Update(It.IsAny<Guid>(), It.IsAny<DbModels.OrderDetail>()));
+                    .Update(It.IsAny<string>(), It.IsAny<DbModels.OrderDetail>()));
         }
 
         [Fact]
@@ -327,7 +336,7 @@ namespace GameStore.BLL.Tests
                         It.IsAny<IEnumerable<DbModels.OrderDetail>>()))
                 .Returns(_orderDetails);
 
-            _gameService.Setup(g => g.GetGameById(It.IsAny<Guid>())).Returns(game);
+            _gameService.Setup(g => g.GetGameById(It.IsAny<string>())).Returns(game);
 
             int result = _orderService.GetOrdersByCustomerId(_customerId.ToString()).Count();
 
@@ -368,10 +377,10 @@ namespace GameStore.BLL.Tests
         public void DeleteOrder_PassOrderModel_VerifyDeleting()
         {
             _orderRepository
-                .Setup(o => o.IsPresent(It.IsAny<Guid>()))
+                .Setup(o => o.IsPresent(It.IsAny<string>()))
                 .Returns(true);
             _orderRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(_ordersFromDb.First());
 
             _orderService.DeleteOrder(_orders.First());
@@ -385,7 +394,7 @@ namespace GameStore.BLL.Tests
             DbModels.Order order = _ordersFromDb.First();
             order.IsRemoved = true;
 
-            _orderRepository.Setup(g => g.GetById(It.IsAny<Guid>())).Returns(order);
+            _orderRepository.Setup(g => g.GetById(It.IsAny<string>())).Returns(order);
 
             Assert.Throws<ArgumentException>(() => _orderService
                 .DeleteOrder(_orders.First()));
@@ -408,7 +417,7 @@ namespace GameStore.BLL.Tests
                 .UpdateOrder(_orders.First());
 
             _orderRepository
-                .Verify(c => c.Update(It.IsAny<Guid>(), It.IsAny<DbModels.Order>()));
+                .Verify(c => c.Update(It.IsAny<string>(), It.IsAny<DbModels.Order>()));
 
             Assert.NotNull(result);
         }
@@ -424,10 +433,10 @@ namespace GameStore.BLL.Tests
             };
 
             _orderRepository
-                .Setup(c => c.GetById(It.IsAny<Guid>()))
+                .Setup(c => c.GetById(It.IsAny<string>()))
                 .Returns(_ordersFromDb.First());
             _gameService
-                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Setup(g => g.GetGameById(It.IsAny<string>()))
                 .Returns(game);
             _mapper
                 .Setup(m => m
@@ -464,7 +473,7 @@ namespace GameStore.BLL.Tests
 
             _orderRepository.Setup(p => p.GetAll()).Returns(_ordersFromDb);
             _gameService
-                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Setup(g => g.GetGameById(It.IsAny<string>()))
                 .Returns(game);
             _mapper
                 .Setup(m => m
@@ -507,13 +516,13 @@ namespace GameStore.BLL.Tests
             };
 
             _orderDetailRepository
-                .Setup(o => o.IsPresent(It.IsAny<Guid>()))
+                .Setup(o => o.IsPresent(It.IsAny<string>()))
                 .Returns(true);
             _orderDetailRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(_orderDetailsFromDb.First());
             _gameService
-                .Setup(g => g.GetGameById(It.IsAny<Guid>()))
+                .Setup(g => g.GetGameById(It.IsAny<string>()))
                 .Returns(game);
             _orderService
                 .DeleteOrderDetail(_orderDetails.First());
@@ -528,7 +537,7 @@ namespace GameStore.BLL.Tests
             orderDetail.IsRemoved = true;
 
             _orderDetailRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(orderDetail);
 
             Assert
@@ -554,7 +563,7 @@ namespace GameStore.BLL.Tests
 
             _orderDetailRepository
                 .Verify(c => c
-                    .Update(It.IsAny<Guid>(), It.IsAny<DbModels.OrderDetail>()));
+                    .Update(It.IsAny<string>(), It.IsAny<DbModels.OrderDetail>()));
 
             Assert.NotNull(result);
         }
@@ -563,10 +572,10 @@ namespace GameStore.BLL.Tests
         public void GetOrderDetailById_PassOrderDetailId_ReturnsOrderDetail()
         {
             _orderDetailRepository
-                .Setup(o => o.IsPresent(It.IsAny<Guid>()))
+                .Setup(o => o.IsPresent(It.IsAny<string>()))
                 .Returns(true);
             _orderDetailRepository
-                .Setup(c => c.GetById(It.IsAny<Guid>()))
+                .Setup(c => c.GetById(It.IsAny<string>()))
                 .Returns(_orderDetailsFromDb.First());
             _mapper
                 .Setup(m => m
@@ -651,9 +660,9 @@ namespace GameStore.BLL.Tests
         [Fact]
         public void DeleteOrderStatus_PassOrderStatusModel_VerifyDeleting()
         {
-            _orderStatusRepository.Setup(o => o.IsPresent(It.IsAny<Guid>())).Returns(true);
+            _orderStatusRepository.Setup(o => o.IsPresent(It.IsAny<string>())).Returns(true);
             _orderStatusRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(_orderStatusesFromDb.First());
             _orderService.DeleteOrderStatus(_orderStatuses.First());
 
@@ -667,7 +676,7 @@ namespace GameStore.BLL.Tests
             orderStatus.IsRemoved = true;
 
             _orderStatusRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(orderStatus);
 
             Assert
@@ -693,7 +702,7 @@ namespace GameStore.BLL.Tests
 
             _orderStatusRepository
                 .Verify(c => c
-                    .Update(It.IsAny<Guid>(), It.IsAny<DbModels.OrderStatus>()));
+                    .Update(It.IsAny<string>(), It.IsAny<DbModels.OrderStatus>()));
             Assert.NotNull(result);
         }
 

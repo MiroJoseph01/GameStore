@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
 using BusinessModels = GameStore.BLL.Models;
@@ -11,11 +11,11 @@ namespace GameStore.BLL.Services
 {
     public class GenreService : IGenreService
     {
-        private readonly IRepository<DbModels.Genre> _genreRepository;
+        private readonly IGenreRepositoryFacade _genreRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public GenreService(IRepository<DbModels.Genre> genreRepository, IUnitOfWork unitOfWork, IMapper mapper)
+        public GenreService(IGenreRepositoryFacade genreRepository, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _genreRepository = genreRepository;
             _unitOfWork = unitOfWork;
@@ -24,6 +24,8 @@ namespace GameStore.BLL.Services
 
         public BusinessModels.Genre AddGenre(BusinessModels.Genre genre)
         {
+            genre.GenreId = Guid.NewGuid().ToString();
+
             _genreRepository.Create(_mapper.Map<DbModels.Genre>(genre));
 
             _unitOfWork.Commit();
@@ -52,7 +54,7 @@ namespace GameStore.BLL.Services
             return genre;
         }
 
-        public BusinessModels.Genre GetGenreById(Guid genreId)
+        public BusinessModels.Genre GetGenreById(string genreId)
         {
             var genreFromDb = _genreRepository.GetById(genreId);
 

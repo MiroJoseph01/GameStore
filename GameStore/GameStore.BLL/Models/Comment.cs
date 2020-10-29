@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace GameStore.BLL.Models
+﻿namespace GameStore.BLL.Models
 {
     public class Comment
     {
-        public Guid CommentId { get; set; }
+        public string CommentId { get; set; }
 
         public string Name { get; set; }
 
@@ -14,8 +12,8 @@ namespace GameStore.BLL.Models
 
         public bool IsRemoved { get; set; }
 
-        public Guid? ParentCommentId { get; set; }
+        public string ParentCommentId { get; set; }
 
-        public Guid GameId { get; set; }
+        public string GameId { get; set; }
     }
 }

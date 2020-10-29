@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using GameStore.DAL.Entities.Interfaces;
 using GameStore.DAL.Entities.SupportingModels;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace GameStore.DAL.Entities
 {
+    [BsonIgnoreExtraElements]
     public class Game : ISoftDelete
     {
         public Game()
@@ -16,7 +18,7 @@ namespace GameStore.DAL.Entities
             Comments = new List<Comment>();
         }
 
-        public Guid GameId { get; set; }
+        public string GameId { get; set; }
 
         public string Key { get; set; }
 
@@ -34,11 +36,11 @@ namespace GameStore.DAL.Entities
 
         public decimal Price { get; set; }
 
-        public int Views { get; set; }
-
         public DateTime Date { get; set; }
 
-        public Guid? PublisherId { get; set; }
+        public bool FromMongo { get; set; }
+
+        public string PublisherId { get; set; }
 
         public Publisher Publisher { get; set; }
 

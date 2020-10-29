@@ -1,5 +1,4 @@
-﻿using System;
-using GameStore.BLL.Interfaces;
+﻿using GameStore.BLL.Interfaces;
 
 namespace GameStore.BLL.Payments
 {
@@ -12,7 +11,7 @@ namespace GameStore.BLL.Payments
             _strategy = strategy;
         }
 
-        public PaymentInfo ProcessPayment(Guid id)
+        public PaymentInfo ProcessPayment(string id)
         {
             return _strategy.Pay(id);
         }

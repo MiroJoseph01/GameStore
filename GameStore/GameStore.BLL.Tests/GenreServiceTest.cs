@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Services;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
@@ -16,7 +16,7 @@ namespace GameStore.BLL.Tests
     public class GenreServiceTest
     {
         private readonly IGenreService _genreService;
-        private readonly Mock<IRepository<DbModels.Genre>> _genreRepository;
+        private readonly Mock<IGenreRepositoryFacade> _genreRepository;
         private readonly Mock<IUnitOfWork> _unitOfWork;
         private readonly Mock<IMapper> _mapper;
 
@@ -25,7 +25,7 @@ namespace GameStore.BLL.Tests
 
         public GenreServiceTest()
         {
-            _genreRepository = new Mock<IRepository<DbModels.Genre>>();
+            _genreRepository = new Mock<IGenreRepositoryFacade>();
             _unitOfWork = new Mock<IUnitOfWork>();
             _mapper = new Mock<IMapper>();
 
@@ -38,12 +38,12 @@ namespace GameStore.BLL.Tests
             {
                 new BusinessModels.Genre
                 {
-                    GenreId = Guid.NewGuid(),
+                    GenreId = Guid.NewGuid().ToString(),
                     GenreName = "Genre1 name",
                 },
                 new BusinessModels.Genre
                 {
-                    GenreId = Guid.NewGuid(),
+                    GenreId = Guid.NewGuid().ToString(),
                     GenreName = "Genre2 name",
                 },
             };
@@ -119,11 +119,11 @@ namespace GameStore.BLL.Tests
         public void DeleteGenre_PassGenreModel()
         {
             _genreRepository
-                .Setup(g => g.IsPresent(It.IsAny<Guid>()))
+                .Setup(g => g.IsPresent(It.IsAny<string>()))
                 .Returns(true);
 
             _genreRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(_genresFromDb.First());
 
             _genreService.DeleteGenre(_genres.First());
@@ -137,7 +137,7 @@ namespace GameStore.BLL.Tests
             var genre = _genresFromDb.First();
             genre.IsRemoved = true;
 
-            _genreRepository.Setup(g => g.GetById(It.IsAny<Guid>())).Returns(genre);
+            _genreRepository.Setup(g => g.GetById(It.IsAny<string>())).Returns(genre);
 
             Assert
                 .Throws<ArgumentException>(() => _genreService
@@ -162,7 +162,7 @@ namespace GameStore.BLL.Tests
 
             _genreRepository
                 .Verify(c => c
-                    .Update(It.IsAny<Guid>(), It.IsAny<DbModels.Genre>()));
+                    .Update(It.IsAny<string>(), It.IsAny<DbModels.Genre>()));
             Assert.NotNull(result);
         }
 
@@ -170,10 +170,10 @@ namespace GameStore.BLL.Tests
         public void GetGenreById_PassGenreId_ReturnsGenre()
         {
             _genreRepository
-                .Setup(g => g.IsPresent(It.IsAny<Guid>()))
+                .Setup(g => g.IsPresent(It.IsAny<string>()))
                 .Returns(true);
             _genreRepository
-                .Setup(c => c.GetById(It.IsAny<Guid>()))
+                .Setup(c => c.GetById(It.IsAny<string>()))
                 .Returns(_genresFromDb.First());
             _mapper
                 .Setup(m => m
@@ -189,7 +189,7 @@ namespace GameStore.BLL.Tests
         public void GetGenreById_PassNonExistingGenreId_ReturnsNull()
         {
             _genreRepository
-                .Setup(g => g.IsPresent(It.IsAny<Guid>()))
+                .Setup(g => g.IsPresent(It.IsAny<string>()))
                 .Returns(false);
             var genre = _genresFromDb.First();
             genre.IsRemoved = true;

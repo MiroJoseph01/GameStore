@@ -1,6 +1,4 @@
 ﻿using GameStore.BLL.Models;
-using GameStore.Web.ViewModels;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GameStore.Web.Utill
 {

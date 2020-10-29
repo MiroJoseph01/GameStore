@@ -10,18 +10,23 @@ namespace GameStore.DAL.Pipeline.Filters
 {
     public class PublisherFilter : IFilter<Game>
     {
-        private readonly IEnumerable<Guid> _publisherIds;
+        private readonly IEnumerable<string> _publisherIds;
         private readonly IPublisherRepository _publisherRepository;
 
         public PublisherFilter(IEnumerable<string> publishers, IServiceProvider serviceProvider)
         {
             _publisherRepository = serviceProvider.GetRequiredService<IPublisherRepository>();
             _publisherIds = _publisherRepository.GetPublisherIdsByNames(publishers);
+
+            if (publishers.Count() == 0 && _publisherIds.Count() == 0)
+            {
+                _publisherIds = null;
+            }
         }
 
         public Expression<Func<Game, bool>> Execute(Expression<Func<Game, bool>> expression)
         {
-            if (_publisherIds is null || _publisherIds.Count() == 0)
+            if (_publisherIds is null)
             {
                 return expression;
             }

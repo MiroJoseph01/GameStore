@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Models;
 using GameStore.Web.Controllers;
 using GameStore.Web.Util;
@@ -17,7 +17,7 @@ namespace GameStore.Web.Tests
     public class CommentsControllerTest
     {
         private const string GameKey = "game_key";
-        private readonly Guid _gameId;
+        private readonly string _gameId;
 
         private readonly CommentController _commentsController;
         private readonly Mock<IGameService> _gameService;
@@ -46,7 +46,7 @@ namespace GameStore.Web.Tests
                 _logger.Object,
                 _commentHelper.Object);
 
-            _gameId = Guid.NewGuid();
+            _gameId = Guid.NewGuid().ToString();
 
             _game = new Game
             {
@@ -62,7 +62,7 @@ namespace GameStore.Web.Tests
                     Name = "Comment Name",
                     Body = "Comment Body",
                     GameId = _gameId,
-                    CommentId = Guid.NewGuid(),
+                    CommentId = Guid.NewGuid().ToString(),
                },
 
                new Comment
@@ -70,7 +70,7 @@ namespace GameStore.Web.Tests
                     Name = "Comment Name",
                     Body = "Comment Body",
                     GameId = _gameId,
-                    CommentId = Guid.NewGuid(),
+                    CommentId = Guid.NewGuid().ToString(),
                 },
             };
 

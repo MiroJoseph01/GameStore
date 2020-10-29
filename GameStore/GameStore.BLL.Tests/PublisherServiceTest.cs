@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using GameStore.BLL.Interfaces;
+using GameStore.BLL.Interfaces.Services;
 using GameStore.BLL.Services;
 using GameStore.DAL.Interfaces;
 using GameStore.DAL.Interfaces.Repositories;
@@ -16,7 +16,7 @@ namespace GameStore.BLL.Tests
     public class PublisherServiceTest
     {
         private readonly IPublisherService _publisherService;
-        private readonly Mock<IRepository<DbModels.Publisher>> _publisherRepository;
+        private readonly Mock<IPublisherRepositoryFacade> _publisherRepository;
         private readonly Mock<IUnitOfWork> _unitOfWork;
         private readonly Mock<IMapper> _mapper;
 
@@ -25,7 +25,7 @@ namespace GameStore.BLL.Tests
 
         public PublisherServiceTest()
         {
-            _publisherRepository = new Mock<IRepository<DbModels.Publisher>>();
+            _publisherRepository = new Mock<IPublisherRepositoryFacade>();
             _unitOfWork = new Mock<IUnitOfWork>();
             _mapper = new Mock<IMapper>();
 
@@ -37,13 +37,13 @@ namespace GameStore.BLL.Tests
             _publishers = new List<BusinessModels.Publisher>
             {
                 new BusinessModels.Publisher {
-                    PublisherId = Guid.NewGuid(),
+                    PublisherId = Guid.NewGuid().ToString(),
                     CompanyName = "Publisher1",
                     Description = "Desc1",
                     HomePage = "store",
                 },
                 new BusinessModels.Publisher {
-                    PublisherId = Guid.NewGuid(),
+                    PublisherId = Guid.NewGuid().ToString(),
                     CompanyName = "Publisher2",
                     Description = "Desc2",
                     HomePage = "store",
@@ -93,7 +93,7 @@ namespace GameStore.BLL.Tests
             var publisher = _publishers.First();
 
             _publisherRepository
-                .Setup(p => p.GetById(It.IsAny<Guid>()))
+                .Setup(p => p.GetById(It.IsAny<string>()))
                 .Returns((DbModels.Publisher)null);
 
             var result = _publisherService
@@ -161,10 +161,10 @@ namespace GameStore.BLL.Tests
         public void DeletePublisher_PassPublisherModel()
         {
             _publisherRepository
-                .Setup(p => p.IsPresent(It.IsAny<Guid>()))
+                .Setup(p => p.IsPresent(It.IsAny<string>()))
                 .Returns(true);
             _publisherRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(_publishersFromDb.First());
 
             _publisherService.DeletePublisher(_publishers.First());
@@ -180,7 +180,7 @@ namespace GameStore.BLL.Tests
             publisher.IsRemoved = true;
 
             _publisherRepository
-                .Setup(g => g.GetById(It.IsAny<Guid>()))
+                .Setup(g => g.GetById(It.IsAny<string>()))
                 .Returns(publisher);
 
             Assert
@@ -207,15 +207,15 @@ namespace GameStore.BLL.Tests
 
             _publisherRepository
                 .Verify(c => c
-                    .Update(It.IsAny<Guid>(), It.IsAny<DbModels.Publisher>()));
+                    .Update(It.IsAny<string>(), It.IsAny<DbModels.Publisher>()));
             Assert.NotNull(result);
         }
 
         [Fact]
         public void GetpublisherById_PassPublisherId_ReturnsPublisher()
         {
-            _publisherRepository.Setup(g => g.IsPresent(It.IsAny<Guid>())).Returns(true);
-            _publisherRepository.Setup(c => c.GetById(It.IsAny<Guid>())).Returns(_publishersFromDb.First());
+            _publisherRepository.Setup(g => g.IsPresent(It.IsAny<string>())).Returns(true);
+            _publisherRepository.Setup(c => c.GetById(It.IsAny<string>())).Returns(_publishersFromDb.First());
             _mapper.Setup(m => m.Map<BusinessModels.Publisher>(It.IsAny<DbModels.Publisher>())).Returns(_publishers.First());
 
             var result = _publisherService.GetPublisherById(_publishers.First().PublisherId);
@@ -227,7 +227,7 @@ namespace GameStore.BLL.Tests
         public void GetPublisherById_PassNonExistingPublisherId_ReturnsNull()
         {
             _publisherRepository
-                .Setup(g => g.IsPresent(It.IsAny<Guid>()))
+                .Setup(g => g.IsPresent(It.IsAny<string>()))
                 .Returns(false);
             var publisher = _publishersFromDb.First();
             publisher.IsRemoved = true;

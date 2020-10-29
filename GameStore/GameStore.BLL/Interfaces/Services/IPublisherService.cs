@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GameStore.BLL.Models;
 
-namespace GameStore.BLL.Interfaces
+namespace GameStore.BLL.Interfaces.Services
 {
     public interface IPublisherService
     {
@@ -14,7 +13,7 @@ namespace GameStore.BLL.Interfaces
 
         Publisher UpdatePublisher(Publisher publisher);
 
-        Publisher GetPublisherById(Guid publisherId);
+        Publisher GetPublisherById(string publisherId);
 
         Publisher CreatePublisher(Publisher publisher);
 

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GameStore.DAL.Pipeline.Util
 {
+    [ExcludeFromCodeCoverage]
     public static class EnumHelper
     {
         public static T GetValueFromDescription<T>(string description)
