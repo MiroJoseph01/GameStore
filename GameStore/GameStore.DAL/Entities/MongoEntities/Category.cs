@@ -6,6 +6,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace GameStore.DAL.Entities.MongoEntities
 {
     [Description("categories")]
+    [BsonIgnoreExtraElements]
     public class Category
     {
         public ObjectId Id { get; set; }
