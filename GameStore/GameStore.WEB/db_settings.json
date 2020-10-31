@@ -1,13 +1,13 @@
 ﻿{
   "ConnectionStrings": {
-    "DevelopmentConnection": "Server=EPUAKHAW04F4\\SQLEXPRESS;Database=GameStore_VB;Trusted_Connection=True;MultipleActiveResultSets=true",
+    "DevelopmentConnection": "Server=DESKTOP-OQV67MM\\SQLEXPRESS;Database=GameStore_VB;Trusted_Connection=True;MultipleActiveResultSets=true",
     "DevelopmentMongoConnection": "mongodb://localhost:27017",
-    "DefaultConnection": "Data Source=tcp:ecsd00300935.epam.com,8272;User Id=student;Password=23AXK@cQRz;Initial Catalog=volodymyrbukhanovskyi;MultipleActiveResultSets=True",
-    "DefaultMongoConnection": "mongodb://ecsd00300935.epam.com:8372/volodymyrbukhanovskyi"
+    "DefaultConnection": "",
+    "DefaultMongoConnection": ""
   },
   "MongoConnection": {
     "DevelopmentName": "Northwind",
-    "DefaultName": "volodymyrbukhanovskyi",
+    "DefaultName": "",
     "NewIds": "true"
   }
 }

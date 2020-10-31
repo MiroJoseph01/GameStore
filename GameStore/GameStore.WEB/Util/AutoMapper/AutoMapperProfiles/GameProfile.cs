@@ -68,6 +68,37 @@ namespace GameStore.Web.Util.AutoMapperProfiles
             CreateMap<BusinessModels.QueryModel, FilterModel>();
 
             CreateMap<DbModels.Game, DbModels.Game>();
+
+            CreateMap<BusinessModels.Game, ApiModels.GameViewModel>()
+                .ForMember(
+                    x => x.Genres,
+                    y => y.MapFrom(z => z.GameGenres))
+                .ForMember(
+                    x => x.Platforms,
+                    y => y.MapFrom(z => z.GamePlatforms))
+                .ForMember(
+                    x => x.Publisher,
+                    y => y.MapFrom(z => z.Publisher.CompanyName))
+                .ForMember(
+                    x => x.Discount,
+                    y => y.MapFrom(z => (z.Discount * 100).ToString() + " %"))
+                .ForMember(
+                    x => x.Date,
+                    y => y.MapFrom(z => z.Date.ToShortDateString()));
+
+            CreateMap<ApiModels.GameCreateAndUpdateModel, BusinessModels.Game>()
+                .ForMember(
+                    x => x.GameId,
+                    y => y.MapFrom(z => string.IsNullOrWhiteSpace(z.GameId) ? Guid.NewGuid().ToString() : z.GameId))
+                .ForMember(
+                    x => x.GameGenres,
+                    y => y.MapFrom(z => z.Genres))
+                .ForMember(
+                    x => x.GamePlatforms,
+                    y => y.MapFrom(z => z.Platforms))
+                .ForMember(
+                    x => x.PublisherId,
+                    y => y.Ignore());
         }
     }
 }

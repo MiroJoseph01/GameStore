@@ -20,6 +20,9 @@ namespace GameStore.Web.Util.AutoMapperProfiles
             CreateMap<SelectListItem, BusinessModels.Platform>()
                 .ForMember(x => x.PlatformId, y => y.MapFrom(z => z.Value))
                 .ForMember(x => x.PlatformName, y => y.MapFrom(z => z.Text));
+
+            CreateMap<string, BusinessModels.Platform>()
+                .ForMember(x => x.PlatformId, y => y.MapFrom(z => z));
         }
     }
 }

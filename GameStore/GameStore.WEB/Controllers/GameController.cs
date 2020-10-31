@@ -390,11 +390,6 @@ namespace GameStore.Web.Controllers
         [Route("games/remove/{key}")]
         public IActionResult Delete(string key)
         {
-            if (string.IsNullOrEmpty(key))
-            {
-                return View();
-            }
-
             if (!_gameService.IsPresent(key))
             {
                 return NotFound();

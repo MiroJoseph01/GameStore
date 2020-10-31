@@ -130,16 +130,11 @@ namespace GameStore.BLL.Services
             return Convert(gamesFromDb);
         }
 
-        public bool IsPresent(string gameKey)
+        public bool IsPresent(string gameKeyOrId)
         {
-            DbModels.Game game = _gameRepository.GetByKey(gameKey);
+            DbModels.Game game = _gameRepository.GetByKey(gameKeyOrId);
 
-            if (game is null)
-            {
-                return false;
-            }
-
-            return true;
+            return !(game is null) || _gameRepository.IsPresent(gameKeyOrId);
         }
 
         public int Count()

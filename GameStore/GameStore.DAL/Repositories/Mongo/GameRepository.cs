@@ -100,13 +100,17 @@ namespace GameStore.DAL.Repositories.Mongo
             var publisherCollection = _database
                 .GetCollection<Supplier>(RepositoryHelper.GetDescription(typeof(Supplier)));
 
-            var supplierId = _collection
+            var supplier = _collection
                 .Find(x => x.ProductId.Equals(gameId))
-                .FirstOrDefault()
-                .SupplierID;
+                .FirstOrDefault();
+
+            if (supplier is null)
+            {
+                return null;
+            }
 
             return _mapper.Map<Publisher>(
-                publisherCollection.Find(x => x.SupplierID.Equals(supplierId)).FirstOrDefault());
+                publisherCollection.Find(x => x.SupplierID.Equals(supplier.SupplierID)).FirstOrDefault());
         }
 
         public IEnumerable<Game> GetGamesOfGenre(string genreId)

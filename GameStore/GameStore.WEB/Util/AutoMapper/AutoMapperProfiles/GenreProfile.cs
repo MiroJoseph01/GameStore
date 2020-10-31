@@ -25,6 +25,9 @@ namespace GameStore.Web.Util.AutoMapperProfiles
                 .ForMember(x => x.GenreId, y => y.MapFrom(z => z.CategoryID))
                 .ForMember(x => x.GenreName, y => y.MapFrom(z => z.CategoryName))
                 .ForMember(x => x.ParentGenreId, y => y.Ignore());
+
+            CreateMap<string, BusinessModels.Genre>()
+                .ForMember(x => x.GenreId, y => y.MapFrom(z => z));
         }
     }
 }
