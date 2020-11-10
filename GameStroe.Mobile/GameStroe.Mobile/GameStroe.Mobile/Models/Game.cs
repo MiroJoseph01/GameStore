@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GameStore.Web.ApiModels
+namespace GameStroe.Mobile.Models
 {
     public class Game
     {
@@ -26,7 +26,7 @@ namespace GameStore.Web.ApiModels
 
         public decimal Price { get; set; }
 
-        public string Publisher { get; set; }
+        public Publisher Publisher { get; set; }
 
         public int Views { get; set; }
 

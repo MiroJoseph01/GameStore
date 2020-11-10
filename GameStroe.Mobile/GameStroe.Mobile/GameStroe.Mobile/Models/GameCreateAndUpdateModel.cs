@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace GameStore.Web.ApiModels
+namespace GameStore.Mobile.Models
 {
     public class GameCreateAndUpdateModel
     {

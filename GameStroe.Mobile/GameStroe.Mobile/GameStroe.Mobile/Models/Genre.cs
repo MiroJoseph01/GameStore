@@ -1,4 +1,4 @@
-﻿namespace GameStore.Web.ApiModels
+﻿namespace GameStroe.Mobile.Models
 {
     public class Genre
     {

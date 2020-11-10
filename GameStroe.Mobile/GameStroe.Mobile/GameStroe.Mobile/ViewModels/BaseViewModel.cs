@@ -7,12 +7,13 @@ using Xamarin.Forms;
 
 using GameStroe.Mobile.Models;
 using GameStroe.Mobile.Services;
+using GameStroe.Mobile.Services.Interfaces;
 
 namespace GameStroe.Mobile.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
-        public IDataStore<Item> DataStore => DependencyService.Get<IDataStore<Item>>();
+        public IDataStore<Game> DataStore => DependencyService.Get<IDataStore<Game>>();
 
         bool isBusy = false;
         public bool IsBusy

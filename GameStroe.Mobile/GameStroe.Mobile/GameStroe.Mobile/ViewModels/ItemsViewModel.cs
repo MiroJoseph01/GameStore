@@ -12,22 +12,19 @@ namespace GameStroe.Mobile.ViewModels
 {
     public class ItemsViewModel : BaseViewModel
     {
-        private Item _selectedItem;
+        private Game _selectedItem;
 
-        public ObservableCollection<Item> Items { get; }
+        public ObservableCollection<Game> Items { get; }
         public Command LoadItemsCommand { get; }
-        public Command AddItemCommand { get; }
-        public Command<Item> ItemTapped { get; }
+        public Command<Game> ItemTapped { get; }
 
         public ItemsViewModel()
         {
-            Title = "Browse";
-            Items = new ObservableCollection<Item>();
+            Title = "Games";
+            Items = new ObservableCollection<Game>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
 
-            ItemTapped = new Command<Item>(OnItemSelected);
-
-            AddItemCommand = new Command(OnAddItem);
+            ItemTapped = new Command<Game>(OnItemSelected);
         }
 
         async Task ExecuteLoadItemsCommand()
@@ -59,7 +56,7 @@ namespace GameStroe.Mobile.ViewModels
             SelectedItem = null;
         }
 
-        public Item SelectedItem
+        public Game SelectedItem
         {
             get => _selectedItem;
             set
@@ -69,18 +66,13 @@ namespace GameStroe.Mobile.ViewModels
             }
         }
 
-        private async void OnAddItem(object obj)
-        {
-            await Shell.Current.GoToAsync(nameof(NewItemPage));
-        }
-
-        async void OnItemSelected(Item item)
+        async void OnItemSelected(Game item)
         {
             if (item == null)
                 return;
 
             // This will push the ItemDetailPage onto the navigation stack
-            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.ItemId)}={item.Id}");
+            await Shell.Current.GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.ItemId)}={item.Key}");
         }
     }
 }

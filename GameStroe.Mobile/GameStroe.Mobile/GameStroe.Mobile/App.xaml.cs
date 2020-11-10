@@ -1,8 +1,5 @@
-﻿using System;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+﻿using Xamarin.Forms;
 using GameStroe.Mobile.Services;
-using GameStroe.Mobile.Views;
 
 namespace GameStroe.Mobile
 {
@@ -12,8 +9,7 @@ namespace GameStroe.Mobile
         public App()
         {
             InitializeComponent();
-
-            DependencyService.Register<MockDataStore>();
+            DependencyService.Register<GameDataStore>();
             MainPage = new AppShell();
         }
 

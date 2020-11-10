@@ -44,8 +44,8 @@ namespace GameStroe.Mobile.ViewModels
             try
             {
                 var item = await DataStore.GetItemAsync(itemId);
-                Id = item.Id;
-                Text = item.Text;
+                Id = item.Key;
+                Text = item.Name;
                 Description = item.Description;
             }
             catch (Exception)
