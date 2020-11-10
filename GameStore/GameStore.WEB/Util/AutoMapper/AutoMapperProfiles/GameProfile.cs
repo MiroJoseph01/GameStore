@@ -77,14 +77,14 @@ namespace GameStore.Web.Util.AutoMapperProfiles
                     x => x.Platforms,
                     y => y.MapFrom(z => z.GamePlatforms))
                 .ForMember(
-                    x => x.Publisher,
-                    y => y.MapFrom(z => z.Publisher.CompanyName))
-                .ForMember(
                     x => x.Discount,
                     y => y.MapFrom(z => (z.Discount * 100).ToString() + " %"))
                 .ForMember(
                     x => x.Date,
-                    y => y.MapFrom(z => z.Date.ToShortDateString()));
+                    y => y.MapFrom(z => z.Date.ToShortDateString()))
+                .ForMember(
+                    x => x.Publisher,
+                    y => y.MapFrom(z => z.Publisher));
 
             CreateMap<ApiModels.GameCreateAndUpdateModel, BusinessModels.Game>()
                 .ForMember(

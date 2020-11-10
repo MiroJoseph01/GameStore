@@ -2,6 +2,7 @@
 using AutoMapper;
 using GameStore.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using API = GameStore.Web.ApiModels;
 using BusinessModels = GameStore.BLL.Models;
 using DbModels = GameStore.DAL.Entities;
 
@@ -23,6 +24,8 @@ namespace GameStore.Web.Util.AutoMapperProfiles
 
             CreateMap<string, BusinessModels.Platform>()
                 .ForMember(x => x.PlatformId, y => y.MapFrom(z => z));
+
+            CreateMap<BusinessModels.Platform, API.PlatformViewModel>().ReverseMap();
         }
     }
 }

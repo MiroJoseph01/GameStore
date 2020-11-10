@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
 using GameStore.Web.ViewModels;
+using API = GameStore.Web.ApiModels;
 using BusinessModels = GameStore.BLL.Models;
 using DbModels = GameStore.DAL.Entities;
 
@@ -18,6 +19,8 @@ namespace GameStore.Web.Util.AutoMapperProfiles
             CreateMap<BusinessModels.Comment, DbModels.Comment>();
 
             CreateMap<CommentsViewModel, BusinessModels.Comment>();
+
+            CreateMap<BusinessModels.Comment, API.CommentViewModel>().ReverseMap();
         }
     }
 }

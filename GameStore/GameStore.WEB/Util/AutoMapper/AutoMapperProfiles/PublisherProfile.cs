@@ -2,6 +2,7 @@
 using AutoMapper;
 using GameStore.DAL.Entities.MongoEntities;
 using GameStore.Web.ViewModels;
+using API = GameStore.Web.ApiModels;
 using BusinessModels = GameStore.BLL.Models;
 using DbModels = GameStore.DAL.Entities;
 
@@ -27,6 +28,8 @@ namespace GameStore.Web.Util.AutoMapperProfiles
 
             CreateMap<DbModels.Publisher, Supplier>()
                 .ForMember(x => x.SupplierID, z => z.MapFrom(y => y.PublisherId));
+
+            CreateMap<BusinessModels.Publisher, API.PublisherViewModel>().ReverseMap();
         }
     }
 }

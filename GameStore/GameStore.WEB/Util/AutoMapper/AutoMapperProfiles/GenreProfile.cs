@@ -3,6 +3,7 @@ using AutoMapper;
 using GameStore.DAL.Entities.MongoEntities;
 using GameStore.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using API = GameStore.Web.ApiModels;
 using BusinessModels = GameStore.BLL.Models;
 using DbModels = GameStore.DAL.Entities;
 
@@ -28,6 +29,8 @@ namespace GameStore.Web.Util.AutoMapperProfiles
 
             CreateMap<string, BusinessModels.Genre>()
                 .ForMember(x => x.GenreId, y => y.MapFrom(z => z));
+
+            CreateMap<BusinessModels.Genre, API.GenreViewModel>().ReverseMap();
         }
     }
 }
