@@ -2,12 +2,12 @@
   "ConnectionStrings": {
     "DevelopmentConnection": "Server=DESKTOP-OQV67MM\\SQLEXPRESS;Database=GameStore_VB;Trusted_Connection=True;MultipleActiveResultSets=true",
     "DevelopmentMongoConnection": "mongodb://localhost:27017",
-    "DefaultConnection": "",
-    "DefaultMongoConnection": ""
+    "DefaultConnection": "Server=DESKTOP-OQV67MM\\SQLEXPRESS;Database=GameStore_VB;Trusted_Connection=True;MultipleActiveResultSets=true",
+    "DefaultMongoConnection": "mongodb://localhost:27017"
   },
   "MongoConnection": {
     "DevelopmentName": "Northwind",
-    "DefaultName": "",
+    "DefaultName": "Northwind",
     "NewIds": "true"
   }
 }

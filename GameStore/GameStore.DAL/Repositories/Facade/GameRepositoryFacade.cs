@@ -129,15 +129,16 @@ namespace GameStore.DAL.Repositories.Facade
 
         public IEnumerable<Game> GetAll()
         {
+            //edit to make project working faster
             var sqlResult = _firstSourceGameRepository.GetAll().ToList();
-            var mongoResult = _secondSourceGameRepository.GetAll().ToList();
+            //var mongoResult = _secondSourceGameRepository.GetAll().ToList();
 
-            mongoResult = DeleteMongoGameCopies(sqlResult, mongoResult).ToList();
+            //mongoResult = DeleteMongoGameCopies(sqlResult, mongoResult).ToList();
 
             var result = new List<Game>();
 
             result.AddRange(sqlResult);
-            result.AddRange(mongoResult);
+            ///result.AddRange(mongoResult);
 
             result = result.Where(x => !x.IsRemoved).ToList();
 

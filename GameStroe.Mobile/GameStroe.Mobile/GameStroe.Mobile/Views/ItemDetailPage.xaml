@@ -3,12 +3,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GameStroe.Mobile.Views.ItemDetailPage"
              Title="{Binding Title}">
-
-    <StackLayout Spacing="20" Padding="15">
-        <Label Text="Text:" FontSize="Medium" />
-        <Label Text="{Binding Text}" FontSize="Small"/>
-        <Label Text="Description:" FontSize="Medium" />
-        <Label Text="{Binding Description}" FontSize="Small"/>
-    </StackLayout>
-    
+    <ScrollView>
+        <StackLayout Spacing="20" Padding="15">
+            
+            
+            
+            <Label Text="Name:" FontSize="Medium" />
+            <Label Text="{Binding Text}" FontSize="Small"/>
+            <Label Text="Description:" FontSize="Medium" />
+            <Label Text="{Binding Description}" FontSize="Small"/>
+            <Label Text="Price:" FontSize="Medium" />
+            <Label Text="{Binding Price}" FontSize="Small"/>
+            <Label Text="Publisher: "/>
+            <Button Text="{Binding PublisherName}"   
+                Clicked="OnPublisherButtonClick"/>
+            <Label Text="Discount:" FontSize="Medium" />
+            <Label Text="{Binding Discount}" FontSize="Small"/>
+            <Label Text="UnitsInStock:" FontSize="Medium" />
+            <Label Text="{Binding UnitsInStock}" FontSize="Small"/>
+            <Label Text="Date:" FontSize="Medium" />
+            <Label Text="{Binding Date}" FontSize="Small"/>
+            <Label Text="Discontinued:" FontSize="Medium" />
+            <Label Text="{Binding Discontinued}" FontSize="Small"/>
+            <Label Text="Views:" FontSize="Medium" />
+            <Label Text="{Binding Views}" FontSize="Small"/>
+        </StackLayout>  
+    </ScrollView>
 </ContentPage>
