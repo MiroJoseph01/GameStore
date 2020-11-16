@@ -9,7 +9,7 @@ namespace GameStroe.Mobile
         public App()
         {
             InitializeComponent();
-            DependencyService.Register<GameDataStore>();
+            DependencyService.Register<MockDataStore>();
             MainPage = new AppShell();
         }
 

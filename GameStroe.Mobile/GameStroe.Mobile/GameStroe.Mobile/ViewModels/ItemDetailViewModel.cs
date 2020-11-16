@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using GameStroe.Mobile.Models;
 using Xamarin.Forms;
@@ -14,8 +15,6 @@ namespace GameStroe.Mobile.ViewModels
         private string text;
         private string description;
 
-        private string discount;
-        private bool discontinued;
         private short unitsInStock;
         private int views;
         private string date;
@@ -41,18 +40,6 @@ namespace GameStroe.Mobile.ViewModels
         {
             get => description;
             set => SetProperty(ref description, value);
-        }
-
-        public string Discount
-        {
-            get => discount;
-            set => SetProperty(ref discount, value);
-        }
-
-        public bool Discontinued
-        {
-            get => discontinued;
-            set => SetProperty(ref discontinued, value);
         }
 
         public short UnitsInStock
@@ -91,6 +78,18 @@ namespace GameStroe.Mobile.ViewModels
             set => SetProperty(ref publisherName, value);
         }
 
+        public string Genres
+        {
+            get => genres;
+            set => SetProperty(ref genres, value);
+        }
+
+        public string Platforms
+        {
+            get => platforms;
+            set => SetProperty(ref platforms, value);
+        }
+
         #endregion
 
         public string ItemId
@@ -115,14 +114,16 @@ namespace GameStroe.Mobile.ViewModels
                 Id = item.Key;
                 Text = item.Name;
                 Description = item.Description;
-                Discount = item.Discount;
-                Discontinued = item.Discontinued;
                 UnitsInStock = item.UnitsInStock;
                 Date = item.Date;
                 Price = item.Price;
                 Views = item.Views;
                 Publisher = item.Publisher;
-                PublisherName = item.Publisher is null? "No Publisher" : item.Publisher.CompanyName;    
+                PublisherName = item.Publisher is null? "No Publisher" : item.Publisher.CompanyName;
+                Genres = (item.Genres is null || item.Genres.Count == 0) ?
+                    "No genres" : String.Join("| ", item.Genres.Select(x=>x.GenreName).ToList());
+                Platforms = (item.Platforms is null || item.Platforms.Count == 0) ?
+                    "No platforms" : String.Join(" | ", item.Platforms.Select(x => x.PlatformName).ToList());
             }
             catch (Exception)
             {

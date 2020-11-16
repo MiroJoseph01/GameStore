@@ -407,36 +407,36 @@ namespace GameStore.DAL
 
             var games = new List<Game>();
 
-            for (var i = 1; i <= 20; i++)
-            {
-                var g = new Game
-                {
-                    GameId = Guid.NewGuid().ToString(),
-                    Name = "Game " + i,
-                    Description = "Game Description " + i,
-                    Key = "game" + i,
-                    Price = i,
-                    UnitsInStock = (short)i,
-                    PublisherId = publisher1.PublisherId,
-                    Date = DateTime.Now.AddMonths(-i),
-                };
+            //for (var i = 1; i <= 20; i++)
+            //{
+            //    var g = new Game
+            //    {
+            //        GameId = Guid.NewGuid().ToString(),
+            //        Name = "Game " + i,
+            //        Description = "Game Description " + i,
+            //        Key = "game" + i,
+            //        Price = i,
+            //        UnitsInStock = (short)i,
+            //        PublisherId = publisher1.PublisherId,
+            //        Date = DateTime.Now.AddMonths(-i),
+            //    };
 
-                games.Add(g);
+            //    games.Add(g);
 
-                gameGenre.Add(new GameGenre
-                {
-                    GameId = g.GameId,
-                    GenreId = arcade.GenreId,
-                });
+            //    gameGenre.Add(new GameGenre
+            //    {
+            //        GameId = g.GameId,
+            //        GenreId = arcade.GenreId,
+            //    });
 
-                gamePlatform.Add(new GamePlatform
-                {
-                    GameId = g.GameId,
-                    PlatformId = platform1.PlatformId,
-                });
+            //    gamePlatform.Add(new GamePlatform
+            //    {
+            //        GameId = g.GameId,
+            //        PlatformId = platform1.PlatformId,
+            //    });
 
-                gameViews.Add(new View { Id = Guid.NewGuid().ToString(), GameId = g.GameId, Views = 100 + i, });
-            }
+            //    gameViews.Add(new View { Id = Guid.NewGuid().ToString(), GameId = g.GameId, Views = 100 + i, });
+            //}
 
             #endregion
 
@@ -539,8 +539,9 @@ namespace GameStore.DAL
             builder.Entity<Game>()
                 .HasData(game1, game2, game3, game4, game5);
 
-            builder.Entity<Game>()
-                .HasData(games);
+            //too many data
+            //builder.Entity<Game>()
+            //    .HasData(games);
 
             builder.Entity<GameGenre>().HasData(gameGenre);
 

@@ -5,28 +5,24 @@
              Title="{Binding Title}">
     <ScrollView>
         <StackLayout Spacing="20" Padding="15">
-            
-            
-            
-            <Label Text="Name:" FontSize="Medium" />
-            <Label Text="{Binding Text}" FontSize="Small"/>
-            <Label Text="Description:" FontSize="Medium" />
-            <Label Text="{Binding Description}" FontSize="Small"/>
-            <Label Text="Price:" FontSize="Medium" />
-            <Label Text="{Binding Price}" FontSize="Small"/>
-            <Label Text="Publisher: "/>
-            <Button Text="{Binding PublisherName}"   
+
+
+            <Image Source="game.png"/>
+            <Label Text="Description:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Text="{Binding Description}" FontSize="Medium"/>
+            <Label Text="Price:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Text="{Binding Price}" FontSize="Medium"/>
+            <Label Text="Publisher: " FontSize="Large" TextColor="DarkCyan"/>
+            <Button Text="{Binding PublisherName}" BackgroundColor="DarkCyan" 
                 Clicked="OnPublisherButtonClick"/>
-            <Label Text="Discount:" FontSize="Medium" />
-            <Label Text="{Binding Discount}" FontSize="Small"/>
-            <Label Text="UnitsInStock:" FontSize="Medium" />
-            <Label Text="{Binding UnitsInStock}" FontSize="Small"/>
-            <Label Text="Date:" FontSize="Medium" />
-            <Label Text="{Binding Date}" FontSize="Small"/>
-            <Label Text="Discontinued:" FontSize="Medium" />
-            <Label Text="{Binding Discontinued}" FontSize="Small"/>
-            <Label Text="Views:" FontSize="Medium" />
-            <Label Text="{Binding Views}" FontSize="Small"/>
+            <Label Text="Platforms:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Text="{Binding Platforms}" FontSize="Medium"/>
+            <Label Text="Genres:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Text="{Binding Genres}" FontSize="Medium"/>
+            <Label Text="Discount:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Text="{Binding UnitsInStock}" FontSize="Medium"/>
+            <Label Text="Date:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Text="{Binding Date}" FontSize="Medium"/>
         </StackLayout>  
     </ScrollView>
 </ContentPage>

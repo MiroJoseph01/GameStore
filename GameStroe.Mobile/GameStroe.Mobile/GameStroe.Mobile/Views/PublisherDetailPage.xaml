@@ -1,11 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="GameStroe.Mobile.Views.PublisherDetailPage">
-    <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Publisher:" FontSize="Medium"/>
-            <Label Text="{Binding CompanyName}" FontSize="Small"/>
+             x:Class="GameStroe.Mobile.Views.PublisherDetailPage"
+             Title="{Binding Title}">
+    <ScrollView>
+        <StackLayout Spacing="20" Padding="15">
+            <ImageButton Source="publisher.png"
+                             Clicked="OnImageButtonPublisherClicked"/>
+            <Label Text="Tab on image to visit publisher page" 
+                       TextColor="Navy"
+                       FontSize="Small"
+                       HorizontalTextAlignment="Center"></Label>
+            <Label Text="Description:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Text="{Binding Description}" FontSize="Medium"/>
+            <Label Text="Geo information:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Text="Address:" FontSize="Medium" TextColor="Navy"/>
+            <Label Text="{Binding Address}" FontSize="Small"/>
+            <Label Text="City:" FontSize="Medium" TextColor="Navy"/>
+            <Label Text="{Binding City}" FontSize="Small"/>
+            <Label Text="Country:" FontSize="Medium" TextColor="Navy"/>
+            <Label Text="{Binding Country}" FontSize="Small"/>
+            <Label Text="Postal Code:" FontSize="Medium" TextColor="Navy"/>
+            <Label Text="{Binding PostalCode}" FontSize="Small"/>
+            <Label Text="Contact information:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Text="Phone:" FontSize="Medium" TextColor="Navy"/>
+            <Label Text="{Binding Phone}" FontSize="Small"/>
+            <Label Text="Fax:" FontSize="Medium" TextColor="Navy"/>
+            <Label Text="{Binding Fax}" FontSize="Small"/>
+            <Label Text="Contact Name:" FontSize="Medium" TextColor="Navy"/>
+            <Label Text="{Binding ContactName}" FontSize="Small"/>
         </StackLayout>
-    </ContentPage.Content>
+    </ScrollView>
 </ContentPage>

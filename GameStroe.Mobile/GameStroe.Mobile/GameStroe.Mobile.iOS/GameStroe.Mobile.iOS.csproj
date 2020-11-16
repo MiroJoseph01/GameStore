@@ -142,4 +142,10 @@
       <Name>GameStroe.Mobile</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\game.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\publisher.png" />
+  </ItemGroup>
 </Project>
