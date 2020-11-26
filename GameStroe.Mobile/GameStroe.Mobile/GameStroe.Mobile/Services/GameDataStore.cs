@@ -1,6 +1,5 @@
 ﻿using GameStroe.Mobile.Models;
 using GameStroe.Mobile.Services.Interfaces;
-using ModernHttpClient;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -26,7 +25,7 @@ namespace GameStroe.Mobile.Services
 
             _client = new HttpClient(handler)
             {
-                BaseAddress = new Uri("http://10.0.2.2:59287")
+                BaseAddress = new Uri("http://d60b0505dfb1.ngrok.io")
             };
 
             _items = new List<Game>();

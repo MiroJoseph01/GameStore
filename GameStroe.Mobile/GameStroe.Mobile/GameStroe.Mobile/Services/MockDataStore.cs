@@ -87,6 +87,68 @@ namespace GameStroe.Mobile.Services
                     Date = DateTime.ParseExact("2018-09-12", "yyyy-MM-dd", null).ToShortDateString(),
                     Platforms = new List<Platform>{platform1, platform2},
                     Genres = new List<Genre>{action},
+                    Images = new List<string>
+                    {
+                        "https://purepng.com/public/uploads/large/purepng.com-mario-brosmariofictional-charactervideo-gamefranchisenintendodesigner-1701528631561r0rrv.png",
+                        "https://i.pinimg.com/originals/85/bb/b8/85bbb8ae4e3cc51fa653a70044650306.png"
+                    },
+                    Comments = new List<Comment>
+                    {
+                        new Comment
+                        {
+                            CommentId = "1",
+                            Body = "Comment",
+                            Name = "Author",
+                        },
+
+                        new Comment
+                        {
+                            CommentId = "2",
+                            Body = "Another Comment",
+                            Name = "Another Author"
+                        },
+
+                        new Comment
+                        {
+                            CommentId = "3",
+                            Body = "Comment",
+                            Name = "Author",
+                        },
+                        new Comment
+                        {
+                            CommentId = "4",
+                            Body = "Comment",
+                            Name = "Author",
+                        },
+
+                        new Comment
+                        {
+                            CommentId = "5",
+                            Body = "Comment",
+                            Name = "Author",
+                        },
+
+                        new Comment
+                        {
+                            CommentId = "6",
+                            Body = "Comment",
+                            Name = "Author",
+                        },
+
+                        new Comment
+                        {
+                            CommentId = "7",
+                            Body = "Comment",
+                            Name = "Author",
+                        },
+
+                        new Comment
+                        {
+                            CommentId = "8",
+                            Body = "Comment",
+                            Name = "Author",
+                        },
+                    }
                 },
                 new Game
                 {
@@ -156,7 +218,7 @@ namespace GameStroe.Mobile.Services
 
         public async Task<Game> GetItemAsync(string id)
         {
-            return await Task.FromResult(items.FirstOrDefault(s => s.GameId == id|| s.Key == id));
+            return await Task.FromResult(items.FirstOrDefault(s => s.GameId == id || s.Key == id));
         }
 
         public async Task<IEnumerable<Game>> GetItemsAsync(bool forceRefresh = false)

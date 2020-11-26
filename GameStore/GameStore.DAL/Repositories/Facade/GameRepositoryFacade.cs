@@ -83,48 +83,48 @@ namespace GameStore.DAL.Repositories.Facade
         {
             var sqlResult = _firstSourceGameRepository.Filter(filterModel).ToList();
 
-            var sqlGameIds = sqlResult.Select(x => x.GameId).ToList();
+            //var sqlGameIds = sqlResult.Select(x => x.GameId).ToList();
 
-            var mongoResult = _secondSourceGameRepository
-                .Filter(filterModel)
-                .Where(x => !sqlGameIds.Contains(x.GameId))
-                .ToList();
+            //var mongoResult = _secondSourceGameRepository
+            //    .Filter(filterModel)
+            //    .Where(x => !sqlGameIds.Contains(x.GameId))
+            //    .ToList();
 
-            var result = new List<Game>();
+            //var result = new List<Game>();
 
-            result.AddRange(sqlResult);
-            result.AddRange(mongoResult);
+            //result.AddRange(sqlResult);
+            //result.AddRange(mongoResult);
 
-            result = result.Where(x => !x.IsRemoved).ToList();
+            //result = result.Where(x => !x.IsRemoved).ToList();
 
-            var order = GetOrderOptions()[filterModel.Filter].Func;
+            //var order = GetOrderOptions()[filterModel.Filter].Func;
 
-            if (!(order is null))
-            {
-                if (filterModel.Filter == OrderOption.MostPopular)
-                {
-                    var views = _viewRepository.GetAll().ToList();
-                    var joinResult = from game in result
-                                     join view in views
-                                     on game.GameId equals view.GameId into joined
-                                     from j in joined.DefaultIfEmpty()
-                                     orderby j.Views descending
-                                     select game;
+            //if (!(order is null))
+            //{
+            //    if (filterModel.Filter == OrderOption.MostPopular)
+            //    {
+            //        var views = _viewRepository.GetAll().ToList();
+            //        var joinResult = from game in result
+            //                         join view in views
+            //                         on game.GameId equals view.GameId into joined
+            //                         from j in joined.DefaultIfEmpty()
+            //                         orderby j.Views descending
+            //                         select game;
 
-                    result = joinResult.ToList();
-                }
-                else
-                {
-                    result = order(result.AsQueryable()).ToList();
-                }
-            }
+            //        result = joinResult.ToList();
+            //    }
+            //    else
+            //    {
+            //        result = order(result.AsQueryable()).ToList();
+            //    }
+            //}
 
-            if (filterModel.Take != 0)
-            {
-                result = result.Skip(filterModel.Skip).Take(filterModel.Take).ToList();
-            }
+            //if (filterModel.Take != 0)
+            //{
+            //    result = result.Skip(filterModel.Skip).Take(filterModel.Take).ToList();
+            //}
 
-            return result;
+            return sqlResult;
         }
 
         public IEnumerable<Game> GetAll()

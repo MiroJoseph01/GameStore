@@ -5,24 +5,63 @@
              Title="{Binding Title}">
     <ScrollView>
         <StackLayout Spacing="20" Padding="15">
-
-
-            <Image Source="game.png"/>
+            <CarouselView ItemsSource="{Binding Images}" PeekAreaInsets="15">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout>
+                            <Frame HasShadow="True"
+                                   BorderColor="DarkCyan"
+                                   CornerRadius="5"
+                                   HeightRequest="300"
+                                   Margin="5"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="CenterAndExpand">
+                                <StackLayout>
+                                    <Image Source="{Binding Url}"
+                               HeightRequest="300"
+                               WidthRequest="300"
+                               HorizontalOptions="Center" />
+                                </StackLayout>
+                            </Frame>
+                        </StackLayout>
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
             <Label Text="Description:" FontSize="Large" TextColor="DarkCyan"/>
             <Label Text="{Binding Description}" FontSize="Medium"/>
-            <Label Text="Price:" FontSize="Large" TextColor="DarkCyan"/>
-            <Label Text="{Binding Price}" FontSize="Medium"/>
-            <Label Text="Publisher: " FontSize="Large" TextColor="DarkCyan"/>
-            <Button Text="{Binding PublisherName}" BackgroundColor="DarkCyan" 
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="2*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <BoxView/>
+                <Button Text="Comments" BackgroundColor="DarkCyan" 
+                Clicked="OnCommentsButtonClick"/>
+                
+                <Label Grid.Column="1" Text="Publisher: " FontSize="Large" TextColor="DarkCyan"/>
+                <Button Grid.Column="1" Text="{Binding PublisherName}" BackgroundColor="DarkCyan" 
                 Clicked="OnPublisherButtonClick"/>
-            <Label Text="Platforms:" FontSize="Large" TextColor="DarkCyan"/>
-            <Label Text="{Binding Platforms}" FontSize="Medium"/>
-            <Label Text="Genres:" FontSize="Large" TextColor="DarkCyan"/>
-            <Label Text="{Binding Genres}" FontSize="Medium"/>
-            <Label Text="Discount:" FontSize="Large" TextColor="DarkCyan"/>
-            <Label Text="{Binding UnitsInStock}" FontSize="Medium"/>
-            <Label Text="Date:" FontSize="Large" TextColor="DarkCyan"/>
-            <Label Text="{Binding Date}" FontSize="Medium"/>
+
+                <Label Grid.Row="1" Text="Price:" FontSize="Large" TextColor="DarkCyan"/>
+                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Price}" FontSize="Medium"/>
+                <Label Grid.Row="2" Text="Platforms:" FontSize="Large" TextColor="DarkCyan"/>
+                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Platforms}" FontSize="Medium"/>
+                <Label Grid.Row="3" Text="Genres:" FontSize="Large" TextColor="DarkCyan"/>
+                <Label Grid.Row="3" Grid.Column="1" Text="{Binding Genres}" FontSize="Medium"/>
+                <Label Grid.Row="4" Text="Discount:" FontSize="Large" TextColor="DarkCyan"/>
+                <Label Grid.Row="4" Grid.Column="1" Text="{Binding UnitsInStock}" FontSize="Medium"/>
+                <Label Grid.Row="5" Text="Date:" FontSize="Large" TextColor="DarkCyan"/>
+                <Label Grid.Row="5" Grid.Column="1" Text="{Binding Date}" FontSize="Medium"/>
+            </Grid>
         </StackLayout>  
     </ScrollView>
 </ContentPage>

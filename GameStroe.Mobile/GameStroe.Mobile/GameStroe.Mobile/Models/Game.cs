@@ -31,5 +31,7 @@ namespace GameStroe.Mobile.Models
         public int Views { get; set; }
 
         public string Date { get; set; }
+
+        public List<string> Images { get; set; }
     }
 }

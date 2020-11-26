@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.Configuration;
 using GameStore.BLL.Interfaces;
 using GameStore.BLL.Interfaces.Services;
+using GameStore.BLL.Models;
+using GameStore.Web.ApiModels;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -39,36 +39,84 @@ namespace GameStore.Web.Controllers.API
             _shipperService = shipperService;
         }
 
-        // GET: api/<OrderController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        // GET: api/<OrderController/5
+        [HttpGet("{id}/{getById}")]
+        public IActionResult Get(string id, bool getById)
         {
-            return new string[] { "value1", "value2" };
+            var shippers = _shipperService.GetAllShippers().Select(x => new ShipperViewModel
+            {
+                ShipperId = x.ShipperID,
+                ShipperName = x.CompanyName,
+            }).ToList();
+
+            if (getById)
+            {
+                var order = _mapper.Map<OrderViewModel>(_orderService.GetOrderById(id));
+                order.ShipOptions = shippers;
+
+                return Ok(order);
+            }
+            else
+            {
+                var orders = _mapper
+                    .Map<IEnumerable<OrderViewModel>>(_orderService.GetOrdersByCustomerId(id));
+
+                orders.Select(x => x.ShipOptions = shippers);
+
+                return Ok(orders);
+            }
         }
 
-        // GET api/<OrderController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET api/<OrderController>
+        [HttpGet]
+        public IActionResult Get()
         {
-            return "value";
+            var shippers = _shipperService.GetAllShippers().Select(x => new ShipperViewModel
+            {
+                ShipperId = x.ShipperID,
+                ShipperName = x.CompanyName,
+            }).ToList();
+
+            var orders = _mapper
+                    .Map<IEnumerable<OrderViewModel>>(_orderService.GetAllOrders());
+
+            orders.Select(x => x.ShipOptions = shippers);
+
+            return Ok(orders);
+
+            return Ok();
         }
 
         // POST api/<OrderController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpPost("{gameKey}/{userId}")]
+        public IActionResult Post(string gameKey, string userId)
         {
+            var game = _gameService.GetGameByKey(gameKey);
+
+            if (game is null)
+            {
+                return NotFound();
+            }
+
+            var success = _orderService.AddOrderDetail(userId, game.Key);
+
+            if (!success)
+            {
+                return BadRequest();
+            }
+
+            return Ok();
         }
 
-        // PUT api/<OrderController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
+        // DELETE order detail not order!
         // DELETE api/<OrderController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(string id)
         {
+            _orderService.GetOrderDetailById(id);
+            _orderService.DeleteOrderDetail(new OrderDetail { OrderDetailId = id });
+
+            return Ok();
         }
     }
 }

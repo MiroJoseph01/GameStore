@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using AutoMapper;
 using GameStore.Web.ViewModels;
+using API = GameStore.Web.ApiModels;
 using BusinessModels = GameStore.BLL.Models;
 using DbModels = GameStore.DAL.Entities;
 using MongoModels = GameStore.DAL.Entities.MongoEntities;
@@ -56,6 +57,10 @@ namespace GameStore.Web.Util.AutoMapperProfiles
                 .ForMember(x => x.IsRemoved, y => y.MapFrom(z => false));
 
             CreateMap<MongoModels.Shipper, BusinessModels.Shipper>();
+
+            CreateMap<BusinessModels.Order, API.OrderViewModel>()
+                .ForMember(x => x.OrderDate, y => y.MapFrom(z => z.OrderDate.ToShortDateString()))
+                .ForMember(x => x.OrderStatus, y => y.MapFrom(z => z.Status));
         }
     }
 }

@@ -28,5 +28,18 @@ namespace GameStroe.Mobile.Views
                 await Navigation.PushAsync(new PublisherDetailPage(_itemDetail.Publisher));
             }
         }
+
+        private async void OnCommentsButtonClick(object sender, EventArgs args)
+        {
+            if (_itemDetail.Comments is null|| _itemDetail.Comments.Count == 0)
+            {
+                var button = (Button)sender;
+                button.BackgroundColor = Color.Gray;
+            }
+            else
+            {
+                await Navigation.PushAsync(new CommentsViewModel(_itemDetail.Comments));
+            }
+        }
     }
 }

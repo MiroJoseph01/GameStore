@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using GameStroe.Mobile.Models;
+using GameStroe.Mobile.ViewModels.SupportModels;
 using Xamarin.Forms;
 
 namespace GameStroe.Mobile.ViewModels
@@ -25,6 +27,9 @@ namespace GameStroe.Mobile.ViewModels
         //reserved
         private string genres;
         private string platforms;
+
+        private List<Comment> comments;
+        private List<ImageSupportModel> images;
 
         #region  basic Properties
 
@@ -90,6 +95,18 @@ namespace GameStroe.Mobile.ViewModels
             set => SetProperty(ref platforms, value);
         }
 
+        public List<ImageSupportModel> Images
+        {
+            get => images;
+            set => SetProperty(ref images, value);
+        }
+
+        public List<Comment> Comments
+        {
+            get => comments;
+            set => SetProperty(ref comments, value);
+        }
+
         #endregion
 
         public string ItemId
@@ -124,6 +141,10 @@ namespace GameStroe.Mobile.ViewModels
                     "No genres" : String.Join("| ", item.Genres.Select(x=>x.GenreName).ToList());
                 Platforms = (item.Platforms is null || item.Platforms.Count == 0) ?
                     "No platforms" : String.Join(" | ", item.Platforms.Select(x => x.PlatformName).ToList());
+                Images = item.Images is null || item.Images.Count == 0 ?
+                    new List<ImageSupportModel> { new ImageSupportModel { Url = "game.png" } } 
+                    : item.Images.Select(x => new ImageSupportModel { Url = x }).ToList();
+                Comments = item.Comments.ToList();
             }
             catch (Exception)
             {

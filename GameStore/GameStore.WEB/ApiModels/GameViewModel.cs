@@ -36,5 +36,7 @@ namespace GameStore.Web.ApiModels
         public int Views { get; set; }
 
         public string Date { get; set; }
+
+        public IList<string> Images { get; set; }
     }
 }
