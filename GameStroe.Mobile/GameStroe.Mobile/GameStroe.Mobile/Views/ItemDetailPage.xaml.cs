@@ -25,6 +25,7 @@ namespace GameStroe.Mobile.Views
             {
                 var button = (Button)sender;
                 button.BackgroundColor = Color.Gray;
+                button.Text = "No publisher";
             }
             else
             {
@@ -38,6 +39,7 @@ namespace GameStroe.Mobile.Views
             {
                 var button = (Button)sender;
                 button.BackgroundColor = Color.Gray;
+                button.Text = "No comments";
             }
             else
             {
@@ -51,6 +53,7 @@ namespace GameStroe.Mobile.Views
             {
                 var button = (Button)sender;
                 button.BackgroundColor = Color.Gray;
+                button.Text = "No items left";
             }
             else
             {

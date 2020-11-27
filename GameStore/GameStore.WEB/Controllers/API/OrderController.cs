@@ -56,7 +56,8 @@ namespace GameStore.Web.Controllers.API
             else
             {
                 var orders = _mapper
-                    .Map<IEnumerable<OrderViewModel>>(_orderService.GetOrdersByCustomerId(id));
+                    .Map<IEnumerable<OrderViewModel>>(_orderService.GetOrdersByCustomerId(id)
+                    .Where(x=>x.OrderDetails.Count > 0));
 
                 foreach (var o in orders)
                 {

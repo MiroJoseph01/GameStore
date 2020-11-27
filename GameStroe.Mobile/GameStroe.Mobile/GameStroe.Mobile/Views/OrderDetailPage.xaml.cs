@@ -1,7 +1,7 @@
 ﻿using GameStroe.Mobile.Services.Interfaces;
 using GameStroe.Mobile.ViewModels;
 using System;
-
+using System.Threading;
 using Xamarin.Forms;
 
 namespace GameStroe.Mobile.Views
@@ -30,6 +30,24 @@ namespace GameStroe.Mobile.Views
                 var button = (ToolbarItem)sender;
                 button.Text = "Paid";
             }
+        }
+
+        public void OnDeleteClick(object sender, EventArgs args)
+        {
+            if(_orderDetail.OrderStatus == "Open")
+            {
+                var data = ((Button)sender).BindingContext as string;
+                OrderDataStore.DeleteDetail(data);
+                Thread.Sleep(1000);
+                _orderDetail.LoadItemId(_orderDetail.Id);
+            }
+            else
+            {
+                var button = (Button)sender;
+                button.BackgroundColor = Color.Gray;
+                button.Text = "Impossible";
+            }
+            
         }
     }
 }

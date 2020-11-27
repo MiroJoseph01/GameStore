@@ -1,6 +1,7 @@
 ﻿using GameStroe.Mobile.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,12 @@ namespace GameStroe.Mobile.ViewModels
         private string shipName;
         private string shipAddress;
         private List<Shipper> shippers;
-        private List<OrderDetail> details;
+        private ObservableCollection<OrderDetail> details;
+
+        public OrderViewModel()
+        {
+            OrderDetails = new ObservableCollection<OrderDetail>();
+        }
 
         public string OrderId
         {
@@ -82,7 +88,7 @@ namespace GameStroe.Mobile.ViewModels
             set => SetProperty(ref shippers, value);
         }
 
-        public List<OrderDetail> OrderDetails
+        public ObservableCollection<OrderDetail> OrderDetails
         {
             get => details;
             set => SetProperty(ref details, value);
@@ -102,10 +108,27 @@ namespace GameStroe.Mobile.ViewModels
                 Total = (float)item.Total;
                 OrderDate = item.OrderDate;
                 ShipName = item.ShipName is null ? "No selected shipper" : item.ShipName; ;
-                ShipAddress = item.ShipAddress is null? "No address yet" : item.ShipAddress;
+                ShipAddress = item.ShipAddress is null ? "No address yet" : item.ShipAddress;
                 Shippers = item.ShipOptions;
-                OrderDetails = item.OrderDetails is null || item.OrderDetails.Count == 0 ?
-                    new List<OrderDetail>() : item.OrderDetails.ToList();
+
+                IsBusy = true;
+
+                try
+                {
+                    OrderDetails.Clear();
+                    foreach (var i in item.OrderDetails)
+                    {
+                        OrderDetails.Add(i);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
             }
             catch (Exception)
             {
