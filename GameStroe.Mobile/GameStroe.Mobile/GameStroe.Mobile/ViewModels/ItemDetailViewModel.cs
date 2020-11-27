@@ -24,7 +24,6 @@ namespace GameStroe.Mobile.ViewModels
         private Publisher publisher;
         private string publisherName;
 
-        //reserved
         private string genres;
         private string platforms;
 

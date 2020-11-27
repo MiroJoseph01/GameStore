@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GameStroe.Mobile.Views.OrderDetailPage"
+             Title="{Binding Title}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Pay"
+                     Order="Primary"
+                     Priority="0"
+                     Clicked="OnPayClicked"/>
+    </ContentPage.ToolbarItems>
+    <ContentPage.Content>
+        <ScrollView>
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="200" />
+                </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Label Text="Order Status:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Grid.Column="1" Text="{Binding OrderStatus}" FontSize="Medium"/>
+            <Label Grid.Row="1" Text="Total:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Grid.Row="1" Grid.Column="1" Text="{Binding Total}" FontSize="Medium"/>
+            <Label Grid.Row="2" Text="Shipper Name:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Grid.Row="2" Grid.Column="1" Text="{Binding ShipName}" FontSize="Medium"/>
+            <Label Grid.Row="3" Text="Ship Address:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Grid.Row="3" Grid.Column="1" Text="{Binding ShipAddress}" FontSize="Medium"/>
+            <Label Grid.Row="4" Text="Date:" FontSize="Large" TextColor="DarkCyan"/>
+            <Label Grid.Row="4" Grid.Column="1" Text="{Binding OrderDate}" FontSize="Medium"/>
+                <CarouselView Grid.Row="5" Grid.ColumnSpan="2" ItemsSource="{Binding OrderDetails}" PeekAreaInsets="20" HeightRequest="200">
+                    <CarouselView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout>
+                                <Frame HasShadow="True"
+                       BorderColor="DarkCyan"
+                       CornerRadius="5"
+                       Margin="4"
+                       HeightRequest="200"
+                       HorizontalOptions="Center"
+                       VerticalOptions="CenterAndExpand">
+                                    <StackLayout>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="2*" />
+                                                <RowDefinition Height="2*" />
+                                                <RowDefinition Height="2*" />
+                                                <RowDefinition Height="2*" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition />
+                                                <ColumnDefinition />
+                                            </Grid.ColumnDefinitions>
+                                            <Label Text="{Binding ProductName}"
+                                       FontAttributes="Bold"
+                                       FontSize="Large"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       TextColor="DarkCyan"
+                                       Grid.ColumnSpan="2"/>
+                                            <Label Text="Price:" Grid.Row="1"/>
+                                            <Label Text="{Binding Price}" 
+                                           Grid.Row="1"
+                                           Grid.Column="1"
+                                           HorizontalOptions="Center" 
+                                           FontSize="Medium"/>
+                                            <Label Text="Quantity:" Grid.Row="2"/>
+                                            <Label Text="{Binding Quantity}"
+                                           Grid.Row="2"
+                                           Grid.Column="1"
+                                           HorizontalOptions="Center"
+                                           FontSize="Medium"/>
+                                            <Label Text="Discount:" Grid.Row="3"/>
+                                            <Label Text="{Binding Discount}"
+                                           Grid.Row="3"
+                                           Grid.Column="1"
+                                           HorizontalOptions="Center"
+                                           FontSize="Medium"/>
+                                        </Grid>
+                                    </StackLayout>
+                                </Frame>
+                            </StackLayout>
+                        </DataTemplate>
+                    </CarouselView.ItemTemplate>
+                </CarouselView>
+            </Grid>
+    </ScrollView>
+    </ContentPage.Content>
+</ContentPage>

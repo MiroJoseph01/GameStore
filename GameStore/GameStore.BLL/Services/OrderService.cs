@@ -387,6 +387,7 @@ namespace GameStore.BLL.Services
                 },
                 CustomerId = customerId,
                 OrderId = Guid.NewGuid().ToString(),
+                OrderDate = DateTime.Now,
             };
             orderDetail.OrderId = order.OrderId;
 

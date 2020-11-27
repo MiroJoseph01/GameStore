@@ -154,10 +154,10 @@ namespace GameStore.DAL.Repositories.Facade
                 return null;
             }
 
-            if (game is null)
-            {
-                game = _secondSourceGameRepository.GetById(id);
-            }
+            //if (game is null)
+            //{
+            //    game = _secondSourceGameRepository.GetById(id);
+            //}
 
             return game;
         }

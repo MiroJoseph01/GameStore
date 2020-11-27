@@ -61,6 +61,8 @@ namespace GameStore.Web.Util.AutoMapperProfiles
             CreateMap<BusinessModels.Order, API.OrderViewModel>()
                 .ForMember(x => x.OrderDate, y => y.MapFrom(z => z.OrderDate.ToShortDateString()))
                 .ForMember(x => x.OrderStatus, y => y.MapFrom(z => z.Status));
+
+            CreateMap<BusinessModels.OrderDetail, API.OrderDetailViewModel>();
         }
     }
 }

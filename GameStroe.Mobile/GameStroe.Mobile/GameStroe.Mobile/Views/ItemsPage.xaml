@@ -6,9 +6,6 @@
              xmlns:local="clr-namespace:GameStroe.Mobile.ViewModels"  
              xmlns:model="clr-namespace:GameStroe.Mobile.Models"  
              x:Name="BrowseItemsPage">
-
-    <ContentPage.ToolbarItems>
-    </ContentPage.ToolbarItems>
     <!--
       x:DataType enables compiled bindings for better performance and compile time validation of binding expressions.
       https://docs.microsoft.com/xamarin/xamarin-forms/app-fundamentals/data-binding/compiled-bindings

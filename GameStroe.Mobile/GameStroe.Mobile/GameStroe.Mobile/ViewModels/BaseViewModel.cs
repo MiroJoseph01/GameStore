@@ -14,6 +14,7 @@ namespace GameStroe.Mobile.ViewModels
     public class BaseViewModel : INotifyPropertyChanged
     {
         public IDataStore<Game> DataStore => DependencyService.Get<IDataStore<Game>>();
+        public IOrderDataStore OrderDataStore => DependencyService.Get<IOrderDataStore>();
 
         bool isBusy = false;
         public bool IsBusy

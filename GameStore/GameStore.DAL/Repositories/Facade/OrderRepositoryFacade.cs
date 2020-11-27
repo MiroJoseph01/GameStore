@@ -39,6 +39,7 @@ namespace GameStore.DAL.Repositories.Facade
 
         public IEnumerable<Order> GetAll()
         {
+            //changes
             var sqlOrders = _firstSourceOrderRepository.GetAll();
             var mongoOrders = _secondSourceOrderRepository.GetAll();
 
@@ -47,11 +48,12 @@ namespace GameStore.DAL.Repositories.Facade
             result.AddRange(sqlOrders);
             result.AddRange(mongoOrders);
 
-            return result;
+            return sqlOrders;
         }
 
         public IEnumerable<Order> GetByCustomerId(string customerId)
         {
+            //changes
             var sqlOrders = _firstSourceOrderRepository.GetByCustomerId(customerId);
             var mongoOrders = _secondSourceOrderRepository.GetAll();
 
@@ -60,7 +62,7 @@ namespace GameStore.DAL.Repositories.Facade
             result.AddRange(sqlOrders);
             result.AddRange(mongoOrders);
 
-            return result;
+            return sqlOrders;
         }
 
         public Order GetById(string id)

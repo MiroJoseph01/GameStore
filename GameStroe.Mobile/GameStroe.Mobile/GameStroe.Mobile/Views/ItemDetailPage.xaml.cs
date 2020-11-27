@@ -1,13 +1,16 @@
-﻿using System.ComponentModel;
-using Xamarin.Forms;
+﻿using Xamarin.Forms;
 using GameStroe.Mobile.ViewModels;
 using System;
+using GameStroe.Mobile.Services.Interfaces;
 
 namespace GameStroe.Mobile.Views
 {
     public partial class ItemDetailPage : ContentPage
     {
         private readonly ItemDetailViewModel _itemDetail;
+
+        private IOrderDataStore OrderDataStore => DependencyService.Get<IOrderDataStore>();
+
         public ItemDetailPage()
         {
             InitializeComponent();
@@ -39,6 +42,20 @@ namespace GameStroe.Mobile.Views
             else
             {
                 await Navigation.PushAsync(new CommentsViewModel(_itemDetail.Comments));
+            }
+        }
+
+        private void OnBuyClick(object sender, EventArgs args)
+        {
+            if (_itemDetail.UnitsInStock<1)
+            {
+                var button = (Button)sender;
+                button.BackgroundColor = Color.Gray;
+            }
+            else
+            {
+                OrderDataStore.AddDetail(_itemDetail.Id, Constants.userId);
+                Navigation.PushAsync(new AboutPage());
             }
         }
     }

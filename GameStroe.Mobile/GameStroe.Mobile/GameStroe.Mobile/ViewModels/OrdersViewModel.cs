@@ -1,30 +1,31 @@
-﻿using System;
+﻿using GameStroe.Mobile.Models;
+using GameStroe.Mobile.Views;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-
 using Xamarin.Forms;
-
-using GameStroe.Mobile.Models;
-using GameStroe.Mobile.Views;
 
 namespace GameStroe.Mobile.ViewModels
 {
-    public class ItemsViewModel : BaseViewModel
+    public class OrdersViewModel : BaseViewModel
     {
-        private Game _selectedItem;
+        private Order _selectedItem;
 
-        public ObservableCollection<Game> Items { get; }
+        public ObservableCollection<Order> Items { get; }
         public Command LoadItemsCommand { get; }
-        public Command<Game> ItemTapped { get; }
+        public Command<Order> ItemTapped { get; }
 
-        public ItemsViewModel()
+        public OrdersViewModel()
         {
-            Title = "Games";
-            Items = new ObservableCollection<Game>();
+            Title = "Basket";
+            Items = new ObservableCollection<Order>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
 
-            ItemTapped = new Command<Game>(OnItemSelected);
+            ItemTapped = new Command<Order>(OnItemSelected);
         }
 
         async Task ExecuteLoadItemsCommand()
@@ -34,7 +35,7 @@ namespace GameStroe.Mobile.ViewModels
             try
             {
                 Items.Clear();
-                var items = await DataStore.GetItemsAsync(true);
+                var items = await OrderDataStore.GetOrdersByCustomerId(Constants.userId);
                 foreach (var item in items)
                 {
                     Items.Add(item);
@@ -56,7 +57,7 @@ namespace GameStroe.Mobile.ViewModels
             SelectedItem = null;
         }
 
-        public Game SelectedItem
+        public Order SelectedItem
         {
             get => _selectedItem;
             set
@@ -66,13 +67,13 @@ namespace GameStroe.Mobile.ViewModels
             }
         }
 
-        async void OnItemSelected(Game item)
+        async void OnItemSelected(Order item)
         {
             if (item == null)
                 return;
 
-            await Shell.Current
-                .GoToAsync($"{nameof(ItemDetailPage)}?{nameof(ItemDetailViewModel.ItemId)}={item.Key}");
+            // This will push the ItemDetailPage onto the navigation stack
+            await Shell.Current.GoToAsync($"{nameof(OrderDetailPage)}?{nameof(OrderViewModel.OrderId)}={item.OrderId}");
         }
     }
 }
