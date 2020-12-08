@@ -5,64 +5,87 @@
              Title="{Binding Title}">
     <ScrollView>
         <StackLayout Spacing="20" Padding="15">
-            <CarouselView ItemsSource="{Binding Images}" PeekAreaInsets="15" HeightRequest="350">
-                <CarouselView.ItemTemplate>
-                    <DataTemplate>
-                        <StackLayout>
-                            <Frame HasShadow="True"
-                                   BorderColor="DarkCyan"
-                                   CornerRadius="5"
-                                   HeightRequest="300"
-                                   Margin="5"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="CenterAndExpand">
-                                <StackLayout>
-                                    <Image Source="{Binding Url}"
-                               HeightRequest="300"
-                               WidthRequest="300"
-                               HorizontalOptions="Center" />
-                                </StackLayout>
-                            </Frame>
-                        </StackLayout>
-                    </DataTemplate>
-                </CarouselView.ItemTemplate>
-            </CarouselView>
-            <Label Text="Description:" FontSize="Large" TextColor="DarkCyan"/>
-            <Label Text="{Binding Description}" FontSize="Medium"/>
-            <Grid>
+            <Grid x:Name="main">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="2*" />
-                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="0.5*"/>
+                    <RowDefinition Height="0.8*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
-                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <BoxView/>
-                <Button Text="Comments" BackgroundColor="DarkCyan" 
-                Clicked="OnCommentsButtonClick"/>
-                
-                <Button Grid.Column="1" Text="{Binding PublisherName}" BackgroundColor="DarkCyan" 
-                Clicked="OnPublisherButtonClick"/>
-                <Button Grid.Row="1" Grid.ColumnSpan="2" Text="Buy" BackgroundColor="Cyan" 
-                        Clicked="OnBuyClick"/>
-                <Label Grid.Row="2" Text="Price:" FontSize="Large" TextColor="DarkCyan"/>
-                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Price}" FontSize="Medium"/>
-                <Label Grid.Row="3" Text="Platforms:" FontSize="Large" TextColor="DarkCyan"/>
-                <Label Grid.Row="3" Grid.Column="1" Text="{Binding Platforms}" FontSize="Medium"/>
-                <Label Grid.Row="4" Text="Genres:" FontSize="Large" TextColor="DarkCyan"/>
-                <Label Grid.Row="4" Grid.Column="1" Text="{Binding Genres}" FontSize="Medium"/>
-                <Label Grid.Row="5" Text="Discount:" FontSize="Large" TextColor="DarkCyan"/>
-                <Label Grid.Row="5" Grid.Column="1" Text="{Binding UnitsInStock}" FontSize="Medium"/>
-                <Label Grid.Row="6" Text="Date:" FontSize="Large" TextColor="DarkCyan"/>
-                <Label Grid.Row="6" Grid.Column="1" Text="{Binding Date}" FontSize="Medium"/>
+                <Image x:Name="image" IsVisible="false">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnImageSwipe" NumberOfTapsRequired="2"/>
+                    </Image.GestureRecognizers>
+                </Image>
+                <StackLayout x:Name="child" Grid.Row="0" IsVisible ="true" >
+                    <CarouselView x:Name="carousel" ItemsSource="{Binding Images}" PeekAreaInsets="15" HeightRequest="350">
+                        <CarouselView.ItemTemplate>
+                            <DataTemplate>
+                                <StackLayout>
+                                    <Frame HasShadow="True"
+                                           BorderColor="DarkCyan"
+                                           CornerRadius="5"
+                                           HeightRequest="300"
+                                           Margin="5"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="CenterAndExpand">
+                                        <StackLayout>
+                                            <Image Source="{Binding Url}"
+                                               HeightRequest="300"
+                                               WidthRequest="300"
+                                               HorizontalOptions="Center">
+                                                <Image.GestureRecognizers>
+                                                    <TapGestureRecognizer Tapped="OnImageClick" NumberOfTapsRequired="2"/>
+                                                </Image.GestureRecognizers>
+                                            </Image>
+                                        </StackLayout>
+                                    </Frame>
+                                </StackLayout>
+                            </DataTemplate>
+                        </CarouselView.ItemTemplate>
+                    </CarouselView>
+                    <Grid x:Name="grid" Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="2*" />
+                        <RowDefinition Height="2*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.ColumnSpan="2" Text="Description:" FontSize="Large" TextColor="DarkCyan"/>
+                    <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Description}" FontSize="Medium"/>
+
+                    <Button Grid.Row="2" Text="Comments" BackgroundColor="DarkCyan" 
+                        Clicked="OnCommentsButtonClick"/>
+
+                    <Button Grid.Row="2" Grid.Column="1" Text="{Binding PublisherName}" BackgroundColor="DarkCyan" 
+                        Clicked="OnPublisherButtonClick"/>
+                    <Button Grid.Row="3" Grid.ColumnSpan="2" Text="Buy" BackgroundColor="Cyan" 
+                                Clicked="OnBuyClick"/>
+                    <Label Grid.Row="4" Text="Price:" FontSize="Large" TextColor="DarkCyan"/>
+                    <Label Grid.Row="4" Grid.Column="1" Text="{Binding Price}" FontSize="Medium"/>
+                    <Label Grid.Row="5" Text="Platforms:" FontSize="Large" TextColor="DarkCyan"/>
+                    <Label Grid.Row="5" Grid.Column="1" Text="{Binding Platforms}" FontSize="Medium"/>
+                    <Label Grid.Row="6" Text="Genres:" FontSize="Large" TextColor="DarkCyan"/>
+                    <Label Grid.Row="6" Grid.Column="1" Text="{Binding Genres}" FontSize="Medium"/>
+                    <Label Grid.Row="7" Text="Discount:" FontSize="Large" TextColor="DarkCyan"/>
+                    <Label Grid.Row="7" Grid.Column="1" Text="{Binding UnitsInStock}" FontSize="Medium"/>
+                    <Label Grid.Row="8" Text="Date:" FontSize="Large" TextColor="DarkCyan"/>
+                    <Label Grid.Row="8" Grid.Column="1" Text="{Binding Date}" FontSize="Medium"/>
+                </Grid>
+                </StackLayout>
             </Grid>
-        </StackLayout>  
+        </StackLayout>
     </ScrollView>
 </ContentPage>

@@ -2,6 +2,7 @@
 using GameStroe.Mobile.ViewModels;
 using System;
 using GameStroe.Mobile.Services.Interfaces;
+using System.Threading;
 
 namespace GameStroe.Mobile.Views
 {
@@ -60,6 +61,24 @@ namespace GameStroe.Mobile.Views
                 OrderDataStore.AddDetail(_itemDetail.Id, Constants.userId);
                 Navigation.PushAsync(new AboutPage());
             }
+        }
+
+        private void OnImageClick(object sender, EventArgs args)
+        {
+            var button = (Image)sender;
+            image.Source = button.Source;
+            image.HorizontalOptions = LayoutOptions.CenterAndExpand;
+            image.VerticalOptions = LayoutOptions.CenterAndExpand;
+            image.IsVisible = true;
+            main.RowDefinitions[0].Height = new GridLength(1, GridUnitType.Star);
+            child.IsVisible = false;
+        }
+
+        private void OnImageSwipe(object sender, EventArgs args)
+        {
+            child.IsVisible = true;
+            main.RowDefinitions[0].Height = new GridLength(900);
+            image.IsVisible = false;
         }
     }
 }

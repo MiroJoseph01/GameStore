@@ -25,7 +25,7 @@ namespace GameStroe.Mobile.Services
 
             _client = new HttpClient(handler)
             {
-                BaseAddress = new Uri("https://d2c5a091c2af.ngrok.io")
+                BaseAddress = new Uri("https://ea58bfae79be.ngrok.io")
             };
 
             _items = new List<Game>();
